@@ -42,28 +42,9 @@ class SavedViewController: UIViewController, UICollectionViewDataSource, UIColle
         APIService.shared.fetchBookmarkedThreads(token: token, folderId: folderId) { [weak self] result in
             DispatchQueue.main.async {
                 if case .success(let bookmarked) = result {
-                    let fmt = ISO8601DateFormatter()
-                    fmt.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-
-                    // Convert APIBookmarkedThread → APIThread for the cell
-                    self?.threads = bookmarked.map { bt in
-                        let dateStr = fmt.string(from: bt.createdAt)
-                        return APIThread(
-                            id: bt.threadId ?? bt.id,
-                            userId: bt.userId,
-                            title: bt.title,
-                            description: bt.description,
-                            imageName: bt.imageName,
-                            imageUrl: bt.imageName,
-                            tags: bt.tags,
-                            likesCount: 0,
-                            isLiked: nil,
-                            commentsCount: 0,
-                            sharesCount: nil,
-                            createdAt: dateStr,
-                            updatedAt: dateStr,
-                            user: nil
-                        )
+                    // Use the fully populated original thread from the backend
+                    self?.threads = bookmarked.compactMap { bt in
+                        return bt.thread
                     }
                     self?.collectionView.reloadData()
                 }

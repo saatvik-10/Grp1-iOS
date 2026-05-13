@@ -44,24 +44,52 @@ class MyThreadsProfileHeaderCollectionReusableView: UICollectionReusableView {
            }
         
         private func setupUI() {
-                backgroundColor = .clear
-                
-                //profileImageView.layer.cornerRadius = profileImageView.frame.width / 2
-                profileImageView.clipsToBounds = true
-                
-           // userNameLabel.font = .systemFont(ofSize: 18, weight: .medium)
-            userNameLabel.textColor = .black
+            backgroundColor = .clear
+            profileImageView.clipsToBounds = true
             
-                [postsCountLabel, followersCountLabel, followingCountLabel].forEach {
-                    //$0?.font = .systemFont(ofSize: 15, weight: .medium)
-                    $0?.textColor = .black
-                    $0?.numberOfLines = 0
-                    $0?.textAlignment = .left
-                }
-    //        gridTitleLabel.text = "Posts"
-    //                gridTitleLabel.font = .systemFont(ofSize: 18, weight: .semibold)
-    //                gridTitleLabel.textColor = .darkGray
-    //                gridTitleLabel.textAlignment = .center
+            // 1. Remove labels from superview to break the broken hardcoded XIB constraints
+            userNameLabel.removeFromSuperview()
+            postsCountLabel.removeFromSuperview()
+            followersCountLabel.removeFromSuperview()
+            followingCountLabel.removeFromSuperview()
+            
+            // 2. Configure text styling
+            userNameLabel.textColor = .black
+            userNameLabel.font = .systemFont(ofSize: 18, weight: .bold)
+            
+            [postsCountLabel, followersCountLabel, followingCountLabel].forEach {
+                $0?.textColor = .black
+                $0?.font = .systemFont(ofSize: 14, weight: .medium)
+                $0?.numberOfLines = 0
+                $0?.textAlignment = .center
+            }
+            
+            // 3. Create a dynamic, auto-resizing StackView for the stats
+            let statsStack = UIStackView(arrangedSubviews: [postsCountLabel, followersCountLabel, followingCountLabel])
+            statsStack.axis = .horizontal
+            statsStack.distribution = .fillEqually
+            statsStack.alignment = .center
+            statsStack.spacing = 8
+            
+            // 4. Add them back to the view
+            addSubview(userNameLabel)
+            addSubview(statsStack)
+            
+            userNameLabel.translatesAutoresizingMaskIntoConstraints = false
+            statsStack.translatesAutoresizingMaskIntoConstraints = false
+            
+            // 5. Apply perfectly responsive programmatic constraints
+            NSLayoutConstraint.activate([
+                // Username label pinned to the right of the profile image
+                userNameLabel.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 16),
+                userNameLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -16),
+                userNameLabel.topAnchor.constraint(equalTo: profileImageView.topAnchor, constant: 12),
+                
+                // Stats stack pinned right below the username
+                statsStack.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 16),
+                statsStack.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -16),
+                statsStack.topAnchor.constraint(equalTo: userNameLabel.bottomAnchor, constant: 12)
+            ])
          }
             
             func configure(

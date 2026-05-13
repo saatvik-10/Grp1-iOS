@@ -12,13 +12,24 @@ enum APIMethod: String {
 	case delete = "DELETE"
 }
 
-enum APIError: Error {
+enum APIError: Error, LocalizedError {
 	case invalidURL
 	case invalidResponse
 	case unauthorized
 	case server(statusCode: Int, message: String?)
 	case decodingError
 	case transport(Error)
+	
+	var errorDescription: String? {
+		switch self {
+		case .invalidURL: return "The URL is invalid."
+		case .invalidResponse: return "The server returned an invalid response."
+		case .unauthorized: return "Unauthorized access. Please log in again."
+		case .server(let code, let msg): return msg ?? "Server error (\(code))."
+		case .decodingError: return "Failed to decode the response from the server."
+		case .transport(let err): return err.localizedDescription
+		}
+	}
 }
 
 enum APILevel: String, Codable {
@@ -377,6 +388,7 @@ struct APIBookmarkedThread: Decodable {
 	let imageName: String?
 	let tags: [String]
 	let createdAt: Date
+	let thread: APIThread?
 }
 
 struct APICreateBookmarkedThreadRequest: Encodable {

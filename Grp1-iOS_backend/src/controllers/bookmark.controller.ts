@@ -412,6 +412,9 @@ export class Bookmarks {
         where,
         include: {
           folder: true,
+          thread: {
+            include: { user: true, likes: true, comments: true }
+          }
         },
         orderBy: {
           createdAt: 'desc',
@@ -419,18 +422,40 @@ export class Bookmarks {
       });
 
       const threadsWithUrls = await Promise.all(
-        threads.map(async (thread) => {
+        threads.map(async (bt) => {
           let imageUrl = null;
-          if (thread.imageName) {
+          if (bt.imageName) {
             try {
-              imageUrl = await r2Service.getPresignedUrl(thread.imageName);
+              imageUrl = await r2Service.getPresignedUrl(bt.imageName);
             } catch (err) {
               console.error('Failed to get presigned URL:', err);
             }
           }
+          
+          let threadObj: any = bt.thread;
+          if (threadObj) {
+            let threadImageUrl: string | null = null;
+            if (threadObj.imageName && threadObj.imageName.trim() !== '') {
+              try { threadImageUrl = await r2Service.getPresignedUrl(threadObj.imageName); } catch (e) {}
+            }
+            let profileImageUrl = threadObj.user?.profileImageUrl ?? null;
+            if (profileImageUrl && profileImageUrl.trim() !== '') {
+              try { profileImageUrl = await r2Service.getPresignedUrl(profileImageUrl); } catch (e) {}
+            }
+            const isLiked = userId ? threadObj.likes.some((like: any) => like.userId === userId) : false;
+            
+            threadObj = {
+              ...threadObj,
+              imageUrl: threadImageUrl,
+              isLiked,
+              user: threadObj.user ? { ...threadObj.user, profileImageUrl } : threadObj.user
+            };
+          }
+
           return {
-            ...thread,
+            ...bt,
             imageName: imageUrl,
+            thread: threadObj
           };
         }),
       );

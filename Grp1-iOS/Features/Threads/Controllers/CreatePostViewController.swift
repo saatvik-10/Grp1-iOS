@@ -2,7 +2,7 @@
 import UIKit
 
 
-class CreatePostViewController: UIViewController,UITextViewDelegate, UITextFieldDelegate{
+class CreatePostViewController: UIViewController, UITextViewDelegate, UITextFieldDelegate, UIGestureRecognizerDelegate {
     
     enum CreatePostMode {
         case newPost
@@ -50,6 +50,54 @@ class CreatePostViewController: UIViewController,UITextViewDelegate, UITextField
                addImageButton.isHidden = false
         
         imageView.bringSubviewToFront(removeImageButton)
+        setupKeyboardDismissal()
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    // MARK: - Keyboard Management
+    private func setupKeyboardDismissal() {
+        // 1. Tap anywhere to dismiss — delegate allows it to fire even on UITextView
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboardAction))
+        tap.cancelsTouchesInView = false
+        tap.delegate = self              // ← critical: enables simultaneous recognition
+        view.addGestureRecognizer(tap)
+        
+        // 2. Swipe-down gesture to dismiss keyboard
+        let swipe = UISwipeGestureRecognizer(target: self, action: #selector(dismissKeyboardAction))
+        swipe.direction = UISwipeGestureRecognizer.Direction.down
+        swipe.cancelsTouchesInView = false
+        view.addGestureRecognizer(swipe)
+        
+        // 3. Delegate setup for return key dismissal on text fields
+        titleTextField.delegate = self
+        addTopicTextField.delegate = self
+        
+        // 4. Set return key types for better UX
+        titleTextField.returnKeyType = .next
+        addTopicTextField.returnKeyType = .done
+    }
+    
+    // Allow our tap gesture to fire even when the touch lands on UITextView/UITextField
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+                           shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
+    }
+    
+    @objc private func dismissKeyboardAction() {
+        view.endEditing(true)
+    }
+    
+    // Dismiss keyboard on Return/Done key for UITextFields
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if textField == titleTextField {
+            addTopicTextField.becomeFirstResponder()  // move to tags field
+        } else {
+            textField.resignFirstResponder()
+        }
+        return true
     }
     
     @IBAction func didTapAddImage(_ sender: UIButton) {
@@ -67,6 +115,7 @@ class CreatePostViewController: UIViewController,UITextViewDelegate, UITextField
     }
     
     @IBAction func didTapSaveDraft(_ sender: UIButton) {
+        view.endEditing(true)
         print("🟡 didTapSaveDraft called")
         
         guard let token = UserDefaults.standard.string(forKey: "authToken") else {
@@ -157,6 +206,7 @@ class CreatePostViewController: UIViewController,UITextViewDelegate, UITextField
     }
     
     @IBAction func didTapPost(_ sender: UIButton) {
+        view.endEditing(true)
         guard let title = titleTextField.text, !title.isEmpty,
               let body = bodyTextView.text, !body.isEmpty
         else { return }
