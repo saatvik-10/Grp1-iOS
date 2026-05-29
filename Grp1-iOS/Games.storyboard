@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="HWG-ao-lyw">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="HWG-ao-lyw">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="collection view cell content view" minToolsVersion="11.0"/>
@@ -58,7 +58,6 @@
                         <outlet property="collectionView" destination="hUl-rh-p0C" id="grD-G9-lQN"/>
                         <outlet property="gamesInfoButton" destination="DOs-j0-KH9" id="Phc-oZ-nOx"/>
                         <segue destination="jBd-ck-25J" kind="show" identifier="crossword" id="zi8-ZI-bSf"/>
-                        <segue destination="kgA-qV-NU9" kind="show" identifier="scenario" id="hAQ-Xe-9HH"/>
                         <segue destination="2Zt-D8-Bw3" kind="show" identifier="Evaluate" id="cgC-YZ-mRc"/>
                     </connections>
                 </viewController>
@@ -124,7 +123,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6bL-kd-gIP">
-                                <rect key="frame" x="37" y="132" width="319" height="35"/>
+                                <rect key="frame" x="37" y="132" width="319" height="38.333333333333343"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="tinted" title="Hint"/>
                                 <connections>
@@ -132,7 +131,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jHq-Mv-F1e">
-                                <rect key="frame" x="37" y="182" width="319" height="35"/>
+                                <rect key="frame" x="37" y="185.33333333333334" width="319" height="38.333333333333343"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="filled" title="Reveal Alphabet"/>
                                 <connections>
@@ -179,16 +178,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="k4E-As-zTa" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="2442" y="99"/>
-        </scene>
-        <!--IntroViewController-->
-        <scene sceneID="fmf-rw-cgp">
-            <objects>
-                <viewControllerPlaceholder storyboardIdentifier="IntroViewController" storyboardName="Scenario" referencedIdentifier="IntroViewController" id="kgA-qV-NU9" sceneMemberID="viewController">
-                    <navigationItem key="navigationItem" id="hNd-4h-ajM"/>
-                </viewControllerPlaceholder>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="gHB-7i-y36" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1030" y="-487"/>
         </scene>
         <!--Crossword View Controller-->
         <scene sceneID="k6K-ve-WvK">
@@ -286,10 +275,10 @@
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemGray6Color">
-            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemGreenColor">
-            <color red="0.20392156862745098" green="0.7803921568627451" blue="0.34901960784313724" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.20392156859999999" green="0.78039215689999997" blue="0.34901960780000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

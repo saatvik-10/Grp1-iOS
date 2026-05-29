@@ -29,12 +29,6 @@ final class GamesViewController: UIViewController {
 
     private let categories: [GameCategory] = [
         .init(
-            title: "Scenario",
-            icon: UIImage(named: "SceanrioImaghe")!,
-            colors: [UIColor.white.withAlphaComponent(0.5), UIColor.systemGray3.withAlphaComponent(0.7)],
-            description: "Navigate real-world business situations and make critical decisions."
-        ),
-        .init(
             title: "Wordle",
             icon: UIImage(named: "WordleImage")!,
             colors: [UIColor.white.withAlphaComponent(0.5), UIColor.systemGray3.withAlphaComponent(0.7)],
@@ -134,14 +128,12 @@ final class GamesViewController: UIViewController {
 // MARK: - Games Info Modals
 
 private enum GameHowTo {
-    case scenario
     case wordle
     case evaluate
     case crossword
 
     init?(title: String) {
         switch title {
-        case "Scenario": self = .scenario
         case "Wordle": self = .wordle
         case "Evaluate the Company": self = .evaluate
         case "Crossword": self = .crossword
@@ -151,7 +143,6 @@ private enum GameHowTo {
 
     var title: String {
         switch self {
-        case .scenario: return "Scenario"
         case .wordle: return "Wordle"
         case .evaluate: return "Evaluate the Company"
         case .crossword: return "Crossword"
@@ -160,13 +151,6 @@ private enum GameHowTo {
 
     var body: String {
         switch self {
-        case .scenario:
-            return [
-                "Read the situation carefully.",
-                "Choose the best option based on business and finance logic.",
-                "Think about risk, trade-offs, and long-term impact.",
-                "Finish the scenario to improve decision-making skills."
-            ].joined(separator: "\n\n")
         case .wordle:
             return [
                 "Guess the hidden word in up to 6 tries.",
@@ -193,7 +177,6 @@ private enum GameHowTo {
 
     var iconSystemName: String {
         switch self {
-        case .scenario: return "lightbulb.max"
         case .wordle: return "textformat.abc"
         case .evaluate: return "chart.bar.doc.horizontal"
         case .crossword: return "square.grid.3x3"
@@ -202,8 +185,6 @@ private enum GameHowTo {
 
     var summary: String {
         switch self {
-        case .scenario:
-            return "Make decisions in real-world business situations and learn the why behind each choice."
         case .wordle:
             return "Guess the hidden word using feedback from each attempt. Improve pattern recognition and vocabulary."
         case .evaluate:
@@ -215,12 +196,6 @@ private enum GameHowTo {
 
     var rules: [String] {
         switch self {
-        case .scenario:
-            return [
-                "Read the prompt and consider constraints (time, money, risk).",
-                "Choose the option that best balances trade-offs.",
-                "Some choices may unlock different outcomes."
-            ]
         case .wordle:
             return [
                 "You have up to 6 guesses.",
@@ -237,47 +212,36 @@ private enum GameHowTo {
             return [
                 "Use Across and Down clues to fill the grid.",
                 "Answers must match the exact length.",
-                "Use crossings to verify and correct." 
+                "Use crossings to verify and correct."
             ]
         }
     }
 
     var steps: [String] {
         switch self {
-        case .scenario:
-            return [
-                "Scan the context: goal, constraints, and what success looks like.",
-                "Pick an option, then reflect: what risk are you accepting?",
-                "Finish the scenario and note what you’d do differently next time." 
-            ]
         case .wordle:
             return [
                 "Start with a strong first guess (common letters help).",
                 "Use the color feedback to eliminate letters and lock positions.",
-                "Tighten guesses until you solve it within 6 tries." 
+                "Tighten guesses until you solve it within 6 tries."
             ]
         case .evaluate:
             return [
                 "Identify the business: what does it sell and how does it grow?",
                 "Check the numbers: revenue trend, profit, debt, and margins.",
-                "Decide and write a 1 line reason (the habit matters)." 
+                "Decide and write a 1 line reason (the habit matters)."
             ]
         case .crossword:
             return [
                 "Start with the easiest clues to build momentum.",
                 "Use crossing letters to solve tougher clues.",
-                "Review the grid for typos and finish the puzzle." 
+                "Review the grid for typos and finish the puzzle."
             ]
         }
     }
 
     var tips: [String] {
         switch self {
-        case .scenario:
-            return [
-                "Prefer decisions that are reversible when uncertain.",
-                "Look for second-order effects (what happens after the obvious outcome?)."
-            ]
         case .wordle:
             return [
                 "Avoid repeating letters early unless you have strong evidence.",
@@ -614,7 +578,7 @@ extension GamesViewController: UICollectionViewDelegate {
         print("Current streak: \(DailyGameManager.shared.getStreak())") // ← add this
 
 
-        
+
         let category = categories[indexPath.item]
 
         switch category.title {
@@ -626,7 +590,7 @@ extension GamesViewController: UICollectionViewDelegate {
                 showAlreadyPlayedAlert(for: "Wordle")
 
             }
-            
+
 
         case "Crossword":
             if DailyGameManager.shared.canPlay(.crossword) {
@@ -635,10 +599,8 @@ extension GamesViewController: UICollectionViewDelegate {
             } else {
                 showAlreadyPlayedAlert(for: "Crossword")
             }
-            
-        case "Scenario":
-            performSegue(withIdentifier: "scenario", sender: nil)
-            
+
+
         case "Evaluate the Company":
             performSegue(withIdentifier: "Evaluate", sender: nil)
 
@@ -646,5 +608,5 @@ extension GamesViewController: UICollectionViewDelegate {
             print("No screen connected for:", category.title)
         }
     }
-    
+
 }
