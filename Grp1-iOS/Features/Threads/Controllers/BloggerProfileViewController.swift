@@ -322,15 +322,14 @@ final class BloggerProfileHeaderView: UICollectionReusableView {
         followingStatView.configure(value: "\(following)", label: "following")
         updateFollowButton(isFollowing: isFollowing)
         
-        if let profileUrlStr = profileImageUrl, let url = URL(string: profileUrlStr) {
-            URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
-                guard let data, let img = UIImage(data: data) else { return }
-                DispatchQueue.main.async { self?.profileImageView.image = img }
-            }.resume()
-        } else {
-            profileImageView.image = UIImage(systemName: "person.circle.fill")?
-                .withRenderingMode(.alwaysOriginal)
-                .withTintColor(.systemGray3)
+        profileImageView.image = UIImage(systemName: "person.circle.fill")?
+            .withRenderingMode(.alwaysOriginal)
+            .withTintColor(.systemGray3)
+            
+        if let profileUrlStr = profileImageUrl {
+            let _ = ImageCache.shared.loadImage(from: profileUrlStr) { [weak self] img in
+                if let img = img { self?.profileImageView.image = img }
+            }
         }
     }
  

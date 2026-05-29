@@ -52,6 +52,9 @@ class collectionViewCell: UICollectionViewCell {
         onCommentTapped?()
     }
     
+    private var profileImageTask: URLSessionDataTask?
+    private var threadImageTask: URLSessionDataTask?
+
     override func awakeFromNib() {
         super.awakeFromNib()
         
@@ -84,6 +87,12 @@ class collectionViewCell: UICollectionViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
+        profileImg.image = UIImage(systemName: "person.circle.fill")
+        threadImg.image = nil
+        profileImageTask?.cancel()
+        threadImageTask?.cancel()
+        profileImageTask = nil
+        threadImageTask = nil
         onFollowTapped = nil
         onDeleteTapped = nil
         onUsernameTapped = nil
@@ -95,8 +104,6 @@ class collectionViewCell: UICollectionViewCell {
         isBookmarked = false
         shouldShowFollowAction = true
         isOwnPost = false
-        profileImg.image = nil
-        threadImg.image = nil
         threadImg.isHidden = true
     }
 
@@ -138,45 +145,6 @@ class collectionViewCell: UICollectionViewCell {
         return layoutAttributes
     }
     
-//    override func preferredLayoutAttributesFitting(
-//        _ layoutAttributes: UICollectionViewLayoutAttributes
-//    ) -> UICollectionViewLayoutAttributes {
-//
-//        let attributes = super.preferredLayoutAttributesFitting(layoutAttributes)
-//
-//        let targetSize = CGSize(
-//            width: layoutAttributes.size.width,
-//            height: UIView.layoutFittingCompressedSize.height
-//        )
-//
-//        let size = contentView.systemLayoutSizeFitting(
-//            targetSize,
-//            withHorizontalFittingPriority: .required,
-//            verticalFittingPriority: .fittingSizeLevel
-//        )
-//
-//        attributes.frame.size.height = ceil(size.height)
-//        return attributes
-//    }
-//    override func preferredLayoutAttributesFitting(
-//        _ layoutAttributes: UICollectionViewLayoutAttributes
-//    ) -> UICollectionViewLayoutAttributes {
-//
-//        layoutIfNeeded()
-//
-//        let size = contentView.systemLayoutSizeFitting(
-//            CGSize(
-//                width: layoutAttributes.frame.width,
-//                height: UIView.layoutFittingCompressedSize.height
-//            )
-//        )
-//
-//        var frame = layoutAttributes.frame
-//        frame.size.height = ceil(size.height)
-//        layoutAttributes.frame = frame
-//
-//        return layoutAttributes
-//    }
     func updateWidth(_ width: CGFloat){
            widthConstraint?.constant = width
        }
@@ -212,9 +180,8 @@ class collectionViewCell: UICollectionViewCell {
            
            titleLabel.numberOfLines = 2
            titleLabel.lineBreakMode = .byTruncatingTail
-           //  titleLabel.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
            
-           descriptionLabel.numberOfLines = 0   //girl check this
+           descriptionLabel.numberOfLines = 0
            
            threadImg.contentMode = .scaleAspectFill
            threadImg.layer.cornerRadius = 12
@@ -225,10 +192,6 @@ class collectionViewCell: UICollectionViewCell {
            descriptionLabel.numberOfLines = 3
            descriptionLabel.lineBreakMode = .byTruncatingTail
     
-           //descriptionLabel.font = UIFont.systemFont(ofSize: 15)
-           
-           
-           // likesButton.tintColor = .systemBlue
            var config = UIButton.Configuration.plain()
            config.imagePadding = 1
            likesButton.configuration = config
@@ -236,7 +199,6 @@ class collectionViewCell: UICollectionViewCell {
            sharesButton.tintColor = .systemBlue
            sharesButton.isHidden = true
            
-           // moreButton.setImage(UIImage(systemName: "ellipsis"), for: .normal)
            moreButton.tintColor = .secondaryLabel
            
            dividerView.backgroundColor = .systemGray5
@@ -265,98 +227,25 @@ class collectionViewCell: UICollectionViewCell {
                contentView.layer.cornerRadius = 16
                layer.cornerRadius = 16
                layer.shadowOpacity = 0.08
-               dividerView.isHidden = true   // ← hide in card mode
+               dividerView.isHidden = true
            } else {
                contentView.backgroundColor = .clear
                contentView.layer.cornerRadius = 0
                layer.cornerRadius = 0
                layer.shadowOpacity = 0
-               dividerView.isHidden = false  // ← show in My Threads
+               dividerView.isHidden = false
            }
        }
        
-       
-       //    func configure(with post: ThreadPost, isFollowing: Bool) {
-       //
-       //
-       //        self.isFollowingUser = isFollowing
-       //
-       //
-       //        userNameLabel.text = post.userName
-       //        timeAgoLabel.text = post.timeAgo
-       //        titleLabel.text = post.title
-       //        descriptionLabel.text = post.description
-       //
-       //
-       //        profileImg.image = UIImage(named: post.userProfileImage)
-       //        ?? UIImage(systemName: "person.circle.fill")
-       //
-       //
-       //        if let imageName = post.imageName {
-       //            threadImg.isHidden = false
-       //            threadImg.image = UIImage(named: imageName)
-       //        } else {
-       //            threadImg.isHidden = true
-       //            threadImg.image = nil
-       //        }
-       //
-       //
-       //        //            likesButton.setTitle("\(post.likes)", for: .normal)
-       //        //            let heartName = post.isLiked ? "heart.fill" : "heart"
-       //        //            likesButton.setImage(UIImage(systemName: heartName), for: .normal)
-       //        //            likesButton.tintColor = post.isLiked ? .systemRed : .systemBlue
-       //
-       //        likesButton.setTitle("\(post.likes)", for: .normal)
-       //       // likesButton.setTitleColor(.systemBlue, for: .normal)  ??
-       //
-       //
-       //        let heartName = post.isLiked ? "heart.fill" : "heart"
-       //        let heartImage = UIImage(systemName: heartName)?
-       //            .withRenderingMode(.alwaysTemplate)
-       //
-       //        likesButton.setImage(heartImage, for: .normal)
-       //        likesButton.tintColor = post.isLiked ? .systemRed : .systemBlue
-       //
-       //
-       //        commentsButton.setTitle("\(post.comments)", for: .normal)
-       //        sharesButton.setTitle("\(post.shares)", for: .normal)
-       //
-       //
-       //
-       //        tagsStackView.arrangedSubviews.forEach {
-       //            tagsStackView.removeArrangedSubview($0)
-       //            $0.removeFromSuperview()
-       //        }
-       //
-       //        let tags = Array(post.tags.prefix(3)) // max 3 tags
-       //
-       //        if tags.isEmpty {
-       //            tagsStackView.isHidden = true
-       //        } else {
-       //            tagsStackView.isHidden = false
-       //
-       //            for tag in tags {
-       //                let tagLabel = makeTagLabel(text: tag)
-       //                tagsStackView.addArrangedSubview(tagLabel)
-       //            }
-       //        }
-       //
-       //
-       //
-       //    }
-       //
-       // MARK: - Configure with APIThread (API-synced data)
 func configure(with thread: APIThread, isFollowing: Bool, isOwnPost: Bool) {
     self.isFollowingUser = isFollowing
     self.shouldShowFollowAction = !isOwnPost
     self.isOwnPost = isOwnPost
 
-    // Show normal name first, fallback to username, then userId
     userNameLabel.text = thread.user?.name ?? thread.user?.username ?? thread.userId
     titleLabel.text = thread.title
     descriptionLabel.text = thread.description
 
-    // Relative time from ISO8601 createdAt
     let isoFormatter = ISO8601DateFormatter()
     isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
     if let date = isoFormatter.date(from: thread.createdAt) {
@@ -367,28 +256,24 @@ func configure(with thread: APIThread, isFollowing: Bool, isOwnPost: Bool) {
         timeAgoLabel.text = ""
     }
 
-    // Fix profile image: set a placeholder FIRST to handle cell reuse
-    profileImg.image = UIImage(systemName: "person.circle.fill")
+    // Profile image
+    profileImg.image = UIImage(systemName: "person.circle.fill") // Placeholder
     profileImg.tintColor = .lightGray
-
-    // Load profile image from R2 presigned URL if available
-    if let profileUrlStr = thread.user?.profileImageUrl,
-       let url = URL(string: profileUrlStr) {
-        print("🖼 Loading profile image from: \(profileUrlStr)")
-        URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
-            guard let data, let img = UIImage(data: data) else { return }
-            DispatchQueue.main.async { self?.profileImg.image = img }
-        }.resume()
+    profileImageTask?.cancel()
+    if let urlStr = thread.user?.profileImageUrl {
+        profileImageTask = ImageCache.shared.loadImage(from: urlStr) { [weak self] img in
+            if let img = img { self?.profileImg.image = img }
+        }
     }
 
-    // Post image from R2 presigned URL
-    if let imageUrlStr = thread.imageUrl, let url = URL(string: imageUrlStr) {
+    // Post image
+    threadImageTask?.cancel()
+    if let imageUrlStr = thread.imageUrl {
         threadImg.isHidden = false
         threadImg.image = nil
-        URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
-            guard let data, let img = UIImage(data: data) else { return }
-            DispatchQueue.main.async { self?.threadImg.image = img }
-        }.resume()
+        threadImageTask = ImageCache.shared.loadImage(from: imageUrlStr) { [weak self] img in
+            if let img = img { self?.threadImg.image = img }
+        }
     } else {
         threadImg.image = nil
         threadImg.isHidden = true

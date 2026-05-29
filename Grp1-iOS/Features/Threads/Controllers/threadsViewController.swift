@@ -476,7 +476,6 @@ class threadsViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        loadThreads()
     }
     
     override func viewDidLayoutSubviews() {
@@ -534,88 +533,127 @@ class threadsViewController: UIViewController {
         layout.minimumInteritemSpacing = 12
         layout.sectionInset = UIEdgeInsets(top: 12, left: 16, bottom: 24, right: 16)
         layout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
+        
+        // Pull to Refresh
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+        collectionView.refreshControl = refreshControl
+    }
+    
+    @objc private func handleRefresh() {
+        loadThreads()
     }
     
     // MARK: - API Fetching
     
     private func loadThreads() {
-        loadFollowingUserIds()
-        loadForYouThreads()
-        loadFollowingThreads()
-        loadMyThreads()
-        loadUserProfile()
-        loadBookmarkStates()
+        let group = DispatchGroup()
+        
+        group.enter()
+        loadFollowingUserIds { group.leave() }
+        
+        group.enter()
+        loadForYouThreads { group.leave() }
+        
+        group.enter()
+        loadFollowingThreads { group.leave() }
+        
+        group.enter()
+        loadMyThreads { group.leave() }
+        
+        group.enter()
+        loadUserProfile { group.leave() }
+        
+        group.enter()
+        loadBookmarkStates { group.leave() }
+        
+        group.notify(queue: .main) { [weak self] in
+            self?.collectionView.reloadData()
+            self?.collectionView.refreshControl?.endRefreshing()
+        }
     }
 
     /// Fetches ALL bookmarked threads for the current user and populates the fast-lookup set
-    private func loadBookmarkStates() {
-        guard let token = authToken else { return }
+    private func loadBookmarkStates(completion: (() -> Void)? = nil) {
+        guard let token = authToken else { 
+            completion?()
+            return 
+        }
         APIService.shared.fetchBookmarkedThreads(token: token) { [weak self] result in
             DispatchQueue.main.async {
                 if case .success(let bookmarked) = result {
                     self?.bookmarkedThreadIds = Set(bookmarked.compactMap { $0.threadId })
-                    self?.collectionView.reloadData()
                 }
+                completion?()
             }
         }
     }
     
-    private func loadFollowingUserIds() {
-        guard let token = authToken, let userId = currentUserId else { return }
+    private func loadFollowingUserIds(completion: (() -> Void)? = nil) {
+        guard let token = authToken, let userId = currentUserId else { 
+            completion?()
+            return 
+        }
         APIService.shared.fetchUserFollowing(userId: userId, token: token) { [weak self] result in
             DispatchQueue.main.async {
                 if case .success(let users) = result {
                     self?.followingUserIds = Set(users.map { $0.id })
-                    self?.collectionView.reloadData()
                 }
+                completion?()
             }
         }
     }
     
-    private func loadForYouThreads() {
+    private func loadForYouThreads(completion: (() -> Void)? = nil) {
         APIService.shared.fetchForYouThreads(token: authToken) { [weak self] result in
             DispatchQueue.main.async {
                 if case .success(let threads) = result {
                     self?.forYouThreads = threads
-                    if self?.selectedSegment == .forYou { self?.collectionView.reloadData() }
                 }
+                completion?()
             }
         }
     }
     
-    private func loadFollowingThreads() {
-        guard let token = authToken else { return }
+    private func loadFollowingThreads(completion: (() -> Void)? = nil) {
+        guard let token = authToken else { 
+            completion?()
+            return 
+        }
         APIService.shared.fetchFollowingThreads(token: token) { [weak self] result in
             DispatchQueue.main.async {
                 if case .success(let threads) = result {
                     self?.followingThreads = threads
-                    if self?.selectedSegment == .following { self?.collectionView.reloadData() }
                 }
+                completion?()
             }
         }
     }
     
-    private func loadMyThreads() {
+    private func loadMyThreads(completion: (() -> Void)? = nil) {
         // Filter forYou by currentUserId. If your backend has a
         // dedicated "my threads" endpoint, replace this.
         APIService.shared.fetchForYouThreads(token: authToken) { [weak self] result in
             DispatchQueue.main.async {
                 if case .success(let threads) = result {
                     self?.myThreads = threads.filter { $0.userId == self?.currentUserId }
-                    if self?.selectedSegment == .myThreads { self?.collectionView.reloadData() }
                 }
+                completion?()
             }
         }
     }
     
-    private func loadUserProfile() {
-        guard let token = authToken, let userId = currentUserId else { return }
+    private func loadUserProfile(completion: (() -> Void)? = nil) {
+        guard let token = authToken, let userId = currentUserId else { 
+            completion?()
+            return 
+        }
         APIService.shared.fetchUserProfile(userId: userId, token: token) { [weak self] result in
             DispatchQueue.main.async {
                 if case .success(let profile) = result {
                     self?.currentUserProfile = profile
-                    if self?.selectedSegment == .myThreads { self?.collectionView.reloadData() }
                 }
+                completion?()
             }
         }
     }

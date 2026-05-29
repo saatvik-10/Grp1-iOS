@@ -306,23 +306,19 @@ class ThreadDetailViewController: UIViewController {
         descriptionLabel.text = thread.description
  
         // Profile image
-        if let urlStr = thread.user?.profileImageUrl, let url = URL(string: urlStr) {
-            URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
-                if let data = data, let img = UIImage(data: data) {
-                    DispatchQueue.main.async { self?.profileImageView.image = img }
-                }
-            }.resume()
-        } else {
-            profileImageView.image = UIImage(systemName: "person.circle.fill")
+        profileImageView.image = UIImage(systemName: "person.circle.fill")
+        if let urlStr = thread.user?.profileImageUrl {
+            let _ = ImageCache.shared.loadImage(from: urlStr) { [weak self] img in
+                if let img = img { self?.profileImageView.image = img }
+            }
         }
- 
+
         // Post image
-        if let imageUrlStr = thread.imageUrl, let url = URL(string: imageUrlStr) {
+        if let imageUrlStr = thread.imageUrl {
             postImageView.isHidden = false
-            URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
-                guard let data = data, let img = UIImage(data: data) else { return }
-                DispatchQueue.main.async { self?.postImageView.image = img }
-            }.resume()
+            let _ = ImageCache.shared.loadImage(from: imageUrlStr) { [weak self] img in
+                if let img = img { self?.postImageView.image = img }
+            }
         } else {
             postImageView.isHidden = true
             descriptionLabel.topAnchor
