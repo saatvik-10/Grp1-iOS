@@ -297,7 +297,7 @@ extension ThreadDetailViewController {
 
         if let imageUrlStr = thread.imageUrl, let url = URL(string: imageUrlStr) {
             postImageView.isHidden = false
-            let _ = ImageCache.shared.loadImage(from: imageUrlStr) { [weak self] img in
+            _ = ImageCache.shared.loadImage(from: imageUrlStr) { [weak self] img in
                 if let img = img { self?.postImageView.image = img }
             }
         } else {

@@ -28,7 +28,7 @@ class WordleViewController: UIViewController {
 
         private lazy var currentWordItem: WordleItem = {
             let unplayed = WordleData.items.filter { !WordHistoryManager.shared.hasPlayedWordleWord($0.word) }
-            return unplayed.randomElement() ?? WordleData.items.randomElement()!
+            return unplayed.randomElement() ?? WordleData.items.randomElement() ?? WordleItem(word: "", hints: [], definition: "")
         }()
         private lazy var engine = WordleEngine(answer: currentWordItem.word.lowercased())
 
@@ -43,12 +43,12 @@ class WordleViewController: UIViewController {
 //            view.layer.insertSublayer(makeGradient(), at: 0)
         }
     private func makeGradient() -> CAGradientLayer {
-        let g = CAGradientLayer()
-        g.colors = [
+        let gradient = CAGradientLayer()
+        gradient.colors = [
                 UIColor.systemBlue.withAlphaComponent(0.2).cgColor,
                 UIColor.systemTeal.withAlphaComponent(0.2).cgColor
             ]
-        g.frame = view.bounds
+        gradient.frame = view.bounds
         return g
     }
 
@@ -250,7 +250,7 @@ class WordleViewController: UIViewController {
 
     private func endGame(won: Bool) {
         isGameOver = true
-        
+
         WordHistoryManager.shared.markWordleWordPlayed(currentWordItem.word)
 
         self.presentWinSheet()
@@ -295,9 +295,9 @@ extension WordleViewController {
     private func resetGame() {
         isGameOver = false
         currentGuess = ""
-        
+
         let unplayed = WordleData.items.filter { !WordHistoryManager.shared.hasPlayedWordleWord($0.word) }
-        currentWordItem = unplayed.randomElement() ?? WordleData.items.randomElement()!
+        currentWordItem = unplayed.randomElement() ?? WordleData.items.randomElement() ?? WordleItem(word: "", hints: [], definition: "")
         engine = WordleEngine(answer: currentWordItem.word.lowercased())
         hints = currentWordItem.hints
         currentHintIndex = 0

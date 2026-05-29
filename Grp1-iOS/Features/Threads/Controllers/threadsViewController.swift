@@ -57,10 +57,6 @@ class threadsViewController: UIViewController {
         loadThreads()
     }
 
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-    }
-
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         if let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
@@ -116,13 +112,13 @@ class threadsViewController: UIViewController {
         layout.minimumInteritemSpacing = 12
         layout.sectionInset = UIEdgeInsets(top: 12, left: 16, bottom: 24, right: 16)
         layout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
-        
+
         // Pull to Refresh
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
         collectionView.refreshControl = refreshControl
     }
-    
+
     @objc private func handleRefresh() {
         loadThreads()
     }
