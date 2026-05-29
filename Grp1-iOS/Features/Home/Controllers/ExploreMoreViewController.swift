@@ -7,13 +7,10 @@
 
 import UIKit
 
-
-
 class ExploreMoreViewController: UIViewController, UICollectionViewDelegate {
 
     @IBOutlet weak var collectionView: UICollectionView!
     let newsStore = NewsDataStore.shared
-
 
         var exploreTrending: [NewsArticle] = []
         var exploreList: [NewsArticle] = []
@@ -35,7 +32,6 @@ class ExploreMoreViewController: UIViewController, UICollectionViewDelegate {
             collectionView.delegate = self
             collectionView.dataSource = self
         }
-
 
         func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
 
@@ -82,8 +78,6 @@ extension ExploreMoreViewController {
     }
 }
 
-
-
 extension ExploreMoreViewController: UICollectionViewDataSource {
 
     func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -106,12 +100,13 @@ extension ExploreMoreViewController: UICollectionViewDataSource {
 
         switch indexPath.section {
 
-
         case 0:
-            let cell = collectionView.dequeueReusableCell(
+            guard let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: "trending_cell",
                 for: indexPath
-            ) as! TrendingCollectionViewCell
+            ) as? TrendingCollectionViewCell else {
+                return UICollectionViewCell()
+            }
 
             cell.configureCell(with: exploreTrending[indexPath.row])
 
@@ -129,12 +124,13 @@ extension ExploreMoreViewController: UICollectionViewDataSource {
 
             return cell
 
-
         case 1:
-            let cell = collectionView.dequeueReusableCell(
+            guard let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: "explore_cell",
                 for: indexPath
-            ) as! ExploreCollectionViewCell
+            ) as? ExploreCollectionViewCell else {
+                return UICollectionViewCell()
+            }
 
             cell.configureCell(with: exploreList[indexPath.row])
 
@@ -152,12 +148,13 @@ extension ExploreMoreViewController: UICollectionViewDataSource {
 
             return cell
 
-
         default:
-            let cell = collectionView.dequeueReusableCell(
+            guard let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: "realexplore_cell",
                 for: indexPath
-            ) as! RealExploreCollectionViewCell
+            ) as? RealExploreCollectionViewCell else {
+                return UICollectionViewCell()
+            }
 
             cell.configureCell(with: exploreGrid[indexPath.row])
             return cell
@@ -165,17 +162,13 @@ extension ExploreMoreViewController: UICollectionViewDataSource {
     }
 }
 
-
-
-
 extension ExploreMoreViewController {
 
     func generateLayout() -> UICollectionViewLayout {
 
-        return UICollectionViewCompositionalLayout { section, env in
+        return UICollectionViewCompositionalLayout { section, _ in
 
             switch section {
-
 
             case 0:
                 let item = NSCollectionLayoutItem(
@@ -240,5 +233,3 @@ extension ExploreMoreViewController {
         }
     }
 }
-
-

@@ -1,7 +1,7 @@
-//import Foundation
+// import Foundation
 //
 //// MARK: - Enums
-//enum APIGender: String, Encodable {
+// enum APIGender: String, Encodable {
 //    case male
 //    case female
 //    case other
@@ -13,9 +13,9 @@
 //        case .other: return "other"
 //        }
 //    }
-//}
+// }
 //
-//enum APILevel: String, Encodable {
+// enum APILevel: String, Encodable {
 //    case beginner
 //    case intermediate
 //    case advanced
@@ -27,10 +27,10 @@
 //        case .advanced: return "ADVANCE"
 //        }
 //    }
-//}
+// }
 //
 //// MARK: - Request Models
-//struct APISignUpRequest: Encodable {
+// struct APISignUpRequest: Encodable {
 //    let name: String
 //    let email: String
 //    let password: String
@@ -40,16 +40,16 @@
 //    let gender: APIGender
 //    let hasOnboarding: Bool
 //    let profileImageUrl: String?
-//}
+// }
 //
-//struct APISignInRequest: Encodable {
+// struct APISignInRequest: Encodable {
 //    let email: String
 //    let password: String
-//}
+// }
 //
 //// MARK: - Response Models
-//struct APISignInResponse: Decodable {
+// struct APISignInResponse: Decodable {
 //    let token: String
 //    let userId: String?
 //    let email: String?
-//}
+// }

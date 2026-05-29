@@ -37,5 +37,5 @@ class ChatTableViewCell: UITableViewCell {
         static func nib() -> UINib {
             return UINib(nibName: "ChatTableViewCell", bundle: nil)
         }
-    
+
 }

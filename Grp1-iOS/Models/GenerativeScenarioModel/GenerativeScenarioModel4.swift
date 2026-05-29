@@ -27,7 +27,7 @@ struct RealitySummary: Codable {
     let stats: [SummaryStat]
     let finalQuestion: String
     let stateKey: String
-    let finalOptions: [EventOption] 
+    let finalOptions: [EventOption]
 }
 
 struct SummaryStat: Codable {

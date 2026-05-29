@@ -19,7 +19,6 @@ final class BlockTarget {
     }
 }
 
-
 extension UILabel {
 
     func animateNumber(
@@ -47,5 +46,3 @@ extension UILabel {
         displayLink.add(to: .main, forMode: .common)
     }
 }
-
-

@@ -8,7 +8,7 @@
 import UIKit
 
 class QuizViewController: UIViewController {
-    
+
     @IBOutlet weak var continueButton: UIButton!
     @IBOutlet weak var quitButton: UIButton!
     @IBOutlet weak var progressView: UIProgressView!
@@ -31,7 +31,7 @@ class QuizViewController: UIViewController {
         showLoadingState()
         generateAndStart()
     }
-    
+
     private func showLoadingState() {
         questionLabel.text = ""
 
@@ -114,8 +114,7 @@ class QuizViewController: UIViewController {
             self.renderCurrentQuestion()
         }
     }
-    
-    
+
     func setupEndQuizButton() {
         endQuizButton.isEnabled = false
         endQuizButton.alpha = 0.0
@@ -125,7 +124,7 @@ class QuizViewController: UIViewController {
         continueButton.isEnabled = false
         continueButton.alpha = 0.5
     }
-    
+
     func renderCurrentQuestion() {
 
         let question = quizQuestions[currentQuestionIndex]
@@ -169,8 +168,7 @@ class QuizViewController: UIViewController {
 
         updateProgress()
     }
-    
-    
+
     func goToNextQuestion() {
 
         if currentQuestionIndex + 1 < quizQuestions.count {
@@ -180,7 +178,7 @@ class QuizViewController: UIViewController {
             showQuizCompleted()
         }
     }
-        
+
         func showQuizCompleted() {
             progressView.setProgress(1.0, animated: true)
             questionLabel.text = "Quiz Completed 🎉"
@@ -190,13 +188,12 @@ class QuizViewController: UIViewController {
             optionButton3.isHidden = true
             optionButton4.isHidden = true
         }
-    
+
     func updateProgress() {
         let progress = Float(currentQuestionIndex + 1) / Float(quizQuestions.count)
         progressView.setProgress(progress, animated: true)
     }
-    
-    
+
     @IBAction func optionTapped(_ sender: UIButton) {
 
         guard !hasSelectedOption else { return }
@@ -230,11 +227,11 @@ class QuizViewController: UIViewController {
                 continueButton.alpha = 1.0
             }
         }
-    
+
     @IBAction func endQuizTapped(_ sender: UIButton) {
         performSegue(withIdentifier: "toEndQuiz", sender: nil)
     }
-    
+
     @IBAction func continueTapped(_ sender: UIButton) {
         goToNextQuestion()
     }
@@ -254,7 +251,7 @@ class QuizViewController: UIViewController {
 
         present(alert, animated: true)
     }
-    
+
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
 
         if segue.identifier == "toEndQuiz",
@@ -265,9 +262,3 @@ class QuizViewController: UIViewController {
         }
     }
 }
-
-
-    
-
-
-

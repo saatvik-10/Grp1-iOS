@@ -1,5 +1,5 @@
 import UIKit
-//struct ProfileDataSource {
+// struct ProfileDataSource {
 //    static let items: [ProfileOption] = [
 //        ProfileOption(title: "Progress", isDestructive: false),
 //        ProfileOption(title: "Interests", isDestructive: false),
@@ -7,7 +7,7 @@ import UIKit
 //        ProfileOption(title: "About Us", isDestructive: false),
 //        ProfileOption(title: "Logout", isDestructive: true)
 //    ]
-//}
+// }
 
 struct ProfileDataSource {
     static let progressSection = ProgressSectionModel(
@@ -15,7 +15,7 @@ struct ProfileDataSource {
         progressLevel: ProgressSectionMockData.mockProgress.progressLevel,
         requirementNextLevel: ProgressSectionMockData.mockProgress.requirementNextLevel
     )
-    
+
     static let interestsSection = InterestsSectionModel(
         interests: Array(
             (UserInterests.domains.map { $0.title })
@@ -23,12 +23,12 @@ struct ProfileDataSource {
                 .prefix(4)
         )
     )
-    
+
     static let bookmarksSection = BookmarksSectionModel(
         totalBookmarks: Bookmarks.mockBookmarks.count,
         totalFolders: Bookmarks.mockBookmarks.count
     )
-    
+
     static let sections: [ProfileSection] = [
         .progress(progressSection),
         .interests(interestsSection),
@@ -39,7 +39,7 @@ struct ProfileDataSource {
 }
 
 struct InterestsDataSource {
-    
+
     static let domains: [InterestModel] = [
         InterestModel(title: "Stocks", subtitle: nil, icon: "chart.line.uptrend.xyaxis"),
         InterestModel(title: "Crypto", subtitle: nil, icon: "bitcoinsign.circle"),
@@ -102,10 +102,11 @@ struct InterestsDataSource {
         InterestModel(title: "Risk Management", subtitle: nil, icon: "exclamationmark.shield"),
         InterestModel(title: "Economic Policy", subtitle: nil, icon: "doc.plaintext")
     ]
-    
-    
+
     static let preferences: [InterestModel] = [
-        InterestModel(title: "Indian Economy", subtitle: "Inflation, GDP and growth trends", icon: "indianrupeesign.gauge.chart.lefthalf.righthalf"),
+        InterestModel(title: "Indian Economy",
+                      subtitle: "Inflation, GDP and growth trends",
+                      icon: "indianrupeesign.gauge.chart.lefthalf.righthalf"),
         InterestModel(title: "Stock Markets", subtitle: "Shares, indices and market cycles", icon: "chart.line.uptrend.xyaxis"),
         InterestModel(title: "Personal Finance", subtitle: "Savings, budgeting and wealth building", icon: "wallet.pass"),
         InterestModel(title: "Government Policy", subtitle: "Reforms, taxation and public spending", icon: "newspaper"),
@@ -195,17 +196,17 @@ struct ProgressSectionMockData {
 struct Bookmarks {
     static let mockBookmarks: [BookmarkItem] = [
         BookmarkItem(
-            icon: UIImage(systemName: "folder")!,
+            icon: UIImage(systemName: "folder") ?? UIImage(),
             id: "1",
             title: "Stocks"
         ),
         BookmarkItem(
-            icon: UIImage(systemName: "folder")!,
+            icon: UIImage(systemName: "folder") ?? UIImage(),
             id: "2",
             title: "Crypto"
         ),
         BookmarkItem(
-            icon: UIImage(systemName: "folder")!,
+            icon: UIImage(systemName: "folder") ?? UIImage(),
             id: "3",
             title: "Gold"
         )
@@ -218,13 +219,13 @@ struct ProgressMockData {
         quizCompletionNumber: "2/3 Completed",
         levelNumber: 5
     )
-    
+
     static let stats = ProgressStats(
         dayStreak: 12,
         totalXP: 2400,
         accuracyPercentage: 82
     )
-    
+
     static let quizzes: [Quiz] = [
         Quiz(title: "Quiz 1", date: "17 Dec 2025", accuracy: 82),
         Quiz(title: "Quiz 2", date: "15 Dec 2025", accuracy: 76),

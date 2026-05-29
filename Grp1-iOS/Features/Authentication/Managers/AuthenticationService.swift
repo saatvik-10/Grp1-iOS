@@ -7,21 +7,25 @@ class AuthenticationService {
 
     // MARK: - Sign Up
 
+    struct SignUpParameters {
+        let name: String
+        let email: String
+        let password: String
+        let phone: String
+        let level: String
+        let dob: String
+        let gender: String
+        let hasOnboarding: Bool
+        let profileImageData: Data?
+        let profileImageFileName: String?
+    }
+
     func signUp(
-        name: String,
-        email: String,
-        password: String,
-        phone: String,
-        level: String,
-        dob: String,
-        gender: String,
-        hasOnboarding: Bool,
-        profileImageData: Data? = nil,       // ✅ actual image bytes from the view
-        profileImageFileName: String? = nil, // ✅ e.g. "avatar.jpg"
+        params: SignUpParameters,
         completion: @escaping (Bool, String?) -> Void
     ) {
         let levelEnum: APILevel
-        switch level.uppercased() {
+        switch params.level.uppercased() {
         case "BEGINNER":              levelEnum = .beginner
         case "INTERMEDIATE":          levelEnum = .intermediate
         case "ADVANCE", "ADVANCED":   levelEnum = .advance
@@ -29,7 +33,7 @@ class AuthenticationService {
         }
 
         let genderEnum: APIGender
-        switch gender.uppercased() {
+        switch params.gender.uppercased() {
         case "MALE":           genderEnum = .male
         case "FEMALE":         genderEnum = .female
         case "OTHER", "OTHERS": genderEnum = .others
@@ -37,16 +41,16 @@ class AuthenticationService {
         }
 
         let payload = APISignUpRequest(
-            name: name,
-            email: email,
-            password: password,
-            phone: phone,
+            name: params.name,
+            email: params.email,
+            password: params.password,
+            phone: params.phone,
             level: levelEnum,
-            dob: dob,
+            dob: params.dob,
             gender: genderEnum,
-            hasOnboarding: hasOnboarding,
-            profileImageData: profileImageData,
-            profileImageFileName: profileImageFileName ?? "avatar.jpg"
+            hasOnboarding: params.hasOnboarding,
+            profileImageData: params.profileImageData,
+            profileImageFileName: params.profileImageFileName ?? "avatar.jpg"
         )
 
         apiService.signUp(payload: payload) { result in

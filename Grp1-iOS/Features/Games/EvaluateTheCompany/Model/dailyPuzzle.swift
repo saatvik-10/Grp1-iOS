@@ -7,7 +7,6 @@
 
 import Foundation
 
-
 struct DailyPuzzle: Codable {
     let sector: String
     let companies: [Company]
@@ -25,7 +24,7 @@ extension DailyPuzzle {
     }
 }
 
-//extension DailyPuzzle {
+// extension DailyPuzzle {
 //
 //    func calculateScores() -> [CompanyScore] {
 //        var result: [CompanyScore] = []
@@ -84,4 +83,4 @@ extension DailyPuzzle {
 //            return max(0, 100 - numeric) * 0.7
 //        }
 //    }
-//}
+// }

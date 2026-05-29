@@ -48,28 +48,26 @@ NEW DELHI: India's benchmark inflation rate stayed on the lower side of RBI's ta
 The latest inflation reading also means that quarterly inflation in the period ending December 2025, was 0.76%, the lowest ever in the current series and the second consecutive quarter when it stayed below the lower end of RBI's target band. To be sure, the December quarter inflation print is slightly higher than the 0.6% projected by RBI in its December Monetary Policy Committee (MPC) resolution. Headline inflation has stayed below RBI's actual target of 4%  for four consecutive quarters now.
 """
 
-
 func cleanText(_ text: String) -> String {
     let stopWords = Set(["the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of", "with", "as", "by", "from", "is", "are", "was", "were", "be", "been", "being"])
-    
+
     let cleaned = text.lowercased()
         .replacingOccurrences(of: "'s", with: "")
         .replacingOccurrences(of: "[^a-z0-9\\s]", with: " ", options: .regularExpression)
         .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
         .trimmingCharacters(in: .whitespaces)
-    
+
     let words = cleaned.split(separator: " ")
         .map(String.init)
         .filter { !stopWords.contains($0) && $0.count > 1 }
-    
+
     return words.joined(separator: " ")
 }
-
 
 func lemmatize(_ word: String) -> String {
     let tagger = NLTagger(tagSchemes: [.lemma])
     tagger.string = word
-    
+
     var lemma = word
     tagger.enumerateTags(in: word.startIndex..<word.endIndex, unit: .word, scheme: .lemma) { tag, _ in
         if let tag = tag {
@@ -77,16 +75,16 @@ func lemmatize(_ word: String) -> String {
         }
         return true
     }
-    
+
     return lemma.lowercased()
 }
 
 func lemmatizePhrase(_ phrase: String) -> String {
     let tagger = NLTagger(tagSchemes: [.lemma])
     tagger.string = phrase
-    
+
     var lemmatizedWords: [String] = []
-    
+
     tagger.enumerateTags(in: phrase.startIndex..<phrase.endIndex, unit: .word, scheme: .lemma, options: [.omitWhitespace, .omitPunctuation]) { tag, range in
         if let tag = tag {
             lemmatizedWords.append(tag.rawValue.lowercased())
@@ -95,19 +93,18 @@ func lemmatizePhrase(_ phrase: String) -> String {
         }
         return true
     }
-    
+
     return lemmatizedWords.joined(separator: " ")
 }
-
 
 func extractPhrases(from text: String, maxPhraseLength: Int = 4) -> [String] {
     let tagger = NLTagger(tagSchemes: [.lexicalClass, .nameType, .lemma])
     tagger.string = text
-    
+
     var phrases: Set<String> = []
     var nounPhraseBuffer: [String] = []
     var lemmaBuffer: [String] = []
-    
+
     tagger.enumerateTags(
         in: text.startIndex..<text.endIndex,
         unit: .word,
@@ -120,7 +117,7 @@ func extractPhrases(from text: String, maxPhraseLength: Int = 4) -> [String] {
         }
         return true
     }
-    
+
     tagger.enumerateTags(
         in: text.startIndex..<text.endIndex,
         unit: .word,
@@ -128,7 +125,7 @@ func extractPhrases(from text: String, maxPhraseLength: Int = 4) -> [String] {
         options: [.omitWhitespace, .omitPunctuation]
     ) { tag, range in
         let word = String(text[range]).lowercased()
-        
+
         let wordTagger = NLTagger(tagSchemes: [.lemma])
         wordTagger.string = word
         var lemma = word
@@ -138,11 +135,11 @@ func extractPhrases(from text: String, maxPhraseLength: Int = 4) -> [String] {
             }
             return true
         }
-        
+
         if tag == .noun || tag == .adjective || tag == .verb {
             nounPhraseBuffer.append(word)
             lemmaBuffer.append(lemma)
-            
+
             if nounPhraseBuffer.count > maxPhraseLength {
                 nounPhraseBuffer.removeFirst()
                 lemmaBuffer.removeFirst()
@@ -153,7 +150,7 @@ func extractPhrases(from text: String, maxPhraseLength: Int = 4) -> [String] {
                     for start in 0...(nounPhraseBuffer.count - length) {
                         let originalNgram = nounPhraseBuffer[start..<(start + length)].joined(separator: " ")
                         let lemmatizedNgram = lemmaBuffer[start..<(start + length)].joined(separator: " ")
-                        
+
                         phrases.insert(originalNgram)
                         phrases.insert(lemmatizedNgram)
                     }
@@ -164,31 +161,30 @@ func extractPhrases(from text: String, maxPhraseLength: Int = 4) -> [String] {
         }
         return true
     }
-    
+
     if !nounPhraseBuffer.isEmpty {
         for length in 1...nounPhraseBuffer.count {
             for start in 0...(nounPhraseBuffer.count - length) {
                 let originalNgram = nounPhraseBuffer[start..<(start + length)].joined(separator: " ")
                 let lemmatizedNgram = lemmaBuffer[start..<(start + length)].joined(separator: " ")
-                
+
                 phrases.insert(originalNgram)
                 phrases.insert(lemmatizedNgram)
             }
         }
     }
-    
+
     let words = text.lowercased()
         .components(separatedBy: CharacterSet.alphanumerics.inverted)
         .filter { $0.count > 1 }
-    
+
     for word in words {
         phrases.insert(word)
         phrases.insert(lemmatize(word))
     }
-    
+
     return Array(phrases)
 }
-
 
 func matchUserTagsWithArticle(
     userTags: [String],
@@ -196,36 +192,36 @@ func matchUserTagsWithArticle(
     body: String,
     config: MatchConfig = MatchConfig()
 ) -> (matchedTags: [String], matchCount: Int) {
-    
+
     guard let embedding = NLEmbedding.wordEmbedding(for: .english) else {
         print("Failed to load embeddings")
         return ([], 0)
     }
-    
+
     let articleText = cleanText(headline + " " + body)
     let phrases = extractPhrases(from: articleText)
-    
+
     print("\nExtracted Article Phrases (\(phrases.count) total):")
     Array(phrases).sorted().prefix(25).forEach { print("   • \($0)") }
     if phrases.count > 25 {
         print("   ... and \(phrases.count - 25) more")
     }
     print("")
-    
+
     var matchedTags: [String] = []
-    
+
     for tag in userTags {
         let cleanedTag = cleanText(tag)
         let lemmatizedTag = lemmatizePhrase(cleanedTag)
         let tagWords = cleanedTag.split(separator: " ").map(String.init)
         let lemmatizedTagWords = lemmatizedTag.split(separator: " ").map(String.init)
-        
+
         if phrases.contains(cleanedTag) || phrases.contains(lemmatizedTag) {
             matchedTags.append(tag)
             print("Tag: '\(tag)' → EXACT PHRASE MATCH (confidence: 1.00)")
             continue
         }
-        
+
         var foundPartialMatch = false
         for phrase in phrases {
             if phrase.contains(cleanedTag) || phrase.contains(lemmatizedTag) {
@@ -236,50 +232,50 @@ func matchUserTagsWithArticle(
             }
         }
         if foundPartialMatch { continue }
-        
+
         var tagWordScores: [Double] = []
-        
+
         for (index, tagWord) in tagWords.enumerated() {
             let tagLemma = lemmatizedTagWords[index]
             var bestScore = 0.0
             var bestMatch = ""
-            
+
             for phrase in phrases {
                 let phraseWords = phrase.split(separator: " ").map(String.init)
-                
+
                 for phraseWord in phraseWords {
                     if tagWord == phraseWord || tagLemma == phraseWord {
                         bestScore = config.exactMatchBoost
                         bestMatch = phraseWord
                         break
                     }
-                    
+
                     let distance = embedding.distance(between: tagWord, and: phraseWord)
                     let similarity = max(config.semanticFloor, 1.0 - distance)
-                    
+
                     if similarity > bestScore {
                         bestScore = similarity
                         bestMatch = phraseWord
                     }
                 }
-                
+
                 if bestScore == config.exactMatchBoost { break }
             }
-            
+
             tagWordScores.append(bestScore)
             if bestScore > 0.5 {
                 print("'\(tagWord)' → '\(bestMatch)' (score: \(String(format: "%.2f", bestScore)))")
             }
         }
-        
+
         let confidence = tagWordScores.isEmpty ? 0.0 : tagWordScores.reduce(0, +) / Double(tagWordScores.count)
         let bestDistance = tagWordScores.isEmpty ? 2.0 : (1.0 - (tagWordScores.max() ?? 0.0))
-        
+
         print(
             "Tag: '\(tag)' → distance: \(String(format: "%.2f", bestDistance)), " +
             "confidence: \(String(format: "%.2f", confidence))"
         )
-        
+
         if confidence >= config.minConfidence {
             matchedTags.append(tag)
             print("   ✓ MATCHED")
@@ -288,10 +284,9 @@ func matchUserTagsWithArticle(
         }
         print("")
     }
-    
+
     return (matchedTags, matchedTags.count)
 }
-
 
 func calculateArticleScore(
     matchedTags: [String],
@@ -301,7 +296,6 @@ func calculateArticleScore(
         score + (tagWeights[tag] ?? 0.0)
     }
 }
-
 
 print("Starting Enhanced Tag Matching Algorithm\n")
 print(String(repeating: "=", count: 60))
@@ -328,16 +322,11 @@ let articleScore = calculateArticleScore(
 print("\nFinal Article Score: \(articleScore)")
 print("\n" + String(repeating: "=", count: 60))
 
-
-
-
-
-
-//Starting Enhanced Tag Matching Algorithm
+// Starting Enhanced Tag Matching Algorithm
 //
-//============================================================
+// ============================================================
 //
-//Extracted Article Phrases (198 total):
+// Extracted Article Phrases (198 total):
 //   • 2025
 //   • 76
 //   • actual
@@ -365,60 +354,60 @@ print("\n" + String(repeating: "=", count: 60))
 //   • consecutive month december
 //   ... and 173 more
 //
-//Tag: 'banking' → distance: 1.00, confidence: 0.00
+// Tag: 'banking' → distance: 1.00, confidence: 0.00
 //   ✗ Below threshold
 //
-//Tag: 'stock market' → distance: 0.88, confidence: 0.10
+// Tag: 'stock market' → distance: 0.88, confidence: 0.10
 //   ✗ Below threshold
 //
-//Tag: 'hdfc bank' → distance: 0.93, confidence: 0.04
+// Tag: 'hdfc bank' → distance: 0.93, confidence: 0.04
 //   ✗ Below threshold
 //
-//'rate' → 'rate' (score: 1.00)
-//Tag: 'interest rate' → distance: 0.00, confidence: 0.50
+// 'rate' → 'rate' (score: 1.00)
+// Tag: 'interest rate' → distance: 0.00, confidence: 0.50
 //   ✓ MATCHED
 //
-//Tag: 'rbi' → EXACT PHRASE MATCH (confidence: 1.00)
-//Tag: 'technology' → distance: 1.00, confidence: 0.00
+// Tag: 'rbi' → EXACT PHRASE MATCH (confidence: 1.00)
+// Tag: 'technology' → distance: 1.00, confidence: 0.00
 //   ✗ Below threshold
 //
-//Tag: 'digital banking' → distance: 1.00, confidence: 0.00
+// Tag: 'digital banking' → distance: 1.00, confidence: 0.00
 //   ✗ Below threshold
 //
-//Tag: 'fintech' → distance: 1.00, confidence: 0.00
+// Tag: 'fintech' → distance: 1.00, confidence: 0.00
 //   ✗ Below threshold
 //
-//Tag: 'inflation' → EXACT PHRASE MATCH (confidence: 1.00)
-//Tag: 'economy' → distance: 0.94, confidence: 0.06
+// Tag: 'inflation' → EXACT PHRASE MATCH (confidence: 1.00)
+// Tag: 'economy' → distance: 0.94, confidence: 0.06
 //   ✗ Below threshold
 //
-//'growth' → 'growth' (score: 1.00)
-//Tag: 'credit growth' → distance: 0.00, confidence: 0.50
+// 'growth' → 'growth' (score: 1.00)
+// Tag: 'credit growth' → distance: 0.00, confidence: 0.50
 //   ✓ MATCHED
 //
-//Tag: 'regulation' → distance: 1.00, confidence: 0.00
+// Tag: 'regulation' → distance: 1.00, confidence: 0.00
 //   ✗ Below threshold
 //
-//'monetary' → 'monetary' (score: 1.00)
-//'policy' → 'policy' (score: 1.00)
-//Tag: 'monetary policy' → distance: 0.00, confidence: 1.00
+// 'monetary' → 'monetary' (score: 1.00)
+// 'policy' → 'policy' (score: 1.00)
+// Tag: 'monetary policy' → distance: 0.00, confidence: 1.00
 //   ✓ MATCHED
 //
-//Tag: 'financial sector' → distance: 1.00, confidence: 0.00
+// Tag: 'financial sector' → distance: 1.00, confidence: 0.00
 //   ✗ Below threshold
 //
 //
-//============================================================
+// ============================================================
 //
-//RESULTS:
+// RESULTS:
 //
-//Matched Tags (5 total):
+// Matched Tags (5 total):
 //   • interest rate (weight: 20.0)
 //   • rbi (weight: 18.0)
 //   • inflation (weight: 11.0)
 //   • credit growth (weight: 6.0)
 //   • monetary policy (weight: 13.0)
 //
-//Final Article Score: 68.0
+// Final Article Score: 68.0
 //
-//============================================================
+// ============================================================

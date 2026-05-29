@@ -6,33 +6,33 @@
 //
 
 import Foundation
- 
+
 final class ThreadsDataStore {
- 
+
     static let shared = ThreadsDataStore()
- 
+
     private let env = MockEnvironment.shared
- 
+
     // MARK: - State
- 
+
     private var threadPosts: [ThreadPost]
     private var drafts: [Draft]
     private var followedUsers: Set<String>
- 
+
     // MARK: - Current user (single source of truth)
- 
-    var currentUserName: String        { env.anandita.userName }
+
+    var currentUserName: String { env.anandita.userName }
     var currentUserProfileImage: String { env.anandita.profileImage }
- 
+
     // MARK: - Init
- 
+
     private init() {
         // All posts come from MockEnvironment
         threadPosts = MockEnvironment.shared.allPosts
- 
+
         // Anandita follows everyone in her followingNames list
         followedUsers = Set(MockEnvironment.shared.anandita.followingNames)
- 
+
         // One pre-seeded draft
         drafts = [
             Draft(
@@ -45,33 +45,33 @@ final class ThreadsDataStore {
             )
         ]
     }
- 
+
     // MARK: - Posts
- 
+
     private func index(of id: Int) -> Int? {
         threadPosts.firstIndex { $0.id == id }
     }
- 
+
     func getForYouThreads() -> [ThreadPost] {
         threadPosts.filter { $0.userName != currentUserName }
     }
- 
+
     func getFollowingThreads() -> [ThreadPost] {
         threadPosts.filter { followedUsers.contains($0.userName) }
     }
- 
+
     func getMyThreads() -> [ThreadPost] {
         threadPosts.filter { $0.userName == currentUserName }
     }
- 
+
     func getAllPostsForSearch() -> [ThreadPost] {
         threadPosts
     }
- 
+
     func addNewThread(_ thread: ThreadPost) {
         threadPosts.insert(thread, at: 0)
     }
- 
+
     func postThreadFromCreate(
         title: String,
         body: String,
@@ -94,26 +94,26 @@ final class ThreadsDataStore {
         )
         addNewThread(newThread)
     }
- 
+
     func deletePost(id: Int) {
         threadPosts.removeAll { $0.id == id }
     }
- 
+
     func toggleLike(for threadID: Int) {
-        guard let i = index(of: threadID) else { return }
-        threadPosts[i].isLiked.toggle()
-        threadPosts[i].likes += threadPosts[i].isLiked ? 1 : -1
+        guard let index = index(of: threadID) else { return }
+        threadPosts[index].isLiked.toggle()
+        threadPosts[index].likes += threadPosts[index].isLiked ? 1 : -1
     }
- 
+
     // MARK: - Comments
- 
+
     func getComments(for postID: Int) -> [Comment] {
-        guard let i = index(of: postID) else { return [] }
-        return threadPosts[i].comments
+        guard let index = index(of: postID) else { return [] }
+        return threadPosts[index].comments
     }
- 
+
     func addComment(to postID: Int, text: String) {
-        guard let i = index(of: postID) else { return }
+        guard let index = index(of: postID) else { return }
         let newComment = Comment(
             id: UUID(),
             userName: currentUserName,
@@ -123,9 +123,9 @@ final class ThreadsDataStore {
             isLiked: false,
             replies: []
         )
-        threadPosts[i].comments.insert(newComment, at: 0)
+        threadPosts[index].comments.insert(newComment, at: 0)
     }
- 
+
     func toggleLikeOnComment(postID: Int, commentID: UUID) {
         guard let pi = index(of: postID),
               let ci = threadPosts[pi].comments.firstIndex(where: { $0.id == commentID })
@@ -133,7 +133,7 @@ final class ThreadsDataStore {
         threadPosts[pi].comments[ci].isLiked.toggle()
         threadPosts[pi].comments[ci].likes += threadPosts[pi].comments[ci].isLiked ? 1 : -1
     }
- 
+
     func addReply(to postID: Int, commentID: UUID, text: String) {
         guard let pi = index(of: postID),
               let ci = threadPosts[pi].comments.firstIndex(where: { $0.id == commentID })
@@ -148,13 +148,13 @@ final class ThreadsDataStore {
         )
         threadPosts[pi].comments[ci].replies.append(reply)
     }
- 
+
     // MARK: - Follow / Unfollow
- 
+
     func isFollowing(_ userName: String) -> Bool {
         followedUsers.contains(userName)
     }
- 
+
     func toggleFollow(_ userName: String) {
         if followedUsers.contains(userName) {
             followedUsers.remove(userName)
@@ -162,33 +162,33 @@ final class ThreadsDataStore {
             followedUsers.insert(userName)
         }
     }
- 
+
     // MARK: - Drafts
- 
+
     func getDrafts() -> [Draft] { drafts }
- 
+
     func saveDraft(title: String?, topic: String?, body: String?, imageName: String?) {
         drafts.insert(
             Draft(id: UUID(), title: title, topic: topic, body: body, imageName: imageName, lastUpdated: Date()),
             at: 0
         )
     }
- 
+
     func updateDraft(id: UUID, title: String?, topic: String?, body: String?, imageName: String?) {
-        guard let i = drafts.firstIndex(where: { $0.id == id }) else { return }
-        drafts[i].title       = title
-        drafts[i].topic       = topic
-        drafts[i].body        = body
-        drafts[i].imageName   = imageName
-        drafts[i].lastUpdated = Date()
+        guard let index = drafts.firstIndex(where: { $0.id == id }) else { return }
+        drafts[index].title       = title
+        drafts[index].topic       = topic
+        drafts[index].body        = body
+        drafts[index].imageName   = imageName
+        drafts[index].lastUpdated = Date()
     }
- 
+
     func deleteDraft(id: UUID) {
         drafts.removeAll { $0.id == id }
     }
- 
+
     // MARK: - Recommendation engine integration
- 
+
     /// Returns ranked BlogArticles for Anandita's "For You" feed using the engine.
     /// Call this from your ForYou view controller instead of getForYouThreads()
     /// when you want personalised ordering.

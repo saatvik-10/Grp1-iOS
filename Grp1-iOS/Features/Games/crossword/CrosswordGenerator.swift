@@ -1,6 +1,6 @@
 import Foundation
 
-public let BOARD_SIZE = 32
+public let boardSize = 32
 
 public var board: [[Character?]] = []
 public var wordArr: [String] = []
@@ -9,17 +9,29 @@ public var wordsActive: [WordObj] = []
 
 public let bounds = Bounds()
 
+public struct Placement {
+    public let column: Int
+    public let row: Int
+    public let direction: Int
+
+    public init(column: Int, row: Int, direction: Int) {
+        self.column = column
+        self.row = row
+        self.direction = direction
+    }
+}
+
 public final class Bounds {
     public var top = 999
     public var right = 0
     public var bottom = 0
     public var left = 999
 
-    public func update(x: Int, y: Int) {
-        top = min(top, y)
-        right = max(right, x)
-        bottom = max(bottom, y)
-        left = min(left, x)
+    public func update(column: Int, row: Int) {
+        top = min(top, row)
+        right = max(right, column)
+        bottom = max(bottom, row)
+        left = min(left, column)
     }
 
     public func clean() {
@@ -32,11 +44,11 @@ public final class Bounds {
     public func center() -> (x: Int, y: Int) {
         ((left + right) / 2, (top + bottom) / 2)
     }
-    
+
     public func width() -> Int {
         return right - left + 1
     }
-    
+
     public func height() -> Int {
         return bottom - top + 1
     }
@@ -48,11 +60,11 @@ public final class WordObj {
 
     public var totalMatches = 0
     public var effectiveMatches = 0
-    public var successfulMatches: [(x: Int, y: Int, dir: Int)] = []
+    public var successfulMatches: [Placement] = []
 
-    public var x = 0
-    public var y = 0
-    public var dir = 0   // 0 = horizontal, 1 = vertical
+    public var column = 0
+    public var row = 0
+    public var direction = 0   // 0 = horizontal, 1 = vertical
 
     public init(_ value: String) {
         self.string = value
@@ -61,22 +73,22 @@ public final class WordObj {
 }
 
 @MainActor
-func distanceScore(x: Int, y: Int) -> Int {
-    let c = bounds.center()
-    return abs(x - c.x) + abs(y - c.y)
+func distanceScore(column: Int, row: Int) -> Int {
+    let center = bounds.center()
+    return abs(column - center.x) + abs(row - center.y)
 }
 
 @MainActor
-func localDensityScore(x: Int, y: Int, length: Int, dir: Int) -> Int {
+func localDensityScore(column: Int, row: Int, length: Int, direction: Int) -> Int {
     var density = 0
-    for i in -2...(length + 2) {
-        let px = dir == 0 ? x + i : x
-        let py = dir == 0 ? y : y + i
+    for offset in -2...(length + 2) {
+        let px = direction == 0 ? column + offset : column
+        let py = direction == 0 ? row : row + offset
         for dx in -1...1 {
             for dy in -1...1 {
                 let nx = px + dx
                 let ny = py + dy
-                if nx >= 0, ny >= 0, nx < BOARD_SIZE, ny < BOARD_SIZE {
+                if nx >= 0, ny >= 0, nx < boardSize, ny < boardSize {
                     if board[nx][ny] != nil { density += 1 }
                 }
             }
@@ -86,54 +98,55 @@ func localDensityScore(x: Int, y: Int, length: Int, dir: Int) -> Int {
 }
 
 @MainActor
-func directionBalanceBonus(dir: Int) -> Int {
-    let horizontal = wordsActive.filter { $0.dir == 0 }.count
+func directionBalanceBonus(direction: Int) -> Int {
+    let horizontal = wordsActive.filter { $0.direction == 0 }.count
     let vertical = wordsActive.count - horizontal
 
-    if dir == 0 && horizontal > vertical { return -5 }
-    if dir == 1 && vertical > horizontal { return -5 }
+    if direction == 0 && horizontal > vertical { return -5 }
+    if direction == 1 && vertical > horizontal { return -5 }
     return 5
 }
 
 @MainActor
 func chooseBestSpreadPlacement(
-    _ placements: [(x: Int, y: Int, dir: Int)],
+    _ placements: [Placement],
     wordLength: Int
-) -> (x: Int, y: Int, dir: Int) {
+) -> Placement {
 
-    let scored = placements.map { p -> ((Int, Int, Int), Int) in
+    let scored = placements.map { placement -> (Placement, Int) in
 
-        let dist = distanceScore(x: p.x, y: p.y) * 3
-        let density = localDensityScore(x: p.x, y: p.y, length: wordLength, dir: p.dir) * 4
-        let dirBonus = directionBalanceBonus(dir: p.dir)
+        let dist = distanceScore(column: placement.column, row: placement.row) * 3
+        let density = localDensityScore(column: placement.column, row: placement.row,
+                                        length: wordLength, direction: placement.direction) * 4
+        let dirBonus = directionBalanceBonus(direction: placement.direction)
 
-        return ((p.x, p.y, p.dir), dist - density + dirBonus)
+        return (placement, dist - density + dirBonus)
     }
 
-    let bestScore = scored.map { $0.1 }.max()!
+    guard let bestScore = scored.map({ $0.1 }).max() else { return Placement(column: 12, row: 12, direction: 0) }
     let bestCandidates = scored.filter { $0.1 >= bestScore - 3 }
-    return bestCandidates.randomElement()!.0
+    return bestCandidates.randomElement()?.0 ?? Placement(column: 12, row: 12, direction: 0)
 }
 
 @MainActor
 func isCompactCrossword() -> Bool {
     let width = bounds.width()
     let height = bounds.height()
-    
+
     // Crossword should fit in 9x9 grid
     if width > 9 || height > 9 {
         return false
     }
-    
+
     let wordCount = wordsActive.count
     if wordCount < 3 {
         return false
     }
-    
+
     let usedCells = board.flatMap { $0 }.compactMap { $0 }.count
     let gridArea = width * height
     let density = Double(usedCells) / Double(gridArea)
-    
+
     return density >= 0.20 && density <= 0.90
 }
 
@@ -143,19 +156,19 @@ func isCompactCrossword() -> Bool {
     wordsActive.removeAll()
 
     board = Array(
-        repeating: Array(repeating: nil, count: BOARD_SIZE),
-        count: BOARD_SIZE
+        repeating: Array(repeating: nil, count: boardSize),
+        count: boardSize
     )
 }
 
 @MainActor func prepareBoard() {
     wordBank = wordArr.map { WordObj($0) }
 
-    for i in 0..<wordBank.count {
-        let wA = wordBank[i]
+    for index in wordBank.indices {
+        let wA = wordBank[index]
         for cA in wA.chars {
-            for j in 0..<wordBank.count where i != j {
-                let wB = wordBank[j]
+            for index2 in wordBank.indices where index != index2 {
+                let wB = wordBank[index2]
                 for cB in wB.chars where cA == cB {
                     wA.totalMatches += 1
                 }
@@ -166,10 +179,7 @@ func isCompactCrossword() -> Bool {
 
 @MainActor func populateBoard() -> Bool {
     prepareBoard()
-    for _ in 0..<wordBank.count {
-        if !addWordToBoard() { return false }
-    }
-    return true
+    return wordBank.indices.allSatisfy { _ in addWordToBoard() }
 }
 
 @MainActor
@@ -180,36 +190,36 @@ func addWordToBoard() -> Bool {
 
     if wordsActive.isEmpty {
 
-        curIndex = wordBank.indices.min { wordBank[$0].totalMatches < wordBank[$1].totalMatches }!
-        wordBank[curIndex].successfulMatches = [(12, 12, 0)]
+        curIndex = wordBank.indices.min { wordBank[$0].totalMatches < wordBank[$1].totalMatches } ?? 0
+        wordBank[curIndex].successfulMatches = [Placement(column: 12, row: 12, direction: 0)]
 
     } else {
 
-        for i in 0..<wordBank.count {
-            let curWord = wordBank[i]
+        for index in wordBank.indices {
+            let curWord = wordBank[index]
             curWord.effectiveMatches = 0
             curWord.successfulMatches.removeAll()
 
-            for (j, curChar) in curWord.chars.enumerated() {
+            for (charIndex, curChar) in curWord.chars.enumerated() {
                 for testWord in wordsActive {
-                    for (l, testChar) in testWord.chars.enumerated()
+                    for (testCharIndex, testChar) in testWord.chars.enumerated()
                         where curChar == testChar {
 
                         curWord.effectiveMatches += 1
-                        var crossX = testWord.x
-                        var crossY = testWord.y
-                        let crossDir = testWord.dir == 0 ? 1 : 0
+                        var crossColumn = testWord.column
+                        var crossRow = testWord.row
+                        let crossDirection = testWord.direction == 0 ? 1 : 0
 
-                        if testWord.dir == 0 {
-                            crossX += l
-                            crossY -= j
+                        if testWord.direction == 0 {
+                            crossColumn += testCharIndex
+                            crossRow -= charIndex
                         } else {
-                            crossY += l
-                            crossX -= j
+                            crossRow += testCharIndex
+                            crossColumn -= charIndex
                         }
 
-                        if isValidPlacement(word: curWord, x: crossX, y: crossY, dir: crossDir) {
-                            curWord.successfulMatches.append((crossX, crossY, crossDir))
+                        if isValidPlacement(word: curWord, column: crossColumn, row: crossRow, direction: crossDirection) {
+                            curWord.successfulMatches.append(Placement(column: crossColumn, row: crossRow, direction: crossDirection))
                         }
                     }
                 }
@@ -218,7 +228,7 @@ func addWordToBoard() -> Bool {
             let diff = curWord.totalMatches - curWord.effectiveMatches
             if diff < minMatchDiff && !curWord.successfulMatches.isEmpty {
                 minMatchDiff = diff
-                curIndex = i
+                curIndex = index
             }
         }
     }
@@ -230,33 +240,33 @@ func addWordToBoard() -> Bool {
 
     let match = chooseBestSpreadPlacement(word.successfulMatches, wordLength: word.chars.count)
 
-    word.x = match.x
-    word.y = match.y
-    word.dir = match.dir
+    word.column = match.column
+    word.row = match.row
+    word.direction = match.direction
 
-    for i in 0..<word.chars.count {
-        let x = word.dir == 0 ? word.x + i : word.x
-        let y = word.dir == 0 ? word.y : word.y + i
-        board[x][y] = word.chars[i]
-        bounds.update(x: x, y: y)
+    for charOffset in word.chars.indices {
+        let col = word.direction == 0 ? word.column + charOffset : word.column
+        let row = word.direction == 0 ? word.row : word.row + charOffset
+        board[col][row] = word.chars[charOffset]
+        bounds.update(column: col, row: row)
     }
 
     return true
 }
 
 @MainActor
-func isValidPlacement(word: WordObj, x: Int, y: Int, dir: Int) -> Bool {
+func isValidPlacement(word: WordObj, column: Int, row: Int, direction: Int) -> Bool {
     let length = word.chars.count
 
-    for i in 0..<length {
-        let px = dir == 0 ? x + i : x
-        let py = dir == 0 ? y : y + i
+    for index in 0..<length {
+        let px = direction == 0 ? column + index : column
+        let py = direction == 0 ? row : row + index
 
-        if px < 0 || py < 0 || px >= BOARD_SIZE || py >= BOARD_SIZE {
+        if px < 0 || py < 0 || px >= boardSize || py >= boardSize {
             return false
         }
 
-        if let existing = board[px][py], existing != word.chars[i] {
+        if let existing = board[px][py], existing != word.chars[index] {
             return false
         }
     }
@@ -277,15 +287,15 @@ public func generateCrossword(words: [String]) -> ([[Character?]], [WordObj]) {
     var success = false
     var attempts = 0
     let maxAttempts = 30
-    
+
     while !success && attempts < maxAttempts {
         cleanVars()
         success = populateBoard()
-        
+
         if success {
             success = isCompactCrossword()
         }
-        
+
         attempts += 1
     }
 
@@ -297,38 +307,38 @@ public func generateUniqueCrosswords(
     from items: [CrosswordData],
     count: Int
 ) -> [([String], [String: String])] {
-    
+
     var puzzles: [([String], [String: String])] = []
     var usedCombinations: Set<String> = []
-    
+
     for _ in 0..<count {
         var attempts = 0
         var foundUnique = false
-        
+
         while !foundUnique && attempts < 20 {
-            
+
             let shuffled = items.shuffled()
             let subset = Array(shuffled.prefix(min(6, shuffled.count)))
-            
+
             let words = subset.map { $0.name }
             let clues = Dictionary(uniqueKeysWithValues: subset.map { ($0.name, $0.clue) })
-            
+
             let signature = words.sorted().joined()
-            
+
             if !usedCombinations.contains(signature) {
-                
+
                 let (_, placedWords) = generateCrossword(words: words)
-                
+
                 if !placedWords.isEmpty && placedWords.count >= 3 {
                     puzzles.append((words, clues))
                     usedCombinations.insert(signature)
                     foundUnique = true
                 }
             }
-            
+
             attempts += 1
         }
     }
-    
+
     return puzzles
 }

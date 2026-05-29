@@ -37,17 +37,17 @@
 //             if let error = error {
 //                 print("❌ Level save error: \(error)")
 //             }
-            
+
 //             let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
 //             let success = statusCode == 200
-            
+
 //             print("📊 Level save status: \(statusCode)")
 //             if success {
 //                 print("✅ Level saved successfully")
 //             } else {
 //                 print("❌ Level save failed")
 //             }
-            
+
 //             DispatchQueue.main.async { completion(success) }
 //         }.resume()
 //     }
@@ -72,17 +72,17 @@
 //             if let error = error {
 //                 print("❌ Interest save error: \(error)")
 //             }
-            
+
 //             let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
 //             let success = statusCode == 201 || statusCode == 200
-            
+
 //             print("📊 Interest save status: \(statusCode)")
 //             if success {
 //                 print("✅ Interest saved: \(interestId)")
 //             } else {
 //                 print("❌ Interest save failed: \(interestId)")
 //             }
-            
+
 //             DispatchQueue.main.async { completion(success) }
 //         }.resume()
 //     }
@@ -108,22 +108,22 @@
 //                 DispatchQueue.main.async { completion([]) }
 //                 return
 //             }
-            
+
 //             let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
 //             print("📊 Fetch interests status: \(statusCode)")
-            
+
 //             guard let data = data,
 //                   let json = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
 //                 print("❌ Failed to decode interests")
 //                 DispatchQueue.main.async { completion([]) }
 //                 return
 //             }
-            
+
 //             print("✅ Fetched \(json.count) interests")
 //             DispatchQueue.main.async { completion(json) }
 //         }.resume()
 //     }
-    
+
 //     /// Mark onboarding as complete
 //     func markOnboardingComplete(token: String, completion: @escaping (Bool) -> Void) {
 //         guard let url = URL(string: "\(baseURL)api/profile/onboarding-complete") else {
@@ -143,17 +143,17 @@
 //             if let error = error {
 //                 print("❌ Onboarding complete error: \(error)")
 //             }
-            
+
 //             let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
 //             let success = statusCode == 200
-            
+
 //             print("📊 Onboarding complete status: \(statusCode)")
 //             if success {
 //                 print("✅ Onboarding marked as complete")
 //             } else {
 //                 print("❌ Failed to mark onboarding complete")
 //             }
-            
+
 //             DispatchQueue.main.async { completion(success) }
 //         }.resume()
 //     }

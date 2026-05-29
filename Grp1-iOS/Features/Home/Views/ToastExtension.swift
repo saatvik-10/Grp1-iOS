@@ -10,7 +10,7 @@ extension UIViewController {
         toastView.backgroundColor = UIColor.black.withAlphaComponent(0.7)
         toastView.layer.cornerRadius = 20
         toastView.layer.masksToBounds = true
-        
+
         toastView.alpha = 0
         toastView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -25,12 +25,12 @@ extension UIViewController {
 
         UIView.animate(withDuration: 0.3, animations: {
             toastView.alpha = 1
-        }) { _ in
+        }, completion: { _ in
             UIView.animate(withDuration: 0.3, delay: 1.2, options: .curveEaseOut, animations: {
                 toastView.alpha = 0
-            }) { _ in
+            }, completion: { _ in
                 toastView.removeFromSuperview()
-            }
-        }
+            })
+        })
     }
 }

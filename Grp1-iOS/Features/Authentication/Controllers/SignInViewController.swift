@@ -238,7 +238,11 @@ class SignInViewController: UIViewController {
     private func showLoading(_ loading: Bool) {
         signInButton.setTitle(loading ? "" : "Sign In", for: .normal)
         signInButton.isEnabled = !loading
-        loading ? activityIndicator.startAnimating() : activityIndicator.stopAnimating()
+        if loading {
+            activityIndicator.startAnimating()
+        } else {
+            activityIndicator.stopAnimating()
+        }
     }
 
     private func showAlert(title: String, message: String) {
@@ -264,13 +268,13 @@ class SignInViewController: UIViewController {
             contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
             contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
             contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
         ])
 
         signInButton.addSubview(activityIndicator)
         NSLayoutConstraint.activate([
             activityIndicator.centerXAnchor.constraint(equalTo: signInButton.centerXAnchor),
-            activityIndicator.centerYAnchor.constraint(equalTo: signInButton.centerYAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: signInButton.centerYAnchor)
         ])
 
         let stackView = UIStackView(arrangedSubviews: [
@@ -281,7 +285,7 @@ class SignInViewController: UIViewController {
             passwordField,
             makeSpacer(height: 24),
             signInButton,
-            backButton,
+            backButton
         ])
         stackView.axis = .vertical
         stackView.spacing = 16
@@ -293,14 +297,14 @@ class SignInViewController: UIViewController {
             stackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
             stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
             stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -40),
-            signInButton.heightAnchor.constraint(equalToConstant: 52),
+            signInButton.heightAnchor.constraint(equalToConstant: 52)
         ])
     }
 
     private func makeSpacer(height: CGFloat) -> UIView {
-        let v = UIView()
-        v.translatesAutoresizingMaskIntoConstraints = false
-        v.heightAnchor.constraint(equalToConstant: height).isActive = true
-        return v
+        let spacer = UIView()
+        spacer.translatesAutoresizingMaskIntoConstraints = false
+        spacer.heightAnchor.constraint(equalToConstant: height).isActive = true
+        return spacer
     }
 }

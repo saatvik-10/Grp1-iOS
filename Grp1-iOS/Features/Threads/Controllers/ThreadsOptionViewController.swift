@@ -10,7 +10,6 @@ final class ThreadsOptionViewController: UIViewController {
         setupUI()
         setupOptions()
 
-      
         preferredContentSize = CGSize(width: 260, height: 240)
     }
 
@@ -31,7 +30,6 @@ final class ThreadsOptionViewController: UIViewController {
             containerView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
 
-    
         let blur = UIBlurEffect(style: .systemMaterial)
         let blurView = UIVisualEffectView(effect: blur)
         blurView.frame = containerView.bounds
@@ -120,4 +118,3 @@ final class ThreadsOptionViewController: UIViewController {
         return button
     }
 }
-

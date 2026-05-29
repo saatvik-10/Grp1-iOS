@@ -41,7 +41,7 @@ struct NewsProvider: TimelineProvider {
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<NewsEntry>) -> Void) {
         let entry = NewsEntry(date: .now, articles: loadArticles())
-        let refresh = Calendar.current.date(byAdding: .minute, value: 30, to: .now)!
+        let refresh = Calendar.current.date(byAdding: .minute, value: 30, to: .now) ?? .now
         completion(Timeline(entries: [entry], policy: .after(refresh)))
     }
 

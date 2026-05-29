@@ -8,14 +8,13 @@
 import UIKit
 
 class DomainSelectionViewController: UIViewController {
-    
+
     @IBOutlet weak var stepLabel: UILabel!
     var onNextTapped: (() -> Void)?
     var onBackTapped: (() -> Void)?
     @IBOutlet weak var collectionView: UICollectionView!
-    
+
     @IBOutlet weak var nextButton: UIButton!
-    
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,17 +34,17 @@ class DomainSelectionViewController: UIViewController {
         let hasSelection = !(collectionView.indexPathsForSelectedItems?.isEmpty ?? true)
         nextButton.isEnabled = hasSelection
         nextButton.alpha = hasSelection ? 1.0 : 0.5
-        
+
     }
-    
+
     @IBAction func backTapped(_ sender: UIButton) {
         onBackTapped?()
     }
-    
+
     @IBAction func nextTapped(_ sender: UIButton) {
         onNextTapped?()
     }
-    
+
 }
 
 extension DomainSelectionViewController: UICollectionViewDataSource {
@@ -59,10 +58,10 @@ extension DomainSelectionViewController: UICollectionViewDataSource {
                         cellForItemAt indexPath: IndexPath)
     -> UICollectionViewCell {
 
-        let cell = collectionView.dequeueReusableCell(
+        guard let cell = collectionView.dequeueReusableCell(
             withReuseIdentifier: "DomainCollectionViewCell",
             for: indexPath
-        ) as! DomainCollectionViewCell
+        ) as? DomainCollectionViewCell else { return UICollectionViewCell() }
 
         cell.configure(domains[indexPath.item])
         return cell

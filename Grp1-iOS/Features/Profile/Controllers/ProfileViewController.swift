@@ -43,6 +43,11 @@ class ProfileViewController: UIViewController {
         setupCollectionView()
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        collectionView.reloadData()
+    }
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         fetchProfile()
@@ -87,7 +92,7 @@ class ProfileViewController: UIViewController {
             blueView.topAnchor.constraint(equalTo: view.topAnchor),
             blueView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             blueView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            bottom,
+            bottom
         ])
     }
 
@@ -126,18 +131,18 @@ class ProfileViewController: UIViewController {
 
         // Reduce spacing between name and username
         profileLevel.transform = CGAffineTransform(translationX: 0, y: -8)
-        
+
         // Add a divider below the name/username header and above collection view
         addDivider()
 
         collectionView.register(
-            UINib(nibName: "ProgressViewCell",       bundle: nil),
+            UINib(nibName: "ProgressViewCell", bundle: nil),
             forCellWithReuseIdentifier: "progress_cell")
         collectionView.register(
-            UINib(nibName: "InterestsViewCell",      bundle: nil),
+            UINib(nibName: "InterestsViewCell", bundle: nil),
             forCellWithReuseIdentifier: "interests_cell")
         collectionView.register(
-            UINib(nibName: "BookmarksViewCell",      bundle: nil),
+            UINib(nibName: "BookmarksViewCell", bundle: nil),
             forCellWithReuseIdentifier: "bookmarks_cell")
         collectionView.register(
             UINib(nibName: "ProfileOption2ViewCell", bundle: nil),
@@ -156,18 +161,19 @@ class ProfileViewController: UIViewController {
             var totalHeight: CGFloat = 0
 
             for (index, sectionType) in self.sections.enumerated() {
-                let h: CGFloat
+                let height: CGFloat
                 switch sectionType {
-                case .progress:       h = 200 // Increased height of the Streak cell
-                case .interests:      h = 95  // Decreased height of the Interests cell
-                case .bookmarks:      h = 85  // Increased height of the Bookmarks cell
-                case .about, .logout: h = 60
+                case .progress:       height = 200
+                case .interests:      height = 95
+                case .bookmarks:      height = 85
+                case .about, .logout: height = 60
                 }
                 let itemSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1),
-                    heightDimension: .absolute(h))
+                    heightDimension: .absolute(height)
+                )
                 groupItems.append(NSCollectionLayoutItem(layoutSize: itemSize))
-                totalHeight += h + (index > 0 ? 10 : 0)
+                totalHeight += height + (index > 0 ? 10 : 0)
             }
 
             let groupSize = NSCollectionLayoutSize(
@@ -184,13 +190,13 @@ class ProfileViewController: UIViewController {
             return section
         }
     }
-    
+
     private func addDivider() {
         let divider = UIView()
         divider.backgroundColor = UIColor.lightGray.withAlphaComponent(0.3)
         divider.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(divider)
-        
+
         NSLayoutConstraint.activate([
             divider.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0),
             divider.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0),
@@ -238,7 +244,7 @@ class ProfileViewController: UIViewController {
             profileName.text       = user.name
             profileLevel.text      = "@" + (user.email.components(separatedBy: "@").first ?? "username")
             profileLevel.textColor = .secondaryLabel
-            
+
             if let img = UIImage(named: user.image) {
                 profileBtn.setImage(nil, for: .normal)
                 profileBtn.setBackgroundImage(img, for: .normal)
@@ -265,7 +271,7 @@ class ProfileViewController: UIViewController {
             gradientView.topAnchor.constraint(equalTo: profileImage.topAnchor),
             gradientView.leadingAnchor.constraint(equalTo: profileImage.leadingAnchor),
             gradientView.trailingAnchor.constraint(equalTo: profileImage.trailingAnchor),
-            gradientView.bottomAnchor.constraint(equalTo: profileImage.bottomAnchor),
+            gradientView.bottomAnchor.constraint(equalTo: profileImage.bottomAnchor)
         ])
         DispatchQueue.main.async {
             let gl = CAGradientLayer()
@@ -282,18 +288,18 @@ class ProfileViewController: UIViewController {
 
     private func dominantColor(from image: UIImage) -> UIColor? {
         guard let ci = CIImage(image: image) else { return nil }
-        let ctx = CIContext(options: [.workingColorSpace: kCFNull!])
+        let ctx = CIContext(options: [.workingColorSpace: kCFNull as Any])
         guard let filter = CIFilter(name: "CIAreaAverage",
-                                    parameters: [kCIInputImageKey:  ci,
+                                    parameters: [kCIInputImageKey: ci,
                                                  kCIInputExtentKey: CIVector(cgRect: ci.extent)]),
               let out = filter.outputImage else { return nil }
         var bm = [UInt8](repeating: 0, count: 4)
         ctx.render(out, toBitmap: &bm, rowBytes: 4,
                    bounds: CGRect(x: 0, y: 0, width: 1, height: 1),
                    format: .RGBA8, colorSpace: nil)
-        return UIColor(red:   CGFloat(bm[0]) / 255,
+        return UIColor(red: CGFloat(bm[0]) / 255,
                        green: CGFloat(bm[1]) / 255,
-                       blue:  CGFloat(bm[2]) / 255,
+                       blue: CGFloat(bm[2]) / 255,
                        alpha: 1)
     }
 
@@ -348,8 +354,10 @@ extension ProfileViewController: UICollectionViewDataSource, UICollectionViewDel
 
         switch sectionType {
         case .progress:
-            let cell = collectionView.dequeueReusableCell(
-                withReuseIdentifier: "progress_cell", for: indexPath) as! ProgressViewCell
+            guard let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: "progress_cell", for: indexPath) as? ProgressViewCell else {
+                return UICollectionViewCell()
+            }
             cell.configure(streakCount: 7)
             cell.contentView.backgroundColor = .white
             cell.backgroundColor = .white
@@ -358,8 +366,10 @@ extension ProfileViewController: UICollectionViewDataSource, UICollectionViewDel
             return cell
 
         case .interests(let data):
-            let cell = collectionView.dequeueReusableCell(
-                withReuseIdentifier: "interests_cell", for: indexPath) as! InterestsViewCell
+            guard let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: "interests_cell", for: indexPath) as? InterestsViewCell else {
+                return UICollectionViewCell()
+            }
             // Render latest user-selected interests rather than the static snapshot.
             let latest = Array(UserInterests.domains.map { $0.title }.prefix(4))
             cell.configure(interests: latest.isEmpty ? data.interests : latest)
@@ -370,8 +380,10 @@ extension ProfileViewController: UICollectionViewDataSource, UICollectionViewDel
             return cell
 
         case .bookmarks(let data):
-            let cell = collectionView.dequeueReusableCell(
-                withReuseIdentifier: "bookmarks_cell", for: indexPath) as! BookmarksViewCell
+            guard let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: "bookmarks_cell", for: indexPath) as? BookmarksViewCell else {
+                return UICollectionViewCell()
+            }
             cell.configure(folders: data.totalFolders, bookmarks: data.totalBookmarks)
             cell.contentView.backgroundColor = .white
             cell.backgroundColor = .white
@@ -380,8 +392,10 @@ extension ProfileViewController: UICollectionViewDataSource, UICollectionViewDel
             return cell
 
         case .about, .logout:
-            let cell = collectionView.dequeueReusableCell(
-                withReuseIdentifier: "option_cell", for: indexPath) as! ProfileOption2ViewCell
+            guard let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: "option_cell", for: indexPath) as? ProfileOption2ViewCell else {
+                return UICollectionViewCell()
+            }
             cell.delegate = self
             cell.configure(title: sectionType.title, isDestructive: sectionType.isDestructive)
             cell.contentView.backgroundColor = .white

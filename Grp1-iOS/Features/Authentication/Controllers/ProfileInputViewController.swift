@@ -5,7 +5,7 @@
 
 import UIKit
 
-class ProfileInputViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class ProfileInputViewController: UIViewController {
 
     // MARK: - Properties
 
@@ -73,7 +73,7 @@ class ProfileInputViewController: UIViewController, UIImagePickerControllerDeleg
             icon.centerXAnchor.constraint(equalTo: badge.centerXAnchor),
             icon.centerYAnchor.constraint(equalTo: badge.centerYAnchor),
             icon.widthAnchor.constraint(equalToConstant: 16),
-            icon.heightAnchor.constraint(equalToConstant: 16),
+            icon.heightAnchor.constraint(equalToConstant: 16)
         ])
         return badge
     }()
@@ -136,9 +136,10 @@ class ProfileInputViewController: UIViewController, UIImagePickerControllerDeleg
         super.viewDidLayoutSubviews()
         applyGradientToButton()
     }
+}
 
-    // MARK: - Profile Image Tap
-
+// MARK: - Profile Image Tap
+extension ProfileInputViewController {
     @objc private func profileImageTapped() {
         let alert = UIAlertController(title: "Profile Photo", message: "Choose a source", preferredStyle: .actionSheet)
 
@@ -163,33 +164,10 @@ class ProfileInputViewController: UIViewController, UIImagePickerControllerDeleg
         picker.allowsEditing = true
         present(picker, animated: true)
     }
+}
 
-    // MARK: - UIImagePickerControllerDelegate
-
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        picker.dismiss(animated: true)
-
-        if let editedImage = info[.editedImage] as? UIImage {
-            selectedImage = editedImage
-            profileImageView.image = editedImage
-        } else if let originalImage = info[.originalImage] as? UIImage {
-            selectedImage = originalImage
-            profileImageView.image = originalImage
-        }
-
-        // Update label after photo is set
-        tapToChangeLabel.text = "Tap to change photo"
-
-        // Update border to accent color
-        profileImageView.layer.borderColor = accentColor.cgColor
-    }
-
-    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-        picker.dismiss(animated: true)
-    }
-
-    // MARK: - Gradient Button
-
+// MARK: - Gradient Button
+extension ProfileInputViewController {
     private func applyGradientToButton() {
         continueButton.layer.sublayers?.removeAll(where: { $0 is CAGradientLayer })
         let gradient = CAGradientLayer()
@@ -200,80 +178,20 @@ class ProfileInputViewController: UIViewController, UIImagePickerControllerDeleg
         gradient.cornerRadius = 14
         continueButton.layer.insertSublayer(gradient, at: 0)
     }
+}
 
-    // MARK: - Gender Pill Buttons
-
-    private func setupGenderButtons() {
-        maleButton = makeGenderOption(title: "Male", icon: "figure.stand")
-        femaleButton = makeGenderOption(title: "Female", icon: "figure.stand.dress")
-        maleButton.addTarget(self, action: #selector(maleSelected), for: .touchUpInside)
-        femaleButton.addTarget(self, action: #selector(femaleSelected), for: .touchUpInside)
-    }
-
-    private func makeGenderOption(title: String, icon: String) -> UIButton {
-        var config = UIButton.Configuration.plain()
-        config.title = title
-        config.image = UIImage(systemName: "circle")
-        config.imagePadding = 12
-        config.baseForegroundColor = .label
-        config.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0)
-        let button = UIButton(configuration: config)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.contentHorizontalAlignment = .left
-        button.heightAnchor.constraint(equalToConstant: 40).isActive = true
-        return button
-    }
-
-    @objc private func maleSelected() {
-        selectedGender = .male
-        updateGenderSelection()
-    }
-
-    @objc private func femaleSelected() {
-        selectedGender = .female
-        updateGenderSelection()
-    }
-
-    private func updateGenderSelection() {
-        maleButton.configuration?.image = UIImage(systemName: selectedGender == .male ? "circle.inset.filled" : "circle")
-        maleButton.configuration?.baseForegroundColor = selectedGender == .male ? accentColor : .label
-        maleButton.layer.borderWidth = 0
-
-        femaleButton.configuration?.image = UIImage(systemName: selectedGender == .female ? "circle.inset.filled" : "circle")
-        femaleButton.configuration?.baseForegroundColor = selectedGender == .female ? accentColor : .label
-        femaleButton.layer.borderWidth = 0
-    }
-
-    // MARK: - Prefill
-
+// MARK: - Prefill
+extension ProfileInputViewController {
     private func prefillFromSession() {
         if let user = SessionManager.shared.currentUser {
             nameField.text = user.name
             emailField.text = user.email
         }
     }
+}
 
-    // MARK: - Date Picker
-
-    private func setupDatePicker() {
-        dobField.inputView = datePicker
-        let toolbar = UIToolbar()
-        toolbar.sizeToFit()
-        let doneButton = UIBarButtonItem(title: "Done", style: .done, target: self, action: #selector(datePickerDone))
-        let flexSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-        toolbar.setItems([flexSpace, doneButton], animated: false)
-        dobField.inputAccessoryView = toolbar
-    }
-
-    @objc private func datePickerDone() {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd/MM/yyyy"
-        dobField.text = formatter.string(from: datePicker.date)
-        dobField.resignFirstResponder()
-    }
-
-    // MARK: - Actions
-
+// MARK: - Actions
+extension ProfileInputViewController {
     private func setupActions() {
         continueButton.addTarget(self, action: #selector(continueTapped), for: .touchUpInside)
 
@@ -314,9 +232,10 @@ class ProfileInputViewController: UIViewController, UIImagePickerControllerDeleg
             self?.dismiss(animated: true)
         }
     }
+}
 
-    // MARK: - Save Profile Image to Documents
-
+// MARK: - Save Profile Image to Documents
+extension ProfileInputViewController {
     private func saveProfileImage() -> String? {
         guard let image = selectedImage,
               let data = image.jpegData(compressionQuality: 0.8) else { return nil }
@@ -334,8 +253,6 @@ class ProfileInputViewController: UIViewController, UIImagePickerControllerDeleg
         }
     }
 
-    // MARK: - Save Profile Data
-
     private func saveProfileLocally(_ profile: UserProfile) {
         let defaults = UserDefaults.standard
         defaults.set(profile.image, forKey: "user_profileImage")
@@ -347,9 +264,10 @@ class ProfileInputViewController: UIViewController, UIImagePickerControllerDeleg
         defaults.set(profile.level.rawValue, forKey: "user_level")
         defaults.set(true, forKey: "profileComplete")
     }
+}
 
-    // MARK: - Helpers
-
+// MARK: - Helpers
+extension ProfileInputViewController {
     private func showAlert(title: String, message: String, completion: (() -> Void)? = nil) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in completion?() })
@@ -379,9 +297,10 @@ class ProfileInputViewController: UIViewController, UIImagePickerControllerDeleg
         field.heightAnchor.constraint(equalToConstant: 50).isActive = true
         return field
     }
+}
 
-    // MARK: - Layout
-
+// MARK: - Layout
+extension ProfileInputViewController {
     private func setupLayout() {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         contentView.translatesAutoresizingMaskIntoConstraints = false
@@ -397,7 +316,7 @@ class ProfileInputViewController: UIViewController, UIImagePickerControllerDeleg
             contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
             contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
             contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
         ])
 
         // Profile image container
@@ -416,7 +335,7 @@ class ProfileInputViewController: UIViewController, UIImagePickerControllerDeleg
             cameraBadge.widthAnchor.constraint(equalToConstant: 32),
             cameraBadge.heightAnchor.constraint(equalToConstant: 32),
             cameraBadge.trailingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 2),
-            cameraBadge.bottomAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 2),
+            cameraBadge.bottomAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 2)
         ])
 
         let genderStack = UIStackView(arrangedSubviews: [maleButton, femaleButton])
@@ -440,7 +359,7 @@ class ProfileInputViewController: UIViewController, UIImagePickerControllerDeleg
             innerStack.topAnchor.constraint(equalTo: genderContainer.topAnchor, constant: 16),
             innerStack.leadingAnchor.constraint(equalTo: genderContainer.leadingAnchor, constant: 16),
             innerStack.trailingAnchor.constraint(equalTo: genderContainer.trailingAnchor, constant: -16),
-            innerStack.bottomAnchor.constraint(equalTo: genderContainer.bottomAnchor, constant: -16),
+            innerStack.bottomAnchor.constraint(equalTo: genderContainer.bottomAnchor, constant: -16)
         ])
 
         let stackView = UIStackView(arrangedSubviews: [
@@ -468,15 +387,102 @@ class ProfileInputViewController: UIViewController, UIImagePickerControllerDeleg
             stackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
             stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
             stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -40),
-            continueButton.heightAnchor.constraint(equalToConstant: 52),
+            continueButton.heightAnchor.constraint(equalToConstant: 52)
         ])
     }
 
     private func makeSpacer(height: CGFloat) -> UIView {
-        let v = UIView()
-        v.translatesAutoresizingMaskIntoConstraints = false
-        v.heightAnchor.constraint(equalToConstant: height).isActive = true
-        return v
+        let spacer = UIView()
+        spacer.translatesAutoresizingMaskIntoConstraints = false
+        spacer.heightAnchor.constraint(equalToConstant: height).isActive = true
+        return spacer
     }
 }
 
+// MARK: - Gender Selection
+extension ProfileInputViewController {
+    fileprivate func setupGenderButtons() {
+        maleButton = makeGenderOption(title: "Male", icon: "figure.stand")
+        femaleButton = makeGenderOption(title: "Female", icon: "figure.stand.dress")
+        maleButton.addTarget(self, action: #selector(maleSelected), for: .touchUpInside)
+        femaleButton.addTarget(self, action: #selector(femaleSelected), for: .touchUpInside)
+    }
+
+    private func makeGenderOption(title: String, icon: String) -> UIButton {
+        var config = UIButton.Configuration.plain()
+        config.title = title
+        config.image = UIImage(systemName: "circle")
+        config.imagePadding = 12
+        config.baseForegroundColor = .label
+        config.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0)
+        let button = UIButton(configuration: config)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.contentHorizontalAlignment = .left
+        button.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        return button
+    }
+
+    @objc private func maleSelected() {
+        selectedGender = .male
+        updateGenderSelection()
+    }
+
+    @objc private func femaleSelected() {
+        selectedGender = .female
+        updateGenderSelection()
+    }
+
+    fileprivate func updateGenderSelection() {
+        maleButton.configuration?.image = UIImage(systemName: selectedGender == .male ? "circle.inset.filled" : "circle")
+        maleButton.configuration?.baseForegroundColor = selectedGender == .male ? accentColor : .label
+        maleButton.layer.borderWidth = 0
+
+        femaleButton.configuration?.image = UIImage(systemName: selectedGender == .female ? "circle.inset.filled" : "circle")
+        femaleButton.configuration?.baseForegroundColor = selectedGender == .female ? accentColor : .label
+        femaleButton.layer.borderWidth = 0
+    }
+}
+
+// MARK: - Date Picker
+extension ProfileInputViewController {
+    fileprivate func setupDatePicker() {
+        dobField.inputView = datePicker
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
+        let doneButton = UIBarButtonItem(title: "Done", style: .done, target: self, action: #selector(datePickerDone))
+        let flexSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        toolbar.setItems([flexSpace, doneButton], animated: false)
+        dobField.inputAccessoryView = toolbar
+    }
+
+    @objc private func datePickerDone() {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd/MM/yyyy"
+        dobField.text = formatter.string(from: datePicker.date)
+        dobField.resignFirstResponder()
+    }
+}
+
+extension ProfileInputViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    func imagePickerController(
+        _ picker: UIImagePickerController,
+        didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]
+    ) {
+        picker.dismiss(animated: true)
+
+        if let editedImage = info[.editedImage] as? UIImage {
+            selectedImage = editedImage
+            profileImageView.image = editedImage
+        } else if let originalImage = info[.originalImage] as? UIImage {
+            selectedImage = originalImage
+            profileImageView.image = originalImage
+        }
+
+        tapToChangeLabel.text = "Tap to change photo"
+        profileImageView.layer.borderColor = accentColor.cgColor
+    }
+
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true)
+    }
+}
