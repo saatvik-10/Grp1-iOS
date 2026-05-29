@@ -150,7 +150,13 @@ final class CrosswordViewController: UIViewController, UICollectionViewDataSourc
 
     @MainActor
     private func generatePuzzles() async {
-        allPuzzles = generateUniqueCrosswords(from: financeData, count: 10)
+        let availableFinanceData = financeData.filter { data in
+            !WordHistoryManager.shared.hasPlayedCrosswordWordRecently(data.name, withinDays: 6)
+        }
+        
+        let dataSource = availableFinanceData.count >= 6 ? availableFinanceData : financeData
+
+        allPuzzles = generateUniqueCrosswords(from: dataSource, count: 10)
 
         print("Generated \(allPuzzles.count) unique puzzles")
 
@@ -557,6 +563,12 @@ final class CrosswordViewController: UIViewController, UICollectionViewDataSourc
         })
 
         present(alert, animated: true)
+        
+        if allPuzzles.indices.contains(currentPuzzleIndex) {
+            let (inputWords, _) = allPuzzles[currentPuzzleIndex]
+            WordHistoryManager.shared.markCrosswordWordsPlayed(inputWords)
+        }
+        
         DailyGameManager.shared.markGamePlayed(.crossword)
         stopTimer()
     }
