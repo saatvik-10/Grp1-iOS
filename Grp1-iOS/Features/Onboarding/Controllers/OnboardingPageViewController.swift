@@ -18,9 +18,9 @@ class OnboardingPageViewController: UIPageViewController {
         let storyboard = UIStoryboard(name: "Onboarding", bundle: nil)
 
         // STEP 1 — Investment Level
-        let step1 = storyboard.instantiateViewController(
+        guard let step1 = storyboard.instantiateViewController(
             withIdentifier: "OnboardingContentViewController"
-        ) as! OnboardingContentViewController
+        ) as? OnboardingContentViewController else { return }
 
         step1.loadViewIfNeeded()
         step1.configure(
@@ -42,17 +42,17 @@ class OnboardingPageViewController: UIPageViewController {
         step1.onNextTapped = { [weak self] in
             self?.goToNextPage()
         }
-        
+
         step1.onSkipTapped = { [weak self] in
             print("⏭️ User chose to skip onboarding. Navigating to Home safely...")
             self?.navigateToHome()
         }
 
         // STEP 2 — Interest Selection
-        let step2 = storyboard.instantiateViewController(
+        guard let step2 = storyboard.instantiateViewController(
             withIdentifier: "InterestCollectionViewController"
-        ) as! InterestCollectionViewController
- 
+        ) as? InterestCollectionViewController else { return }
+
         step2.onFinishTapped = { [weak self] in
             guard let self else { return }
             let previewCount = min(6, InterestsDataSource.domains.count)
@@ -83,14 +83,15 @@ class OnboardingPageViewController: UIPageViewController {
         pageControl.currentPage = 0
         pageControl.pageIndicatorTintColor = UIColor.systemGray4
         pageControl.currentPageIndicatorTintColor = UIColor.systemBlue // or any brand color
-        pageControl.isUserInteractionEnabled = false 
+        pageControl.isUserInteractionEnabled = false
         pageControl.isHidden = true
         pageControl.translatesAutoresizingMaskIntoConstraints = false
-        
+
         // Add to main view and pin to the bottom
         view.addSubview(pageControl)
         NSLayoutConstraint.activate([
-            pageControl.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -70),            pageControl.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+            pageControl.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -70),
+            pageControl.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
 
         setViewControllers(
@@ -108,10 +109,10 @@ class OnboardingPageViewController: UIPageViewController {
             return
         }
         currentIndex += 1
-        
+
         // 3a. Update the dot forwards!
-        pageControl.currentPage = currentIndex 
-        
+        pageControl.currentPage = currentIndex
+
         setViewControllers(
             [controllers[currentIndex]],
             direction: .forward,
@@ -121,20 +122,35 @@ class OnboardingPageViewController: UIPageViewController {
     func goToPreviousPage() {
         guard currentIndex - 1 >= 0 else { return }
         currentIndex -= 1
-        
+
         // 3b. Update the dot backwards!
-        pageControl.currentPage = currentIndex 
-        
+        pageControl.currentPage = currentIndex
+
         setViewControllers(
             [controllers[currentIndex]],
             direction: .reverse,
             animated: true
         )
-    } 
+    }
 
     // MARK: - Submission (saves to DATABASE via API)
 
-        // MARK: - Submission (saves to DATABASE via API)
+    private func saveLevelToBackend(token: String, group: DispatchGroup) {
+        guard let selectedLevel = self.selectedLevel?.components(separatedBy: "\n").first?.uppercased() else { return }
+        let levelString = selectedLevel == "EXPERT" ? APILevel.advance.rawValue : selectedLevel
+        guard let levelEnum = APILevel(rawValue: levelString) else { return }
+
+        group.enter()
+        APIService.shared.saveLevel(levelEnum, token: token) { result in
+            switch result {
+            case .success:
+                print("✅ Saved level '\(levelEnum.rawValue)' to DB")
+            case .failure(let error):
+                print("❌ Failed saving level: \(error)")
+            }
+            group.leave()
+        }
+    }
 
     func submitOnboardingToBackend() {
         guard let token = UserDefaults.standard.string(forKey: "authToken") else {
@@ -146,21 +162,7 @@ class OnboardingPageViewController: UIPageViewController {
         let api = APIService.shared
         let dispatchGroup = DispatchGroup()
 
-        if let selectedLevel = self.selectedLevel?.components(separatedBy: "\n").first?.uppercased() {
-            let levelString = selectedLevel == "EXPERT" ? APILevel.advance.rawValue : selectedLevel
-            guard let levelEnum = APILevel(rawValue: levelString) else { return }
-            
-            dispatchGroup.enter()
-            api.saveLevel(levelEnum, token: token) { result in
-                switch result {
-                case .success:
-                    print("✅ Saved level '\(levelEnum.rawValue)' to DB")
-                case .failure(let error):
-                    print("❌ Failed saving level: \(error)")
-                }
-                dispatchGroup.leave()
-            }
-        }
+        saveLevelToBackend(token: token, group: dispatchGroup)
         // 2) Fetch strongly-typed interests, match by name, then POST each
         dispatchGroup.enter()
         api.fetchAvailableInterests(type: nil) { [weak self] result in
@@ -171,17 +173,17 @@ class OnboardingPageViewController: UIPageViewController {
             case .success(let availableInterests):
                 let allSelected = self.selectedDomains + self.selectedInterests
                 let allSelectedLowercased = allSelected.map { $0.lowercased() }
-                
+
                 print("🚨 DEBUG 1 (iOS Selected Topics): \(allSelectedLowercased)")
                 print("🚨 DEBUG 2 (Available DB Topics): \(availableInterests.map { $0.name.lowercased() })")
-                
+
                 // Find matching APIInterest objects
                 let matches = availableInterests.filter { interest in
                     allSelectedLowercased.contains(interest.name.lowercased())
                 }
-                
+
                 print("🚨 DEBUG 3 (Matches Found): \(matches.count)")
-                
+
                 for match in matches {
                     dispatchGroup.enter()
                     // Uses the safe, native APIService.addInterest
@@ -195,7 +197,7 @@ class OnboardingPageViewController: UIPageViewController {
                         dispatchGroup.leave()
                     }
                 }
-                
+
             case .failure(let error):
                 print("❌ Failed to fetch available interests: \(error)")
             }
@@ -213,7 +215,6 @@ class OnboardingPageViewController: UIPageViewController {
             }
         }
     }
-
 
     func navigateToHome() {
         let storyboard = UIStoryboard(name: "HomeMain", bundle: nil)

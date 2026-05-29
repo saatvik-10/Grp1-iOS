@@ -17,10 +17,9 @@ struct ThreadPost {
     var likes: Int
    var comments: [Comment]
     let shares: Int
-    
-    var isLiked: Bool 
-}
 
+    var isLiked: Bool
+}
 
 struct Draft {
     let id: UUID

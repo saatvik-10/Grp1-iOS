@@ -64,6 +64,5 @@ let financeData: [CrosswordData] = [
     CrosswordData(name: "PORTFOLIO", clue: "Collection of investments"),
     CrosswordData(name: "ECONOMY", clue: "System of money and trade"),
     CrosswordData(name: "SECURITY", clue: "Tradable financial asset"),
-    CrosswordData(name: "INVESTOR", clue: "Person who puts money to grow"),
+    CrosswordData(name: "INVESTOR", clue: "Person who puts money to grow")
 ]
-

@@ -22,17 +22,19 @@ class IndicatorInfoViewController: UIViewController {
     init(visibleIndicatorNames: [String]) {
         self.visibleIndicatorNames = visibleIndicatorNames
         super.init(nibName: nil, bundle: nil)
-        
+
         let allDefs = DailyPuzzle.getAllIndicatorDefinitions()
         for name in visibleIndicatorNames {
             if let def = allDefs[name] {
                 indicators.append(IndicatorInfo(icon: def.icon, iconBg: def.iconBg, name: name, description: def.definition))
             } else {
-                indicators.append(IndicatorInfo(icon: "chart.bar", iconBg: UIColor.systemGray5, name: name, description: "A key financial metric."))
+                let fallback = IndicatorInfo(icon: "chart.bar", iconBg: .systemGray5,
+                                              name: name, description: "A key financial metric.")
+                indicators.append(fallback)
             }
         }
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -40,29 +42,29 @@ class IndicatorInfoViewController: UIViewController {
     // MARK: - UI
 
     private let handleView: UIView = {
-        let v = UIView()
-        v.backgroundColor    = UIColor(white: 0.85, alpha: 1)
-        v.layer.cornerRadius = 2.5
-        v.translatesAutoresizingMaskIntoConstraints = false
-        return v
+        let handle = UIView()
+        handle.backgroundColor    = UIColor(white: 0.85, alpha: 1)
+        handle.layer.cornerRadius = 2.5
+        handle.translatesAutoresizingMaskIntoConstraints = false
+        return handle
     }()
 
     private let titleLabel: UILabel = {
-        let l = UILabel()
-        l.text      = "Understanding the indicators"
-        l.font      = UIFont.systemFont(ofSize: 20, weight: .semibold)
-        l.textColor = UIColor(red: 0.08, green: 0.08, blue: 0.08, alpha: 1)
-        l.translatesAutoresizingMaskIntoConstraints = false
-        return l
+        let title = UILabel()
+        title.text      = "Understanding the indicators"
+        title.font      = UIFont.systemFont(ofSize: 20, weight: .semibold)
+        title.textColor = UIColor(red: 0.08, green: 0.08, blue: 0.08, alpha: 1)
+        title.translatesAutoresizingMaskIntoConstraints = false
+        return title
     }()
 
     private let subtitleLabel: UILabel = {
-        let l = UILabel()
-        l.text      = "4 metrics shown on every company card"
-        l.font      = UIFont.systemFont(ofSize: 16, weight: .regular)
-        l.textColor = .secondaryLabel
-        l.translatesAutoresizingMaskIntoConstraints = false
-        return l
+        let subtitle = UILabel()
+        subtitle.text      = "4 metrics shown on every company card"
+        subtitle.font      = UIFont.systemFont(ofSize: 16, weight: .regular)
+        subtitle.textColor = .secondaryLabel
+        subtitle.translatesAutoresizingMaskIntoConstraints = false
+        return subtitle
     }()
 
     private let stackView: UIStackView = {
@@ -106,16 +108,16 @@ class IndicatorInfoViewController: UIViewController {
 
             stackView.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: 20),
             stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
         ])
     }
 
     private func buildRows() {
-        for (i, info) in indicators.enumerated() {
+        for (index, info) in indicators.enumerated() {
             let row = makeRow(info)
             stackView.addArrangedSubview(row)
 
-            if i < indicators.count - 1 {
+            if index < indicators.count - 1 {
                 let divider = UIView()
                 divider.backgroundColor = UIColor(white: 0.0, alpha: 0.06)
                 divider.heightAnchor.constraint(equalToConstant: 0.5).isActive = true
@@ -179,7 +181,7 @@ class IndicatorInfoViewController: UIViewController {
             row.topAnchor.constraint(equalTo: container.topAnchor, constant: 14),
             row.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -14),
             row.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            row.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            row.trailingAnchor.constraint(equalTo: container.trailingAnchor)
         ])
         return container
     }

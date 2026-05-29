@@ -56,7 +56,7 @@ final class CommentInputAccessoryView: UIView {
             stack.centerXAnchor.constraint(equalTo: emojiBar.centerXAnchor),
             stack.centerYAnchor.constraint(equalTo: emojiBar.centerYAnchor),
             stack.leadingAnchor.constraint(equalTo: emojiBar.leadingAnchor, constant: 32),
-            stack.trailingAnchor.constraint(equalTo: emojiBar.trailingAnchor, constant: -32),
+            stack.trailingAnchor.constraint(equalTo: emojiBar.trailingAnchor, constant: -32)
         ])
     }
 
@@ -114,7 +114,7 @@ final class CommentInputAccessoryView: UIView {
 
             sendButton.trailingAnchor.constraint(equalTo: inputRow.trailingAnchor, constant: -30),
             sendButton.centerYAnchor.constraint(equalTo: inputRow.centerYAnchor),
-            sendButton.widthAnchor.constraint(equalToConstant: 44),
+            sendButton.widthAnchor.constraint(equalToConstant: 44)
         ])
     }
 
@@ -130,7 +130,6 @@ final class CommentInputAccessoryView: UIView {
     }
 }
 
-
 // MARK: - CommentsViewController
 final class CommentsViewController: UIViewController {
 
@@ -145,7 +144,7 @@ final class CommentsViewController: UIViewController {
     override var canBecomeFirstResponder: Bool { true }
 
     // MARK: - Data
-    var threadId : String = ""
+    var threadId: String = ""
     private var comments: [APIThreadComment] = []
 
     // MARK: - Lifecycle
@@ -171,9 +170,9 @@ final class CommentsViewController: UIViewController {
     private func loadUserAvatar() {
         guard let token = UserDefaults.standard.string(forKey: "authToken"),
               let userId = UserDefaults.standard.string(forKey: "userId") else { return }
-        
+
         APIService.shared.fetchUserProfile(userId: userId, token: token) { [weak self] result in
-            if case .success(let profile) = result, 
+            if case .success(let profile) = result,
                let urlStr = profile.profileImageUrl,
                let url = URL(string: urlStr) {
                 URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
@@ -224,7 +223,7 @@ final class CommentsViewController: UIViewController {
 //            closeButton.heightAnchor.constraint(equalToConstant: 36),
 
             titleLabel.centerXAnchor.constraint(equalTo: headerView.centerXAnchor),
-            titleLabel.centerYAnchor.constraint(equalTo: headerView.centerYAnchor),
+            titleLabel.centerYAnchor.constraint(equalTo: headerView.centerYAnchor)
         ])
     }
 
@@ -242,12 +241,12 @@ final class CommentsViewController: UIViewController {
         tableView.contentInsetAdjustmentBehavior = .automatic
         view.addSubview(tableView)
 
-        let headerView = view.viewWithTag(99)!
+        guard let headerView = view.viewWithTag(99) else { return }
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: headerView.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
 
@@ -307,7 +306,7 @@ final class CommentsViewController: UIViewController {
 extension CommentsViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         guard let text = textField.text, !text.trimmingCharacters(in: .whitespaces).isEmpty else { return true }
-        
+
         textField.resignFirstResponder()
         commentInputView.onSend?(text)
         return true
@@ -321,7 +320,9 @@ extension CommentsViewController: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CommentCell", for: indexPath) as! CommentTableViewCell
+        guard let cell = tableView.dequeueReusableCell(
+            withIdentifier: "CommentCell", for: indexPath
+        ) as? CommentTableViewCell else { return UITableViewCell() }
         let comment = comments[indexPath.row]
         cell.configure(with: comment)
 
@@ -333,5 +334,3 @@ extension CommentsViewController: UITableViewDataSource {
 extension Notification.Name {
     static let commentAdded = Notification.Name("commentAdded")
 }
-
-

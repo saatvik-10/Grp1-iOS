@@ -20,18 +20,17 @@ struct NewsArticle: Codable {
     let jargons: [String]
     var selectedJargon: String? = ""
     var qaHistory: [ArticleQA] = []
-    var relevanceScore: Double = 0.0   //scored at fetch time
+    var relevanceScore: Double = 0.0   // scored at fetch time
     var bodyText: String
 
 }
-
 
 class selectedWord {
     static var word: String?
 }
 
 struct JargonPage {
-    let jargonWord: String                
+    let jargonWord: String
     let title: String
     let content: String
 }
@@ -58,7 +57,6 @@ struct QuizQuestion {
     let options: [String]
     let correctIndex: Int
 }
-
 
 struct ScrapedArticle {
     let title: String
@@ -108,7 +106,6 @@ struct DateUtils {
         output.dateFormat = "MMM d, yyyy • h:mm a"
         output.locale = Locale.current
 
-        
         let isoFormatter = ISO8601DateFormatter()
         isoFormatter.formatOptions = [.withInternetDateTime]
         if let date = isoFormatter.date(from: dateString) {
@@ -135,15 +132,11 @@ struct DateUtils {
 
 class AppTheme {
     static let shared = AppTheme()
-    
+
     private init() {}
-    
+
     var dominantColor: UIColor = .systemBackground
 }
-
-
-
-
 
 struct SavedArticle: Codable {
     let id: Int
@@ -241,7 +234,7 @@ class SavedThreadsStore {
     func bookmarkFolders() -> [BookmarkItem] {
         return folders.enumerated().map { (index, name) in
             BookmarkItem(
-                icon: UIImage(systemName: "folder")!,
+                icon: UIImage(systemName: "folder") ?? UIImage(),
                 id: "thread_folder_\(index)",
                 title: name
             )

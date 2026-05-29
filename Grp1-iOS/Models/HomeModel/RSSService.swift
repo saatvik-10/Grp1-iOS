@@ -33,13 +33,12 @@ final class TOIRSSParser: NSObject, XMLParserDelegate {
         return items
     }
 
-
     func parser(
         _ parser: XMLParser,
         didStartElement elementName: String,
         namespaceURI: String?,
         qualifiedName qName: String?,
-        attributes attributeDict: [String : String] = [:]
+        attributes attributeDict: [String: String] = [:]
     ) {
         currentElement = elementName
         buffer = ""
@@ -64,7 +63,7 @@ final class TOIRSSParser: NSObject, XMLParserDelegate {
         namespaceURI: String?,
         qualifiedName qName: String?
     ) {
-        guard let _ = currentItem else { return }
+        guard currentItem != nil else { return }
         let value = buffer.trimmingCharacters(in: .whitespacesAndNewlines)
 
         switch elementName {
@@ -123,8 +122,7 @@ final class RSSService {
     }
 }
 
-
-//------------------------------------------------------------------------------------------------------------------------------------------------------------
+// MARK: - Article Content Service
 
 final class ArticleContentService {
 

@@ -5,9 +5,6 @@
 //  Created by SDC-USER on 05/03/26.
 //
 
-
-
-
 import Foundation
 
 // MARK: - ET RSS Parser
@@ -94,7 +91,6 @@ final class ETRSSParser: NSObject, XMLParserDelegate {
     }
 }
 
-
 final class ETRSSService {
 
     static let shared = ETRSSService()
@@ -126,11 +122,8 @@ final class ETRSSService {
     }
 }
 
-
-
 extension String {
     func extractETArticleBody(minWords: Int = 12) -> String {
         return self.extractTOIArticleBody(minWords: minWords)
     }
 }
-

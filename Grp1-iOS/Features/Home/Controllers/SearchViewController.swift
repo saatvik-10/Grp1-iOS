@@ -21,7 +21,7 @@ class SearchViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         articles = Array(newsStore.getAllNews().sorted { $0.relevanceScore > $1.relevanceScore }.prefix(4))
                 setupCollectionView()
         setupSearchBar()
@@ -39,17 +39,16 @@ class SearchViewController: UIViewController {
                 forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
                 withReuseIdentifier: "recents_header"
             )
-        
+
         collectionView.contentInsetAdjustmentBehavior = .never
         collectionView.keyboardDismissMode = .none
-        
 
     }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         searchBar.translatesAutoresizingMaskIntoConstraints = false
     }
-    
+
     private func setupCollectionView() {
             collectionView.delegate = self
             collectionView.dataSource = self
@@ -68,8 +67,7 @@ class SearchViewController: UIViewController {
 
             collectionView.setCollectionViewLayout(createLayout(), animated: false)
         }
-    
-    
+
     func registerForKeyboardNotifications() {
         NotificationCenter.default.addObserver(
             self,
@@ -85,8 +83,7 @@ class SearchViewController: UIViewController {
             object: nil
         )
     }
-    
-    
+
     @objc func keyboardWillShow(_ notification: Notification) {
         guard
             let info = notification.userInfo,
@@ -103,8 +100,7 @@ class SearchViewController: UIViewController {
             )
         }
     }
-    
-    
+
     @objc func keyboardWillHide(_ notification: Notification) {
         guard
             let info = notification.userInfo,
@@ -115,13 +111,11 @@ class SearchViewController: UIViewController {
             self.searchBar.transform = .identity
         }
     }
-    
+
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
-    
-      
-    
+
 }
 
 extension SearchViewController: UISearchBarDelegate {
@@ -132,26 +126,24 @@ extension SearchViewController: UISearchBarDelegate {
         searchBar.backgroundColor = .clear
         searchBar.isTranslucent = true
         searchBar.isUserInteractionEnabled = true
-        
+
         if let textField = searchBar.value(forKey: "searchField") as? UITextField {
             textField.backgroundColor = .white
             textField.textColor = .black
             textField.layer.cornerRadius = 24
             textField.layer.masksToBounds = true
-            
+
             searchBar.layer.shadowColor = UIColor.black.cgColor
             searchBar.layer.shadowOpacity = 0.1
             searchBar.layer.shadowOffset = CGSize(width: 0, height: 4)
             searchBar.layer.shadowRadius = 6
-            
+
             textField.attributedPlaceholder = NSAttributedString(
                 string: "Search",
                 attributes: [NSAttributedString.Key.foregroundColor: UIColor.gray]
             )
         }
     }
-    
-    
 
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         let trimmed = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -193,7 +185,7 @@ extension SearchViewController: UISearchBarDelegate {
     func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
         searchBar.setShowsCancelButton(false, animated: true)
     }
-    
+
     func clearSearch() {
         searchBar.text = ""
         searchBar.resignFirstResponder()
@@ -203,7 +195,7 @@ extension SearchViewController: UISearchBarDelegate {
         updateHeaderUI()
         collectionView.reloadData()
     }
-    
+
     private func clearRecentArticles() {
         articles.removeAll()
         collectionView.reloadData()
@@ -216,14 +208,14 @@ extension SearchViewController {
         UICollectionViewCompositionalLayout { _, _ in
 
             let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.5), heightDimension: .fractionalHeight(1.0))
-            
+
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
             item.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 0, bottom: 30, trailing: 10)
-            
+
             let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.9), heightDimension: .estimated(280))
-            
+
             let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
-            
+
             let headerSize = NSCollectionLayoutSize(
                             widthDimension: .fractionalWidth(1.0),
                             heightDimension: .absolute(50)
@@ -233,11 +225,11 @@ extension SearchViewController {
                             elementKind: UICollectionView.elementKindSectionHeader,
                             alignment: .top
                         )
-            
+
             let section = NSCollectionLayoutSection(group: group)
             section.orthogonalScrollingBehavior = .continuousGroupLeadingBoundary
             section.boundarySupplementaryItems = [header]
-            
+
             return section
         }
     }
@@ -257,10 +249,12 @@ extension SearchViewController: UICollectionViewDataSource, UICollectionViewDele
     func collectionView(_ collectionView: UICollectionView,
                         cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
 
-        let cell = collectionView.dequeueReusableCell(
+        guard let cell = collectionView.dequeueReusableCell(
             withReuseIdentifier: "realexplore_cell",
             for: indexPath
-        ) as! RealExploreCollectionViewCell
+        ) as? RealExploreCollectionViewCell else {
+            return UICollectionViewCell()
+        }
 
         let article = isSearching
             ? filteredArticles[indexPath.item]
@@ -276,11 +270,13 @@ extension SearchViewController: UICollectionViewDataSource, UICollectionViewDele
         at indexPath: IndexPath
     ) -> UICollectionReusableView {
 
-        let header = collectionView.dequeueReusableSupplementaryView(
+        guard let header = collectionView.dequeueReusableSupplementaryView(
             ofKind: kind,
             withReuseIdentifier: "recents_header",
             for: indexPath
-        ) as! recentsHeaderCollectionViewCell
+        ) as? recentsHeaderCollectionViewCell else {
+            return UICollectionReusableView()
+        }
 
         currentHeaderView = header
 
@@ -299,8 +295,7 @@ extension SearchViewController: UICollectionViewDataSource, UICollectionViewDele
 
         performSegue(withIdentifier: "searchResult", sender: article)
     }
-    
-    
+
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "searchResult",
            let vc = segue.destination as? news1ViewController,
@@ -308,7 +303,7 @@ extension SearchViewController: UICollectionViewDataSource, UICollectionViewDele
             vc.article = article
         }
     }
-    
+
     func updateHeaderUI() {
         guard let header = currentHeaderView else { return }
 
@@ -319,6 +314,5 @@ extension SearchViewController: UICollectionViewDataSource, UICollectionViewDele
         header.clearButton.isEnabled = shouldEnableClear
         header.clearButton.alpha = shouldEnableClear ? 1.0 : 0
     }
-    
-    
+
 }

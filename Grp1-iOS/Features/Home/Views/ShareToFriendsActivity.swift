@@ -38,7 +38,6 @@ class ShareToFriendsActivity: UIActivity {
         sheetVC.modalPresentationStyle = .overFullScreen
         sheetVC.modalTransitionStyle = .crossDissolve
 
-        
         topVC.present(sheetVC, animated: true) { [weak self] in
             self?.activityDidFinish(true)
         }

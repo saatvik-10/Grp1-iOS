@@ -5,23 +5,20 @@
 
 import UIKit
 
-class SignUpViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class SignUpViewController: UIViewController {
 
     // MARK: - Properties
     private var selectedGender: Gender = .male
     private var maleButton: UIButton!
     private var femaleButton: UIButton!
     private var selectedImage: UIImage?
-
     // MARK: - Colors
     private let accentColor = UIColor(red: 0.35, green: 0.45, blue: 0.82, alpha: 1.0)
     private let accentColorLight = UIColor.systemBlue
     private let unselectedColor = UIColor.tertiarySystemBackground
-
     // MARK: - UI Elements
     private let scrollView = UIScrollView()
     private let contentView = UIView()
-
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Create Account"
@@ -67,7 +64,7 @@ class SignUpViewController: UIViewController, UIImagePickerControllerDelegate, U
             icon.centerXAnchor.constraint(equalTo: badge.centerXAnchor),
             icon.centerYAnchor.constraint(equalTo: badge.centerYAnchor),
             icon.widthAnchor.constraint(equalToConstant: 16),
-            icon.heightAnchor.constraint(equalToConstant: 16),
+            icon.heightAnchor.constraint(equalToConstant: 16)
         ])
         return badge
     }()
@@ -111,7 +108,6 @@ class SignUpViewController: UIViewController, UIImagePickerControllerDelegate, U
         label.textColor = .secondaryLabel
         return label
     }()
-
     private lazy var signUpButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Sign Up", for: .normal)
@@ -157,7 +153,6 @@ class SignUpViewController: UIViewController, UIImagePickerControllerDelegate, U
         setupActions()
         applyGradientToButton()
     }
-
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         applyGradientToButton()
@@ -187,105 +182,6 @@ class SignUpViewController: UIViewController, UIImagePickerControllerDelegate, U
         present(picker, animated: true)
     }
 
-    func imagePickerController(_ picker: UIImagePickerController,
-                               didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
-        picker.dismiss(animated: true)
-        if let editedImage = info[.editedImage] as? UIImage {
-            selectedImage = editedImage
-            profileImageView.image = editedImage
-        } else if let originalImage = info[.originalImage] as? UIImage {
-            selectedImage = originalImage
-            profileImageView.image = originalImage
-        }
-        tapToChangeLabel.text = "Tap to change photo"
-        profileImageView.layer.borderColor = accentColor.cgColor
-    }
-
-    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-        picker.dismiss(animated: true)
-    }
-
-    // MARK: - Gradient Button
-
-    private func applyGradientToButton() {
-        signUpButton.layer.sublayers?.removeAll(where: { $0 is CAGradientLayer })
-        let gradient = CAGradientLayer()
-        gradient.colors = [accentColor.cgColor, accentColorLight.cgColor]
-        gradient.startPoint = CGPoint(x: 0, y: 0.5)
-        gradient.endPoint = CGPoint(x: 1, y: 0.5)
-        gradient.frame = signUpButton.bounds
-        gradient.cornerRadius = 14
-        signUpButton.layer.insertSublayer(gradient, at: 0)
-    }
-
-    // MARK: - Gender Buttons
-
-    private func setupGenderButtons() {
-        maleButton = makeGenderOption(title: "Male", icon: "figure.stand")
-        femaleButton = makeGenderOption(title: "Female", icon: "figure.stand.dress")
-        maleButton.addTarget(self, action: #selector(maleSelected), for: .touchUpInside)
-        femaleButton.addTarget(self, action: #selector(femaleSelected), for: .touchUpInside)
-        updateGenderSelection()
-    }
-
-    private func makeGenderOption(title: String, icon: String) -> UIButton {
-        var config = UIButton.Configuration.filled()
-        config.title = title
-        config.image = UIImage(systemName: icon)
-        config.imagePadding = 8
-        config.cornerStyle = .capsule
-        config.baseForegroundColor = .label
-        config.baseBackgroundColor = unselectedColor
-        let button = UIButton(configuration: config)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.heightAnchor.constraint(equalToConstant: 48).isActive = true
-        return button
-    }
-
-    @objc private func maleSelected() {
-        selectedGender = .male
-        updateGenderSelection()
-    }
-
-    @objc private func femaleSelected() {
-        selectedGender = .female
-        updateGenderSelection()
-    }
-
-    private func updateGenderSelection() {
-        let selectedBg = accentColor.withAlphaComponent(0.15)
-        maleButton.configuration?.baseBackgroundColor = selectedGender == .male ? selectedBg : unselectedColor
-        maleButton.configuration?.baseForegroundColor = selectedGender == .male ? accentColor : .label
-        maleButton.layer.borderWidth = selectedGender == .male ? 1.5 : 0
-        maleButton.layer.borderColor = selectedGender == .male ? accentColor.cgColor : UIColor.clear.cgColor
-        maleButton.layer.cornerRadius = 24
-
-        femaleButton.configuration?.baseBackgroundColor = selectedGender == .female ? selectedBg : unselectedColor
-        femaleButton.configuration?.baseForegroundColor = selectedGender == .female ? accentColor : .label
-        femaleButton.layer.borderWidth = selectedGender == .female ? 1.5 : 0
-        femaleButton.layer.borderColor = selectedGender == .female ? accentColor.cgColor : UIColor.clear.cgColor
-        femaleButton.layer.cornerRadius = 24
-    }
-
-    // MARK: - Date Picker
-
-    private func setupDatePicker() {
-        dobField.inputView = datePicker
-        let toolbar = UIToolbar()
-        toolbar.sizeToFit()
-        let doneButton = UIBarButtonItem(title: "Done", style: .done, target: self, action: #selector(datePickerDone))
-        let flexSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-        toolbar.setItems([flexSpace, doneButton], animated: false)
-        dobField.inputAccessoryView = toolbar
-    }
-
-    @objc private func datePickerDone() {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd/MM/yyyy"
-        dobField.text = formatter.string(from: datePicker.date)
-        dobField.resignFirstResponder()
-    }
-
     // MARK: - Actions
 
     private func setupActions() {
@@ -313,8 +209,6 @@ class SignUpViewController: UIViewController, UIImagePickerControllerDelegate, U
             self.present(signInVC, animated: true)
         }
     }
-
-    // MARK: - Sign Up
 
     @objc private func signUpTapped() {
         guard let name = nameField.text, !name.isEmpty,
@@ -363,7 +257,7 @@ class SignUpViewController: UIViewController, UIImagePickerControllerDelegate, U
             if success {
                 print("✅ Sign up successful — now auto signing in...")
 
-                AuthenticationService.shared.signIn(email: email, password: password) { signInSuccess, token, hasOnboarding, signInError in
+                AuthenticationService.shared.signIn(email: email, password: password) { signInSuccess, token, _, signInError in
                     self.showLoading(false)
 
                     if signInSuccess, let token = token {
@@ -387,8 +281,6 @@ class SignUpViewController: UIViewController, UIImagePickerControllerDelegate, U
         }
     }
 
-    // MARK: - Navigation
-
     private func navigateToOnboarding() {
         let storyboard = UIStoryboard(name: "Onboarding", bundle: nil)
         if let onboardingVC = storyboard.instantiateViewController(
@@ -402,13 +294,111 @@ class SignUpViewController: UIViewController, UIImagePickerControllerDelegate, U
             UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
         }
     }
+}
 
-    // MARK: - Helpers
+extension SignUpViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    func imagePickerController(_ picker: UIImagePickerController,
+                               didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+        picker.dismiss(animated: true)
+        if let editedImage = info[.editedImage] as? UIImage {
+            selectedImage = editedImage
+            profileImageView.image = editedImage
+        } else if let originalImage = info[.originalImage] as? UIImage {
+            selectedImage = originalImage
+            profileImageView.image = originalImage
+        }
+        tapToChangeLabel.text = "Tap to change photo"
+        profileImageView.layer.borderColor = accentColor.cgColor
+    }
+
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true)
+    }
+}
+
+extension SignUpViewController {
+    private func setupGenderButtons() {
+        maleButton = makeGenderOption(title: "Male", icon: "figure.stand")
+        femaleButton = makeGenderOption(title: "Female", icon: "figure.stand.dress")
+        maleButton.addTarget(self, action: #selector(maleSelected), for: .touchUpInside)
+        femaleButton.addTarget(self, action: #selector(femaleSelected), for: .touchUpInside)
+        updateGenderSelection()
+    }
+
+    private func makeGenderOption(title: String, icon: String) -> UIButton {
+        var config = UIButton.Configuration.filled()
+        config.title = title
+        config.image = UIImage(systemName: icon)
+        config.imagePadding = 8
+        config.cornerStyle = .capsule
+        config.baseForegroundColor = .label
+        config.baseBackgroundColor = unselectedColor
+        let button = UIButton(configuration: config)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.heightAnchor.constraint(equalToConstant: 48).isActive = true
+        return button
+    }
+
+    @objc private func maleSelected() {
+        selectedGender = .male
+        updateGenderSelection()
+    }
+
+    @objc private func femaleSelected() {
+        selectedGender = .female
+        updateGenderSelection()
+    }
+
+    private func updateGenderSelection() {
+        let selectedBg = accentColor.withAlphaComponent(0.15)
+        maleButton.configuration?.baseBackgroundColor = selectedGender == .male ? selectedBg : unselectedColor
+        maleButton.configuration?.baseForegroundColor = selectedGender == .male ? accentColor : .label
+        maleButton.layer.borderWidth = selectedGender == .male ? 1.5 : 0
+        maleButton.layer.borderColor = selectedGender == .male ? accentColor.cgColor : UIColor.clear.cgColor
+        maleButton.layer.cornerRadius = 24
+        femaleButton.configuration?.baseBackgroundColor = selectedGender == .female ? selectedBg : unselectedColor
+        femaleButton.configuration?.baseForegroundColor = selectedGender == .female ? accentColor : .label
+        femaleButton.layer.borderWidth = selectedGender == .female ? 1.5 : 0
+        femaleButton.layer.borderColor = selectedGender == .female ? accentColor.cgColor : UIColor.clear.cgColor
+        femaleButton.layer.cornerRadius = 24
+    }
+
+    private func setupDatePicker() {
+        dobField.inputView = datePicker
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
+        let doneButton = UIBarButtonItem(title: "Done", style: .done, target: self, action: #selector(datePickerDone))
+        let flexSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        toolbar.setItems([flexSpace, doneButton], animated: false)
+        dobField.inputAccessoryView = toolbar
+    }
+
+    @objc private func datePickerDone() {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd/MM/yyyy"
+        dobField.text = formatter.string(from: datePicker.date)
+        dobField.resignFirstResponder()
+    }
+
+    private func applyGradientToButton() {
+        signUpButton.layer.sublayers?.removeAll(where: { $0 is CAGradientLayer })
+        let gradient = CAGradientLayer()
+        gradient.colors = [accentColor.cgColor, accentColorLight.cgColor]
+        gradient.startPoint = CGPoint(x: 0, y: 0.5)
+        gradient.endPoint = CGPoint(x: 1, y: 0.5)
+        gradient.frame = signUpButton.bounds
+        gradient.cornerRadius = 14
+        signUpButton.layer.insertSublayer(gradient, at: 0)
+    }
 
     private func showLoading(_ loading: Bool) {
         signUpButton.setTitle(loading ? "" : "Sign Up", for: .normal)
         signUpButton.isEnabled = !loading
-        loading ? activityIndicator.startAnimating() : activityIndicator.stopAnimating()
+        if loading {
+            activityIndicator.startAnimating()
+        } else {
+            activityIndicator.stopAnimating()
+        }
     }
 
     private func showAlert(title: String, message: String) {
@@ -439,14 +429,11 @@ class SignUpViewController: UIViewController, UIImagePickerControllerDelegate, U
         return field
     }
 
-    // MARK: - Layout
-
     private func setupLayout() {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         contentView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
-
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -456,14 +443,12 @@ class SignUpViewController: UIViewController, UIImagePickerControllerDelegate, U
             contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
             contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
             contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
         ])
-
         let imageContainer = UIView()
         imageContainer.translatesAutoresizingMaskIntoConstraints = false
         imageContainer.addSubview(profileImageView)
         imageContainer.addSubview(cameraBadge)
-
         NSLayoutConstraint.activate([
             profileImageView.topAnchor.constraint(equalTo: imageContainer.topAnchor),
             profileImageView.centerXAnchor.constraint(equalTo: imageContainer.centerXAnchor),
@@ -473,58 +458,41 @@ class SignUpViewController: UIViewController, UIImagePickerControllerDelegate, U
             cameraBadge.widthAnchor.constraint(equalToConstant: 32),
             cameraBadge.heightAnchor.constraint(equalToConstant: 32),
             cameraBadge.trailingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 2),
-            cameraBadge.bottomAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 2),
+            cameraBadge.bottomAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 2)
         ])
-
         let genderStack = UIStackView(arrangedSubviews: [maleButton, femaleButton])
         genderStack.axis = .horizontal
         genderStack.spacing = 12
         genderStack.distribution = .fillEqually
-
         signUpButton.addSubview(activityIndicator)
         NSLayoutConstraint.activate([
             activityIndicator.centerXAnchor.constraint(equalTo: signUpButton.centerXAnchor),
-            activityIndicator.centerYAnchor.constraint(equalTo: signUpButton.centerYAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: signUpButton.centerYAnchor)
         ])
-
         let stackView = UIStackView(arrangedSubviews: [
-            titleLabel,
-            subtitleLabel,
-            makeSpacer(height: 12),
-            imageContainer,
-            tapToChangeLabel,
-            makeSpacer(height: 16),
-            nameField,
-            emailField,
-            passwordField,
-            confirmPasswordField,
-            phoneField,
-            dobField,
-            makeSpacer(height: 8),
-            genderLabel,
-            genderStack,
-            makeSpacer(height: 30),
-            signUpButton,
-            signInButton,
+            titleLabel, subtitleLabel, makeSpacer(height: 12), imageContainer,
+            tapToChangeLabel, makeSpacer(height: 16), nameField, emailField,
+            passwordField, confirmPasswordField, phoneField, dobField,
+            makeSpacer(height: 8), genderLabel, genderStack, makeSpacer(height: 30),
+            signUpButton, signInButton
         ])
         stackView.axis = .vertical
         stackView.spacing = 16
         stackView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(stackView)
-
         NSLayoutConstraint.activate([
             stackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 40),
             stackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
             stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
             stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -40),
-            signUpButton.heightAnchor.constraint(equalToConstant: 52),
+            signUpButton.heightAnchor.constraint(equalToConstant: 52)
         ])
     }
 
     private func makeSpacer(height: CGFloat) -> UIView {
-        let v = UIView()
-        v.translatesAutoresizingMaskIntoConstraints = false
-        v.heightAnchor.constraint(equalToConstant: height).isActive = true
-        return v
+        let spacer = UIView()
+        spacer.translatesAutoresizingMaskIntoConstraints = false
+        spacer.heightAnchor.constraint(equalToConstant: height).isActive = true
+        return spacer
     }
 }

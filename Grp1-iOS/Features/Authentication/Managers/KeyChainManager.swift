@@ -8,19 +8,19 @@ import Foundation
 import Security
 
 class KeyChainManager {
-    
-    static func saveUserId (_ userId: String) {
-        let data = userId.data(using: .utf8)!
-        let query : [String : Any] = [
-            kSecClass as String : kSecClassGenericPassword,
-            kSecAttrAccount as String : "appleUserID",
-            kSecValueData as String : data
+
+    static func saveUserId(_ userId: String) {
+        guard let data = userId.data(using: .utf8) else { return }
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: "appleUserID",
+            kSecValueData as String: data
         ]
-        
-        SecItemAdd(query as CFDictionary,nil)
+
+        SecItemAdd(query as CFDictionary, nil)
     }
 
-    static func getUserID () -> String? {
+    static func getUserID() -> String? {
         let query: [String: Any] = [
                     kSecClass as String: kSecClassGenericPassword,
                     kSecAttrAccount as String: "appleUserID",

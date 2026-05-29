@@ -5,7 +5,6 @@
 //  Created by SDC-USER on 06/03/26.
 //
 
-
 import AuthenticationServices
 
 class AppleAuthManager {

@@ -11,26 +11,24 @@ struct OnboardingPage {
     let options: [(title: String, subtitle: String)]
 }
 
-
-
 struct OnboardingInterestModel {
-    let icon : String?
-    let title : String
-    let subtitle : String
+    let icon: String?
+    let title: String
+    let subtitle: String
 }
-var preferences : [OnboardingInterestModel] = [
+var preferences: [OnboardingInterestModel] = [
     OnboardingInterestModel(icon: "chart.line.uptrend.xyaxis", title: "Stock Market", subtitle: ""),
     OnboardingInterestModel(icon: "bitcoinsign", title: "Crypto", subtitle: ""),
     OnboardingInterestModel(icon: "building.2", title: "Real Estate", subtitle: ""),
     OnboardingInterestModel(icon: "cpu", title: "Tech Sector", subtitle: ""),
     OnboardingInterestModel(icon: "cylinder", title: "Commodities", subtitle: ""),
-    OnboardingInterestModel(icon: "leaf", title: "Sustainability", subtitle: ""),
-    
+    OnboardingInterestModel(icon: "leaf", title: "Sustainability", subtitle: "")
+
 ]
 
 struct DomainModel {
-    let icon : String?
-    let title : String
+    let icon: String?
+    let title: String
 }
 var domains: [DomainModel] = [
     DomainModel(icon: "chart.line.uptrend.xyaxis", title: "Stocks"),

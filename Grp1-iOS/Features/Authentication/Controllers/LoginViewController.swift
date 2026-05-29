@@ -17,11 +17,12 @@ class LoginViewController: UIViewController {
 
     private func setupUI() {
         headingLabel.text = "Stay on top of your finance with us"
-        subheadingLabel.text = "Understand the news, simplify complex jargon, practice with interactive games, and join a vibrant investor community."
+        subheadingLabel.text = "Understand the news, simplify complex jargon, "
+            + "practice with interactive games, and join a vibrant investor community."
     }
 
     // MARK: - Actions
-    
+
     // Connect this to your "Continue with Apple" or "Sign Up" button in Storyboard
     @IBAction func appleSignInTapped(_ sender: UIButton) {
         let signUpVC = SignUpViewController()

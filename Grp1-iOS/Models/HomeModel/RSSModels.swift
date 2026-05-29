@@ -7,7 +7,6 @@
 
 import Foundation
 
-
 struct RSSItem {
 
     var title: String = ""

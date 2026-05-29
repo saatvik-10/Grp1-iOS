@@ -8,14 +8,14 @@
 import UIKit
 
 class EndingViewController: UIViewController {
-    
-    @IBOutlet weak var ContentView: UIView!
-    
+
+    @IBOutlet weak var contentView: UIView!
+
     @IBOutlet weak var biasScoreView: UIView!
 
     @IBOutlet weak var capitalCardView: UIView!
     @IBOutlet weak var capitalLabel: UILabel!
-    
+
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var biasCardStackView: UIStackView!
     @IBOutlet weak var biasLabel: UILabel!
@@ -28,13 +28,13 @@ class EndingViewController: UIViewController {
     private var ringLayer: CAShapeLayer?
     private var ringTrackLayer: CAShapeLayer?
     private var accentColor: UIColor = UIColor(red: 0.97, green: 0.55, blue: 0.12, alpha: 1.0)
-    
+
     var endingType: EndingType!
     var finalCapital: Int = 0
     var biasScore: Int = 0
-    var dominantBias : CognitiveBias?
+    var dominantBias: CognitiveBias?
     var biasExposure: [CognitiveBias: Int] = [:]
-    
+
     let kahnemanEndingQuotes: [KahnemanQuote] = [
 
         KahnemanQuote(
@@ -49,13 +49,11 @@ class EndingViewController: UIViewController {
             endingType: .partialFailure
         ),
 
-
         KahnemanQuote(
             text: "Confidence in financial decisions often reflects a good story, not a good understanding of probabilities.",
             author: "Daniel Kahneman",
             endingType: .failure
         ),
-
 
         KahnemanQuote(
             text: "What investors see is all there is — past prices anchor expectations, even when the future has already changed.",
@@ -64,8 +62,7 @@ class EndingViewController: UIViewController {
         )
 
     ]
-    
-    
+
     let biasDefinitions: [CognitiveBias: BiasDefine] = [
 
         .lossAversion: BiasDefine(
@@ -87,7 +84,7 @@ class EndingViewController: UIViewController {
             Past investments influenced future decisions.
             Additional capital was committed to justify earlier losses.
 
-            Lesson: Markets don’t care what you already invested.
+            Lesson: Markets don't care what you already invested.
             """,
             iconName: "arrow.triangle.2.circlepath"
         ),
@@ -123,53 +120,73 @@ class EndingViewController: UIViewController {
             Early price levels anchored expectations.
             New information was underweighted.
 
-            Lesson: Yesterday’s price is irrelevant.
+            Lesson: Yesterday's price is irrelevant.
             """,
             iconName: "paperclip"
         )
     ]
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        configureQuoteCard()
+        renderEnding()
+        renderQuote()
+        contentView.backgroundColor = .clear
+        configureTitleLabel()
+        configureBiasScoreView()
+        populateBiasCards()
+    }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        drawBiasScoreRing()
+    }
 
-    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        configureCapitalCard()
+        quoteCardView.isUserInteractionEnabled = false
+        biasCardStackView.isUserInteractionEnabled = false
+    }
+}
+
+// MARK: - Rendering
+extension EndingViewController {
+
     func renderQuote() {
-
         guard let ending = endingType,
               let quote = kahnemanEndingQuotes.first(where: { $0.endingType == ending }) else {
             quoteCardView.isHidden = true
             return
         }
 
-        quoteLabel.text = "“\(quote.text)”"
-        authorLabel.text = "— \(quote.author)"
+        quoteLabel.text = "\u{201C}\(quote.text)\u{201D}"
+        authorLabel.text = "\u{2014} \(quote.author)"
     }
 
-
     func renderEnding() {
-        
-
         guard let endingType = endingType else { return }
-        
+
         view.backgroundColor = .systemBackground
         titleLabel.textColor = .label
-        
+
         switch endingType {
-            
+
         case .success:
             titleLabel.text = "Strategic Victory"
             accentColor = UIColor(red: 0.20, green: 0.68, blue: 0.36, alpha: 1.0)
             view.backgroundColor = UIColor(red: 0.89, green: 0.97, blue: 0.91, alpha: 1.0)
-            
+
         case .partialFailure:
             titleLabel.text = "Capital Preserved"
             accentColor = UIColor(red: 0.95, green: 0.73, blue: 0.18, alpha: 1.0)
             view.backgroundColor = UIColor(red: 0.99, green: 0.96, blue: 0.86, alpha: 1.0)
-            
+
         case .failure:
             titleLabel.text = "Costly Mistakes"
             accentColor = UIColor(red: 0.97, green: 0.55, blue: 0.12, alpha: 1.0)
             view.backgroundColor = UIColor(red: 0.98, green: 0.56, blue: 0.16, alpha: 1.0)
-            
+
         case .criticalFailure:
             titleLabel.text = "Systemic Collapse"
             accentColor = UIColor(red: 0.85, green: 0.15, blue: 0.18, alpha: 1.0)
@@ -181,10 +198,13 @@ class EndingViewController: UIViewController {
         formatter.numberStyle = .decimal
         formatter.locale = Locale(identifier: "en_IN")
         let formattedCapital = formatter.string(from: NSNumber(value: finalCapital)) ?? "\(finalCapital)"
-        capitalLabel.text = "Final Capital: ₹\(formattedCapital)"
+        capitalLabel.text = "Final Capital: \u{20B9}\(formattedCapital)"
         scoreValueLabel.text = "\(biasScore)"
-
     }
+}
+
+// MARK: - Configuration
+extension EndingViewController {
 
     private func applyCardStyle(_ view: UIView, cornerRadius: CGFloat = 24, backgroundColor: UIColor = .white) {
         view.backgroundColor = backgroundColor
@@ -195,9 +215,8 @@ class EndingViewController: UIViewController {
         view.layer.shadowOffset = CGSize(width: 0, height: 8)
         view.layer.masksToBounds = false
     }
-    
-    private func configureCapitalCard() {
 
+    private func configureCapitalCard() {
         applyCardStyle(capitalCardView)
 
         capitalCardView.translatesAutoresizingMaskIntoConstraints = false
@@ -208,20 +227,13 @@ class EndingViewController: UIViewController {
         capitalLabel.textAlignment = .center
 
         NSLayoutConstraint.activate([
-
-            // Card height
             capitalCardView.heightAnchor.constraint(equalToConstant: 80),
-
-            // Center label perfectly inside card
             capitalLabel.centerXAnchor.constraint(equalTo: capitalCardView.centerXAnchor),
             capitalLabel.centerYAnchor.constraint(equalTo: capitalCardView.centerYAnchor)
         ])
     }
 
-
-
     private func configureBiasScoreView() {
-
         applyCardStyle(biasScoreView)
 
         biasLabel.isHidden = true
@@ -247,27 +259,20 @@ class EndingViewController: UIViewController {
             biasScoreView.addSubview(scoreTitleLabel)
         }
 
-
         NSLayoutConstraint.activate([
-
             biasScoreView.heightAnchor.constraint(equalToConstant: 240),
-
             scoreValueLabel.centerXAnchor.constraint(equalTo: biasScoreView.centerXAnchor),
             scoreValueLabel.centerYAnchor.constraint(equalTo: biasScoreView.centerYAnchor, constant: -24),
-
             scoreTitleLabel.topAnchor.constraint(equalTo: scoreValueLabel.bottomAnchor, constant: 4),
-            scoreTitleLabel.centerXAnchor.constraint(equalTo: biasScoreView.centerXAnchor),
-
+            scoreTitleLabel.centerXAnchor.constraint(equalTo: biasScoreView.centerXAnchor)
         ])
     }
 
-    
     private func configureTitleLabel() {
         titleLabel.font = UIFont.systemFont(ofSize: 28, weight: .bold)
     }
 
     private func populateBiasCards() {
-
         biasCardStackView.axis = .vertical
         biasCardStackView.spacing = 16
 
@@ -282,12 +287,10 @@ class EndingViewController: UIViewController {
         guard !sortedBiases.isEmpty else { return }
 
         for (bias, _) in sortedBiases {
-
             guard let define = biasDefinitions[bias] else { continue }
 
             let card = makeBiasCard(define: define)
 
-            // Highlight dominant bias
             if bias == dominantBias {
                 card.layer.borderWidth = 2
                 card.layer.borderColor = accentColor.cgColor
@@ -297,10 +300,7 @@ class EndingViewController: UIViewController {
         }
     }
 
-
-
     private func configureQuoteCard() {
-
         applyCardStyle(
             quoteCardView,
             cornerRadius: 24,
@@ -318,7 +318,6 @@ class EndingViewController: UIViewController {
         quoteLabel.translatesAutoresizingMaskIntoConstraints = false
         authorLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        // Accent bar
         let accent = UIView()
         accent.translatesAutoresizingMaskIntoConstraints = false
         accent.backgroundColor = accentColor
@@ -329,9 +328,7 @@ class EndingViewController: UIViewController {
         quoteCardView.addSubview(quoteLabel)
         quoteCardView.addSubview(authorLabel)
 
-
         NSLayoutConstraint.activate([
-
             quoteLabel.topAnchor.constraint(equalTo: quoteCardView.topAnchor, constant: 24),
             quoteLabel.leadingAnchor.constraint(equalTo: quoteCardView.leadingAnchor, constant: 20),
             quoteLabel.trailingAnchor.constraint(equalTo: quoteCardView.trailingAnchor, constant: -24),
@@ -340,13 +337,9 @@ class EndingViewController: UIViewController {
             authorLabel.leadingAnchor.constraint(equalTo: quoteCardView.leadingAnchor, constant: 20),
             authorLabel.trailingAnchor.constraint(equalTo: quoteCardView.trailingAnchor, constant: -16),
 
-            // 🔑 author defines card bottom
             authorLabel.bottomAnchor.constraint(equalTo: quoteCardView.bottomAnchor, constant: -20)
         ])
-
     }
-
-
 
     private func makeBiasCard(define: BiasDefine) -> UIView {
         let card = UIView()
@@ -417,37 +410,6 @@ class EndingViewController: UIViewController {
         return card
     }
 
-    
-
-
-
-    
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        configureQuoteCard()
-        renderEnding()
-        renderQuote()
-        ContentView.backgroundColor = .clear
-        configureTitleLabel()
-        configureBiasScoreView()
-        populateBiasCards()
-    }
-
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        drawBiasScoreRing()
-    }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        configureCapitalCard()
-        quoteCardView.isUserInteractionEnabled = false
-        biasCardStackView.isUserInteractionEnabled = false
-
-
-    }
-
     private func drawBiasScoreRing() {
         let ringInset: CGFloat = 22
         let radius = min(biasScoreView.bounds.width, biasScoreView.bounds.height) / 2 - ringInset
@@ -470,7 +432,12 @@ class EndingViewController: UIViewController {
         ringTrackLayer = trackLayer
 
         let progress = max(0, min(1, CGFloat(biasScore) / 120.0))
-        let ringPath = UIBezierPath(arcCenter: center, radius: radius, startAngle: startAngle, endAngle: startAngle + progress * (CGFloat.pi * 2), clockwise: true)
+        let ringPath = UIBezierPath(
+            arcCenter: center, radius: radius,
+            startAngle: startAngle,
+            endAngle: startAngle + progress * (CGFloat.pi * 2),
+            clockwise: true
+        )
         let ringLayer = CAShapeLayer()
         ringLayer.path = ringPath.cgPath
         ringLayer.strokeColor = accentColor.cgColor
@@ -480,28 +447,27 @@ class EndingViewController: UIViewController {
         biasScoreView.layer.addSublayer(ringLayer)
         self.ringLayer = ringLayer
     }
-    
+}
+
+// MARK: - Navigation
+extension EndingViewController {
+
     func navigateToHome() {
         let storyboard = UIStoryboard(name: "HomeMain", bundle: nil)
         if let homeVC = storyboard.instantiateInitialViewController() {
-            
-            // Access the active window scene to swap the root view controller safely
             guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                   let window = scene.windows.first else {
                 return
             }
             window.rootViewController = homeVC
-            
-            // Add a smooth cross-dissolve animation so it doesn't just snap suddenly
+
             UIView.transition(with: window, duration: 0.3,
                               options: .transitionCrossDissolve,
                               animations: nil)
-            
+
             window.makeKeyAndVisible()
-            print("🏁 Re-routed from Ending screen to Home")
         }
     }
-    
 
     @IBAction func restartTapped(_ sender: UIButton) {
         navigateToHome()

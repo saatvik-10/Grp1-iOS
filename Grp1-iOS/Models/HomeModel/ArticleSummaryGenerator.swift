@@ -34,7 +34,7 @@ final class ArticleSummaryGenerator {
     }
 
     func generateSummary(from articleText: String) async {
-        
+
         do {
             let prompt = Prompt {
                 """

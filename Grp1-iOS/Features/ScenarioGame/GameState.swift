@@ -9,23 +9,22 @@ enum DecisionNode {
     case act1
 
     // Loyalist branch
-    case loyalist_followup
-    case loyalist_doubleDown
-    case loyalist_timeWillTell
-    case loyalist_exit
-    case loyalist_doubleDown_loss
+    case loyalistFollowup
+    case loyalistDoubleDown
+    case loyalistTimeWillTell
+    case loyalistExit
+    case loyalistDoubleDownLoss
 
     // Pragmatist branch
-    case pragmatist_followup
-    case pragmatist_exit
-    case pragmatist_stay
-    case pragmatic_loss
-    
-    
-    case ev_pivot
-    case ev_pivot_loss
-    case ev_pivot_profit
-    case ev_profit_book
+    case pragmatistFollowup
+    case pragmatistExit
+    case pragmatistStay
+    case pragmaticLoss
+
+    case evPivot
+    case evPivotLoss
+    case evPivotProfit
+    case evProfitBook
 }
 
 enum CognitiveBias: String {
@@ -37,14 +36,9 @@ enum CognitiveBias: String {
     case adaptability = "Adaptability"
 }
 
-
-
-
 enum EndingType {
     case success
     case partialFailure
     case failure
     case criticalFailure
 }
-
-

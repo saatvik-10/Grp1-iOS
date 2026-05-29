@@ -169,82 +169,13 @@ class OnboardingContentViewController: UIViewController {
         view.subviews.forEach { $0.removeFromSuperview() }
         view.backgroundColor = screenBackground
 
-        let skipButton = UIButton(type: .system)
-        skipButton.translatesAutoresizingMaskIntoConstraints = false
-        skipButton.setTitle("Skip", for: .normal)
-        skipButton.titleLabel?.font = .systemFont(ofSize: 14, weight: .semibold)
-        skipButton.tintColor = .white
-        skipButton.backgroundColor = selectedBlue
-        skipButton.layer.cornerRadius = 15
-        skipButton.addTarget(self, action: #selector(skipButtonTapped(_:)), for: .touchUpInside)
-
-        let contentContainer = UIView()
-        contentContainer.translatesAutoresizingMaskIntoConstraints = false
-        contentContainer.backgroundColor = screenBackground
-
-        let titleLabel = UILabel()
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.text = "Experience Level"
-        titleLabel.font = .systemFont(ofSize: 29, weight: .bold)
-        titleLabel.textColor = .label
-        titleLabel.textAlignment = .center
-        titleLabel.adjustsFontForContentSizeCategory = true
-
-        let subtitleLabel = UILabel()
-        subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        subtitleLabel.text = "Tailor your portfolio by choosing your\nbackground in financial markets."
-        subtitleLabel.font = .systemFont(ofSize: 21, weight: .regular)
-        subtitleLabel.textColor = UIColor(red: 0.34, green: 0.40, blue: 0.51, alpha: 1.0)
-        subtitleLabel.textAlignment = .center
-        subtitleLabel.numberOfLines = 2
-        subtitleLabel.lineBreakMode = .byWordWrapping
-
-        let stackView = UIStackView()
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.axis = .vertical
-        stackView.spacing = 20
-        stackView.distribution = .fillEqually
-
-        let beginner = ExperienceOptionButton(type: .custom)
-        let intermediate = ExperienceOptionButton(type: .custom)
-        let advanced = ExperienceOptionButton(type: .custom)
-
-        [beginner, intermediate, advanced].enumerated().forEach { index, button in
-            button.translatesAutoresizingMaskIntoConstraints = false
-            button.tag = index
-            button.heightAnchor.constraint(equalToConstant: 124).isActive = true
-            button.addTarget(self, action: #selector(optionTapped(_:)), for: .touchUpInside)
-            stackView.addArrangedSubview(button)
-        }
-
-        let footerView = UIView()
-        footerView.translatesAutoresizingMaskIntoConstraints = false
-        footerView.backgroundColor = screenBackground
-
-        let bottomBackButton = UIButton(type: .system)
-        bottomBackButton.translatesAutoresizingMaskIntoConstraints = false
-        bottomBackButton.setTitle("  Back", for: .normal)
-        bottomBackButton.setImage(UIImage(systemName: "chevron.left"), for: .normal)
-        bottomBackButton.tintColor = UIColor(red: 0.12, green: 0.15, blue: 0.19, alpha: 1.0)
-        bottomBackButton.titleLabel?.font = .systemFont(ofSize: 18, weight: .medium)
-        bottomBackButton.backgroundColor = UIColor(red: 0.90, green: 0.91, blue: 0.93, alpha: 1.0)
-        bottomBackButton.layer.cornerRadius = 22
-        bottomBackButton.isEnabled = false
-
-        let continueButton = UIButton(type: .system)
-        continueButton.translatesAutoresizingMaskIntoConstraints = false
-        continueButton.setTitle("Continue  ", for: .normal)
-        continueButton.setImage(UIImage(systemName: "chevron.right"), for: .normal)
-        continueButton.semanticContentAttribute = .forceRightToLeft
-        continueButton.tintColor = .white
-        continueButton.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
-        continueButton.backgroundColor = selectedBlue
-        continueButton.layer.cornerRadius = 22
-        continueButton.layer.shadowColor = selectedBlue.cgColor
-        continueButton.layer.shadowOpacity = 0.24
-        continueButton.layer.shadowOffset = CGSize(width: 0, height: 8)
-        continueButton.layer.shadowRadius = 16
-        continueButton.addTarget(self, action: #selector(nextTapped(_:)), for: .touchUpInside)
+        let skipButton = makeSkipButton()
+        let contentContainer = makeContentContainer()
+        let titleLabel = makeTitleLabel()
+        let subtitleLabel = makeSubtitleLabel()
+        let stackView = makeOptionStackView()
+        let footerView = makeFooterView()
+        let (bottomBackButton, continueButton) = makeFooterButtons()
 
         view.addSubview(skipButton)
         view.addSubview(contentContainer)
@@ -254,11 +185,6 @@ class OnboardingContentViewController: UIViewController {
         contentContainer.addSubview(stackView)
         footerView.addSubview(bottomBackButton)
         footerView.addSubview(continueButton)
-
-        beginnerButton = beginner
-        intermediateButton = intermediate
-        advancedButton = advanced
-        nextButton = continueButton
 
         NSLayoutConstraint.activate([
             skipButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
@@ -298,6 +224,111 @@ class OnboardingContentViewController: UIViewController {
             continueButton.topAnchor.constraint(equalTo: bottomBackButton.topAnchor),
             continueButton.heightAnchor.constraint(equalTo: bottomBackButton.heightAnchor)
         ])
+    }
+
+    private func makeSkipButton() -> UIButton {
+        let button = UIButton(type: .system)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setTitle("Skip", for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 14, weight: .semibold)
+        button.tintColor = .white
+        button.backgroundColor = selectedBlue
+        button.layer.cornerRadius = 15
+        button.addTarget(self, action: #selector(skipButtonTapped(_:)), for: .touchUpInside)
+        return button
+    }
+
+    private func makeContentContainer() -> UIView {
+        let container = UIView()
+        container.translatesAutoresizingMaskIntoConstraints = false
+        container.backgroundColor = screenBackground
+        return container
+    }
+
+    private func makeTitleLabel() -> UILabel {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = "Experience Level"
+        label.font = .systemFont(ofSize: 29, weight: .bold)
+        label.textColor = .label
+        label.textAlignment = .center
+        label.adjustsFontForContentSizeCategory = true
+        return label
+    }
+
+    private func makeSubtitleLabel() -> UILabel {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = "Tailor your portfolio by choosing your\nbackground in financial markets."
+        label.font = .systemFont(ofSize: 21, weight: .regular)
+        label.textColor = UIColor(red: 0.34, green: 0.40, blue: 0.51, alpha: 1.0)
+        label.textAlignment = .center
+        label.numberOfLines = 2
+        label.lineBreakMode = .byWordWrapping
+        return label
+    }
+
+    private func makeOptionStackView() -> UIStackView {
+        let stackView = UIStackView()
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.axis = .vertical
+        stackView.spacing = 20
+        stackView.distribution = .fillEqually
+
+        let beginner = ExperienceOptionButton(type: .custom)
+        let intermediate = ExperienceOptionButton(type: .custom)
+        let advanced = ExperienceOptionButton(type: .custom)
+
+        [beginner, intermediate, advanced].enumerated().forEach { index, button in
+            button.translatesAutoresizingMaskIntoConstraints = false
+            button.tag = index
+            button.heightAnchor.constraint(equalToConstant: 124).isActive = true
+            button.addTarget(self, action: #selector(optionTapped(_:)), for: .touchUpInside)
+            stackView.addArrangedSubview(button)
+        }
+
+        beginnerButton = beginner
+        intermediateButton = intermediate
+        advancedButton = advanced
+
+        return stackView
+    }
+
+    private func makeFooterView() -> UIView {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = screenBackground
+        return view
+    }
+
+    private func makeFooterButtons() -> (UIButton, UIButton) {
+        let backButton = UIButton(type: .system)
+        backButton.translatesAutoresizingMaskIntoConstraints = false
+        backButton.setTitle("  Back", for: .normal)
+        backButton.setImage(UIImage(systemName: "chevron.left"), for: .normal)
+        backButton.tintColor = UIColor(red: 0.12, green: 0.15, blue: 0.19, alpha: 1.0)
+        backButton.titleLabel?.font = .systemFont(ofSize: 18, weight: .medium)
+        backButton.backgroundColor = UIColor(red: 0.90, green: 0.91, blue: 0.93, alpha: 1.0)
+        backButton.layer.cornerRadius = 22
+        backButton.isEnabled = false
+
+        let continueButton = UIButton(type: .system)
+        continueButton.translatesAutoresizingMaskIntoConstraints = false
+        continueButton.setTitle("Continue  ", for: .normal)
+        continueButton.setImage(UIImage(systemName: "chevron.right"), for: .normal)
+        continueButton.semanticContentAttribute = .forceRightToLeft
+        continueButton.tintColor = .white
+        continueButton.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
+        continueButton.backgroundColor = selectedBlue
+        continueButton.layer.cornerRadius = 22
+        continueButton.layer.shadowColor = selectedBlue.cgColor
+        continueButton.layer.shadowOpacity = 0.24
+        continueButton.layer.shadowOffset = CGSize(width: 0, height: 8)
+        continueButton.layer.shadowRadius = 16
+        continueButton.addTarget(self, action: #selector(nextTapped(_:)), for: .touchUpInside)
+
+        nextButton = continueButton
+        return (backButton, continueButton)
     }
 
     func setButtonText(button: UIButton, title: String, subtitle: String) {

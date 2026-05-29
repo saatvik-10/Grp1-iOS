@@ -81,11 +81,11 @@ class jargonQuizViewController: UIViewController {
     @IBAction func optionTapped(_ sender: UIButton) {
         UIView.animate(withDuration: 0.15, animations: {
             sender.transform = CGAffineTransform(scaleX: 0.97, y: 0.97)
-        }) { _ in
+        }, completion: { _ in
             UIView.animate(withDuration: 0.2) {
                 sender.transform = .identity
             }
-        }
+        })
 
         selectedIndex = sender.tag
         checkAnswer(selected: sender.tag)
@@ -109,13 +109,15 @@ class jargonQuizViewController: UIViewController {
         }
 
         if selected == quiz.correctIndex {
-            animateCorrect(button: buttons[selected]!)
+            guard let correctButton = buttons[selected] else { return }
+            animateCorrect(button: correctButton)
             animateQuizSuccess()
             showResult(isCorrect: true)
             showConfetti()
             UINotificationFeedbackGenerator().notificationOccurred(.success)
         } else {
-            animateWrong(button: buttons[selected]!)
+            guard let wrongButton = buttons[selected] else { return }
+            animateWrong(button: wrongButton)
             animateQuizError()
             showResult(isCorrect: false)
             UINotificationFeedbackGenerator().notificationOccurred(.error)
@@ -174,7 +176,7 @@ class jargonQuizViewController: UIViewController {
     private func animateCorrect(button: UIButton) {
         UIView.animate(withDuration: 0.15, animations: {
             button.transform = CGAffineTransform(scaleX: 1.08, y: 1.08)
-        }) { _ in
+        }, completion: { _ in
             UIView.animate(
                 withDuration: 0.3, delay: 0,
                 usingSpringWithDamping: 0.55, initialSpringVelocity: 0.6,
@@ -201,7 +203,7 @@ class jargonQuizViewController: UIViewController {
     private func animateQuizSuccess() {
         UIView.animate(withDuration: 0.18, animations: {
             self.quizView.transform = CGAffineTransform(scaleX: 1.04, y: 1.04)
-        }) { _ in
+        }, completion: { _ in
             UIView.animate(
                 withDuration: 0.35, delay: 0,
                 usingSpringWithDamping: 0.6, initialSpringVelocity: 0.8,
@@ -215,7 +217,7 @@ class jargonQuizViewController: UIViewController {
         UIView.animate(withDuration: 0.12, animations: {
             self.quizView.transform = CGAffineTransform(scaleX: 0.97, y: 0.97)
             self.quizView.alpha = 0.85
-        }) { _ in
+        }, completion: { _ in
             UIView.animate(
                 withDuration: 0.25, delay: 0,
                 usingSpringWithDamping: 0.8, initialSpringVelocity: 0.6,

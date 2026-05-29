@@ -1,0 +1,36 @@
+included:
+  - Grp1-iOS
+  - NewsAppWidget
+
+excluded:
+  - algo.playground
+  - algorithm1.playground
+  - textCleaning.playground
+  - Grp1-iOS_backend
+  - build4.log
+  - build5.log
+  - build6.log
+
+disabled_rules:
+  - todo
+  - trailing_comma
+  - type_name
+
+opt_in_rules:
+  - empty_count
+  - force_unwrapping
+
+line_length:
+  warning: 140
+  error: 180
+
+function_body_length:
+  warning: 80
+  error: 120
+
+file_length:
+  warning: 500
+  error: 800
+
+identifier_name:
+  min_length: 2

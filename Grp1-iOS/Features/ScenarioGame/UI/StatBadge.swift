@@ -1,4 +1,3 @@
-
 //
 //  StatBadgeHelper.swift
 //  Grp1-iOS

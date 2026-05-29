@@ -76,19 +76,76 @@ private let explanationTemplates: [String] = [
     "Efficient asset utilization and strong cash flows resulted in sector-leading total returns."
 ]
 
+private struct CompanyResults {
+    let companies: [Company]
+    let visibleIndicators: [IndicatorValue]
+    let twistIndicators: [IndicatorValue]
+    let results: [Result1]
+    let bestCompanyId: String
+    let bestCompanyReturn: Int
+    let bestCompanyData: PuzzleEngine.GeneratedCompanyData?
+    let bestCompanyName: String
+}
+
+private struct IndicatorSelection {
+    let selectedVisibleNames: [Pillar: String]
+    let twistName: String
+    let twistPillar: Pillar
+}
+
 @available(iOS 26.0, *)
 class PuzzleGenerator {
     static let shared = PuzzleGenerator()
-    
+
     /// Generates a fresh DailyPuzzle. Uses on-device AI for company names/explanations
     /// when available; otherwise falls back to a built-in pool. Always returns a valid puzzle.
     func generate() async -> DailyPuzzle? {
+        let (sector, generatedCompanies) = await sectorAndCompanies()
+        let engineData = PuzzleEngine.generatePuzzleData(for: sector)
+        let indicatorSelection = selectIndicators()
+
+        let built = buildCompanyResults(
+            engineData: engineData,
+            generatedCompanies: generatedCompanies,
+            selectedVisibleNames: indicatorSelection.selectedVisibleNames,
+            twistName: indicatorSelection.twistName,
+            twistPillar: indicatorSelection.twistPillar
+        )
+
+        var bestExplanation = explanationTemplates.randomElement() ?? "Strong fundamentals across the board."
+
+        #if canImport(FoundationModels)
+        if SystemLanguageModel.default.isAvailable, let bData = built.bestCompanyData {
+            let input = AIExplanationInput(
+                companyName: built.bestCompanyName, sector: sector, returnPct: built.bestCompanyReturn,
+                visibleNames: indicatorSelection.selectedVisibleNames, twistName: indicatorSelection.twistName, data: bData
+            )
+            if let aiExpl = await generateExplanationWithAI(input: input) {
+                bestExplanation = aiExpl
+            }
+        }
+        #endif
+
+        let finalResults = buildFinalResults(results: built.results, bestCompanyId: built.bestCompanyId, bestExplanation: bestExplanation)
+
+        let puzzle = DailyPuzzle(
+            sector: sector, companies: built.companies,
+            visibleIndicators: built.visibleIndicators,
+            twistIndicators: built.twistIndicators,
+            results: finalResults
+        )
+
+        saveToCache(puzzle)
+        return puzzle
+    }
+
+    // MARK: - Helpers
+
+    private func sectorAndCompanies() async -> (sector: String, generatedCompanies: [(name: String, desc: String)]) {
         let sectors = ["IT/Software", "FMCG", "Banking/NBFC", "Pharma", "Infrastructure/Capital Goods"]
-        let sector = sectors.randomElement()!
-        
-        // ── Step 1: Get company names ──────────────────────────
+        let sector = sectors.randomElement() ?? "IT/Software"
         var generatedCompanies = getCompaniesFromPool(sector: sector)
-        
+
         #if canImport(FoundationModels)
         if SystemLanguageModel.default.isAvailable {
             if let aiCompanies = await generateCompaniesWithAI(sector: sector) {
@@ -96,67 +153,77 @@ class PuzzleGenerator {
             }
         }
         #endif
-        
-        // ── Step 2–3: Engine generates base variables + derives indicators ──
-        let engineData = PuzzleEngine.generatePuzzleData(for: sector)
-        
-        var companies: [Company] = []
-        var visibleIndicators: [IndicatorValue] = []
-        var twistIndicators: [IndicatorValue] = []
-        var results: [Result1] = []
-        
+
+        return (sector, generatedCompanies)
+    }
+
+    private func selectIndicators() -> IndicatorSelection {
         let pillars: [Pillar] = [.growthConsistency, .financialStrength, .debtLevels, .valuation]
-        
+
         let growthNames = ["Revenue Growth YoY", "EPS Growth (YoY)", "5Y Sales CAGR", "5Y Profit CAGR", "Operating CF Growth"]
         let finNames = ["Net Profit Margin", "Return on Equity", "Return on Capital Employed", "Operating Margin", "Asset Turnover"]
         let debtNames = ["Debt-to-Equity", "Interest Coverage", "Debt-to-EBITDA", "Current Ratio", "FCF-to-Debt"]
         let valNames = ["P/E Ratio", "Price-to-Book", "EV/EBITDA", "Price-to-Sales", "PEG Ratio"]
-        
-        // Pick 1 visible + 1 twist per pillar (shuffle then take first two)
+
         let selectedGrowth = Array(growthNames.shuffled().prefix(2))
         let selectedFin = Array(finNames.shuffled().prefix(2))
         let selectedDebt = Array(debtNames.shuffled().prefix(2))
         let selectedVal = Array(valNames.shuffled().prefix(2))
-        
-        let twistPillar = pillars.randomElement()!
-        
+
+        let twistPillar = pillars.randomElement() ?? .growthConsistency
+
         var selectedVisibleNames: [Pillar: String] = [:]
         selectedVisibleNames[.growthConsistency] = selectedGrowth[0]
         selectedVisibleNames[.financialStrength] = selectedFin[0]
         selectedVisibleNames[.debtLevels] = selectedDebt[0]
         selectedVisibleNames[.valuation] = selectedVal[0]
-        
-        // Twist must be from the same pillar but a different indicator
-        var twistName = ""
+
+        let twistName: String
         switch twistPillar {
         case .growthConsistency: twistName = selectedGrowth[1]
         case .financialStrength: twistName = selectedFin[1]
         case .debtLevels: twistName = selectedDebt[1]
         case .valuation: twistName = selectedVal[1]
         }
-        
-        // ── Step 4: Score, rank, assign returns ──────────────────
+
+        return IndicatorSelection(selectedVisibleNames: selectedVisibleNames, twistName: twistName, twistPillar: twistPillar)
+    }
+
+    private func buildCompanyResults(
+        engineData: [PuzzleEngine.GeneratedCompanyData],
+        generatedCompanies: [(name: String, desc: String)],
+        selectedVisibleNames: [Pillar: String],
+        twistName: String,
+        twistPillar: Pillar
+    ) -> CompanyResults {
+        let pillars: [Pillar] = [.growthConsistency, .financialStrength, .debtLevels, .valuation]
+
+        var companies: [Company] = []
+        var visibleIndicators: [IndicatorValue] = []
+        var twistIndicators: [IndicatorValue] = []
+        var results: [Result1] = []
+
         var bestCompanyId = ""
         var bestCompanyReturn = 0
-        var bestCompanyData: PuzzleEngine.GeneratedCompanyData? = nil
+        var bestCompanyData: PuzzleEngine.GeneratedCompanyData?
         var bestCompanyName = ""
-        
-        for (i, data) in engineData.enumerated() {
-            let rank = i + 1
+
+        for (index, data) in engineData.enumerated() {
+            let rank = index + 1
             let retPct = PuzzleEngine.getReturnPercent(forRank: rank)
-            let companyId = "c\(i+1)"
-            let comp = Company(id: companyId, name: generatedCompanies[i].name, description: generatedCompanies[i].desc)
+            let companyId = "c\(index + 1)"
+            let comp = Company(id: companyId, name: generatedCompanies[index].name, description: generatedCompanies[index].desc)
             companies.append(comp)
-            
+
             if rank == 1 {
                 bestCompanyId = companyId
                 bestCompanyReturn = retPct
                 bestCompanyData = data
                 bestCompanyName = comp.name
             }
-            
+
             for pillar in pillars {
-                let indName = selectedVisibleNames[pillar]!
+                guard let indName = selectedVisibleNames[pillar] else { continue }
                 let val = data.indicators[indName] ?? 0.0
                 visibleIndicators.append(IndicatorValue(
                     indicatorName: indName, pillar: pillar,
@@ -164,83 +231,78 @@ class PuzzleGenerator {
                     displayValue: PuzzleEngine.formatIndicatorValue(indName, value: val)
                 ))
             }
-            
+
             let tVal = data.indicators[twistName] ?? 0.0
             twistIndicators.append(IndicatorValue(
                 indicatorName: twistName, pillar: twistPillar,
                 companyId: companyId,
                 displayValue: PuzzleEngine.formatIndicatorValue(twistName, value: tVal)
             ))
-            
+
             results.append(Result1(companyId: companyId, returnPercent: retPct, explanation: ""))
         }
-        
-        // ── Step 5: Generate explanation ──────────────────────────
-        var bestExplanation = explanationTemplates.randomElement() ?? "Strong fundamentals across the board."
-        
-        #if canImport(FoundationModels)
-        if SystemLanguageModel.default.isAvailable, let bData = bestCompanyData {
-            if let aiExpl = await generateExplanationWithAI(
-                companyName: bestCompanyName, sector: sector, returnPct: bestCompanyReturn,
-                visibleNames: selectedVisibleNames, twistName: twistName, data: bData
-            ) {
-                bestExplanation = aiExpl
-            }
-        }
-        #endif
-        
-        var finalResults: [Result1] = []
-        for r in results {
-            if r.companyId == bestCompanyId {
-                finalResults.append(Result1(
-                    companyId: r.companyId, returnPercent: r.returnPercent,
-                    explanation: bestExplanation.replacingOccurrences(of: "\n", with: " ").trimmingCharacters(in: .whitespacesAndNewlines)
-                ))
-            } else {
-                finalResults.append(Result1(
-                    companyId: r.companyId, returnPercent: r.returnPercent,
-                    explanation: "Did not perform optimally compared to sector peers."
-                ))
-            }
-        }
-        
-        let puzzle = DailyPuzzle(
-            sector: sector, companies: companies,
-            visibleIndicators: visibleIndicators,
-            twistIndicators: twistIndicators,
-            results: finalResults
+
+        return CompanyResults(
+            companies: companies, visibleIndicators: visibleIndicators,
+            twistIndicators: twistIndicators, results: results,
+            bestCompanyId: bestCompanyId, bestCompanyReturn: bestCompanyReturn,
+            bestCompanyData: bestCompanyData, bestCompanyName: bestCompanyName
         )
-        
-        saveToCache(puzzle)
-        return puzzle
     }
-    
+
+    private func buildFinalResults(results: [Result1], bestCompanyId: String, bestExplanation: String) -> [Result1] {
+        results.map { result in
+            if result.companyId == bestCompanyId {
+                return Result1(
+                    companyId: result.companyId, returnPercent: result.returnPercent,
+                    explanation: bestExplanation.replacingOccurrences(of: "\n", with: " ").trimmingCharacters(in: .whitespacesAndNewlines)
+                )
+            } else {
+                return Result1(
+                    companyId: result.companyId, returnPercent: result.returnPercent,
+                    explanation: "Did not perform optimally compared to sector peers."
+                )
+            }
+        }
+    }
+
     // MARK: - Offline fallback: pick 4 random companies from the pool
-    
+
     private func getCompaniesFromPool(sector: String) -> [(name: String, desc: String)] {
-        let pool = companyPool[sector] ?? companyPool["IT/Software"]!
+        let pool = companyPool[sector] ?? companyPool["IT/Software"] ?? []
         return Array(pool.shuffled().prefix(4))
     }
-    
+
     // MARK: - AI helpers (only called when FoundationModels is available)
-    
+
     #if canImport(FoundationModels)
+
+    private struct AIExplanationInput {
+        let companyName: String
+        let sector: String
+        let returnPct: Int
+        let visibleNames: [Pillar: String]
+        let twistName: String
+        let data: PuzzleEngine.GeneratedCompanyData
+    }
+
     @available(iOS 26.0, *)
     private func generateCompaniesWithAI(sector: String) async -> [(name: String, desc: String)]? {
         let prompt = """
-        Generate 4 fictional Indian company names that sound like BSE/NSE-listed companies but are not real, for the \(sector) sector. Provide a one-line business description for each.
+        Generate 4 fictional Indian company names that sound like BSE/NSE-listed companies but are not real, \
+        for the \(sector) sector. Provide a one-line business description for each.
         Output EXACTLY 4 lines, formatted exactly as:
         CompanyName|Description
         Do not output any other text or markdown.
         """
-        
+
         do {
             let session = LanguageModelSession()
             let response = try await session.respond(to: prompt)
             let text = String(describing: response.content)
             let lines = text.components(separatedBy: .newlines)
                 .filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
-            
+
             var result: [(name: String, desc: String)] = []
             for line in lines {
                 let parts = line.components(separatedBy: "|")
@@ -257,25 +319,41 @@ class PuzzleGenerator {
             return nil
         }
     }
-    
+
     @available(iOS 26.0, *)
-    private func generateExplanationWithAI(
-        companyName: String, sector: String, returnPct: Int,
-        visibleNames: [Pillar: String], twistName: String,
-        data: PuzzleEngine.GeneratedCompanyData
-    ) async -> String? {
+    private func generateExplanationWithAI(input: AIExplanationInput) async -> String? {
+        let gcName = input.visibleNames[.growthConsistency] ?? ""
+        let gcVal = formatIndicatorSafe(input.visibleNames[.growthConsistency], data: input.data)
+        let fsName = input.visibleNames[.financialStrength] ?? ""
+        let fsVal = formatIndicatorSafe(input.visibleNames[.financialStrength], data: input.data)
+        let dlName = input.visibleNames[.debtLevels] ?? ""
+        let dlVal = formatIndicatorSafe(input.visibleNames[.debtLevels], data: input.data)
+        let valName = input.visibleNames[.valuation] ?? ""
+        let valVal = formatIndicatorSafe(input.visibleNames[.valuation], data: input.data)
+
         let prompt = """
-        You are a financial analyst. The company '\(companyName)' in the '\(sector)' sector generated a \(returnPct)% return.
+        You are a financial analyst. The company '\(input.companyName)' in the \
+        '\(input.sector)' sector generated a \(input.returnPct)% return.
         Its key metrics were:
-        \(visibleNames[.growthConsistency]!): \(PuzzleEngine.formatIndicatorValue(visibleNames[.growthConsistency]!, value: data.indicators[visibleNames[.growthConsistency]!] ?? 0.0))
-        \(visibleNames[.financialStrength]!): \(PuzzleEngine.formatIndicatorValue(visibleNames[.financialStrength]!, value: data.indicators[visibleNames[.financialStrength]!] ?? 0.0))
-        \(visibleNames[.debtLevels]!): \(PuzzleEngine.formatIndicatorValue(visibleNames[.debtLevels]!, value: data.indicators[visibleNames[.debtLevels]!] ?? 0.0))
-        \(visibleNames[.valuation]!): \(PuzzleEngine.formatIndicatorValue(visibleNames[.valuation]!, value: data.indicators[visibleNames[.valuation]!] ?? 0.0))
-        Twist indicator - \(twistName): \(PuzzleEngine.formatIndicatorValue(twistName, value: data.indicators[twistName] ?? 0.0))
-        
+        \(gcName): \(gcVal)
+        \(fsName): \(fsVal)
+        \(dlName): \(dlVal)
+        \(valName): \(valVal)
+        Twist indicator - \(input.twistName): \
+        \(PuzzleEngine.formatIndicatorValue(input.twistName, value: input.data.indicators[input.twistName] ?? 0.0))
+
         Provide a 2-3 sentence plain-English explanation of why it outperformed peers based on these metrics.
         """
-        
+
+        return await performAIRequest(prompt: prompt)
+    }
+
+    private func formatIndicatorSafe(_ name: String?, data: PuzzleEngine.GeneratedCompanyData) -> String {
+        guard let name else { return "N/A" }
+        return PuzzleEngine.formatIndicatorValue(name, value: data.indicators[name] ?? 0.0)
+    }
+
+    private func performAIRequest(prompt: String) async -> String? {
         do {
             let session = LanguageModelSession()
             let response = try await session.respond(to: prompt)
@@ -285,10 +363,11 @@ class PuzzleGenerator {
             return nil
         }
     }
+
     #endif
-    
+
     // MARK: - Cache
-    
+
     private func saveToCache(_ puzzle: DailyPuzzle) {
         let fileManager = FileManager.default
         if let cacheURL = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first {

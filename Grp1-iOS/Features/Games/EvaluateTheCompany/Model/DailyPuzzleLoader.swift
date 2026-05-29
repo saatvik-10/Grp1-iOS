@@ -11,7 +11,7 @@ final class DailyPuzzleLoader {
 
     static func loadDailyPuzzle() -> DailyPuzzle {
         let fileManager = FileManager.default
-        
+
         // 1. Try cache
         if let cacheURL = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first {
             let cacheFile = cacheURL.appendingPathComponent("generated_puzzle.json")
@@ -20,7 +20,7 @@ final class DailyPuzzleLoader {
                 return puzzle
             }
         }
-        
+
         // 2. Fallback to bundle
         guard
             let url = Bundle.main.url(forResource: "daily_puzzle", withExtension: "json"),

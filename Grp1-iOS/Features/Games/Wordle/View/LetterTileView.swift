@@ -15,7 +15,6 @@ final class LetterTileView: UIView {
         case absent
     }
 
-
     private let blurView: UIVisualEffectView = {
         let blur = UIBlurEffect(style: .systemUltraThinMaterial)
         let view = UIVisualEffectView(effect: blur)
@@ -39,7 +38,6 @@ final class LetterTileView: UIView {
         return label
     }()
 
-
     override init(frame: CGRect) {
         super.init(frame: frame)
         setup()
@@ -49,7 +47,6 @@ final class LetterTileView: UIView {
         super.init(coder: coder)
         setup()
     }
-
 
     private func setup() {
         clipsToBounds = true
@@ -76,7 +73,6 @@ final class LetterTileView: UIView {
             label.centerYAnchor.constraint(equalTo: centerYAnchor)
         ])
     }
-
 
     func update(letter: Character, state: State) {
         label.text = String(letter).uppercased()
@@ -107,7 +103,6 @@ final class LetterTileView: UIView {
             self.layer.borderColor = borderColor.cgColor
         }
     }
-
 
     func reset() {
         label.text = ""
@@ -152,10 +147,10 @@ final class WordleEngine {
 
         var result: [GuessResult.Evaluation] = []
 
-        for i in 0..<guessChars.count {
-            let char = guessChars[i]
+        for index in 0..<guessChars.count {
+            let char = guessChars[index]
 
-            if char == answerChars[i] {
+            if char == answerChars[index] {
                 result.append(.init(character: char, state: .correct))
             } else if answerChars.contains(char) {
                 result.append(.init(character: char, state: .present))
@@ -182,5 +177,5 @@ final class WordleEngine {
     func reset() {
         attempts = 0
     }
-    
+
 }

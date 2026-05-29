@@ -1,4 +1,4 @@
- //
+//
  //  SceneDelegate.swift
  //  Grp1-iOS
  //
@@ -44,7 +44,7 @@
 
         window?.makeKeyAndVisible()
     }
-     
+
 //      func scene(_ scene: UIScene, willConnectTo session: UISceneSession,
 //                 options connectionOptions: UIScene.ConnectionOptions) {
 //
@@ -57,7 +57,6 @@
 //
 //          window?.makeKeyAndVisible()
 //      }
-
 
      func sceneDidDisconnect(_ scene: UIScene) {}
      func sceneDidBecomeActive(_ scene: UIScene) {}

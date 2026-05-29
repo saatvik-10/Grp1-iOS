@@ -43,6 +43,13 @@ struct RankedEntry {
     let isBest: Bool
 }
 
+struct IndicatorDefinition {
+    let definition: String
+    let formula: String
+    let icon: String
+    let iconBg: UIColor
+}
+
 // MARK: - Extension
 
 extension DailyPuzzle {
@@ -91,8 +98,9 @@ extension DailyPuzzle {
 
         let definitions = DailyPuzzle.getAllIndicatorDefinitions()
 
-        let def = definitions[twistName] ?? (
-            definition: "\(twistName) is a key financial metric that reveals the underlying quality of a company's performance beyond surface-level numbers.",
+        let def = definitions[twistName] ?? IndicatorDefinition(
+            definition: "\(twistName) is a key financial metric that reveals the underlying quality of a company's performance.",
+
             formula: "Refer to the financial glossary for the exact formula.",
             icon: "chart.bar",
             iconBg: .systemGray5
@@ -122,119 +130,133 @@ extension DailyPuzzle {
         )
     }
 
-    static func getAllIndicatorDefinitions() -> [String: (definition: String, formula: String, icon: String, iconBg: UIColor)] {
-        let greenBg = UIColor(red: 0.91, green: 0.96, blue: 0.87, alpha: 1)
-        let blueBg = UIColor(red: 0.90, green: 0.95, blue: 0.98, alpha: 1)
-        let orangeBg = UIColor(red: 0.98, green: 0.93, blue: 0.85, alpha: 1)
-        let pinkBg = UIColor(red: 0.98, green: 0.91, blue: 0.94, alpha: 1)
-        
+    static func getAllIndicatorDefinitions() -> [String: IndicatorDefinition] {
+        growthDefinitions()
+            .merging(financialStrengthDefinitions()) { $1 }
+            .merging(debtLevelsDefinitions()) { $1 }
+            .merging(valuationDefinitions()) { $1 }
+    }
+
+    private static func growthDefinitions() -> [String: IndicatorDefinition] {
+        let bg = UIColor(red: 0.90, green: 0.95, blue: 0.98, alpha: 1)
         return [
-            // Growth
-            "Revenue Growth YoY": (
+            "Revenue Growth YoY": IndicatorDefinition(
                 definition: "Measures the year-over-year percentage increase in total sales.",
                 formula: "Revenue Growth = (Revenue This Year - Revenue Last Year) / Revenue Last Year",
-                icon: "chart.line.uptrend.xyaxis", iconBg: blueBg
+                icon: "chart.line.uptrend.xyaxis", iconBg: bg
             ),
-            "EPS Growth (YoY)": (
+            "EPS Growth (YoY)": IndicatorDefinition(
                 definition: "Earnings Per Share growth year-over-year measures how fast a company's profit per share is growing.",
                 formula: "EPS Growth = ( EPS This Year − EPS Last Year ) ÷ EPS Last Year × 100",
-                icon: "arrow.up.right.circle", iconBg: blueBg
+                icon: "arrow.up.right.circle", iconBg: bg
             ),
-            "5Y Sales CAGR": (
-                definition: "Compound Annual Growth Rate over 5 years smooths out yearly noise to show the real growth trajectory of a company.",
+            "5Y Sales CAGR": IndicatorDefinition(
+                definition: "Compound Annual Growth Rate over 5 years smooths out yearly noise to show the real growth trajectory.",
                 formula: "CAGR = ( End Value ÷ Start Value ) ^ (1 ÷ 5) − 1",
-                icon: "chart.line.uptrend.xyaxis", iconBg: blueBg
+                icon: "chart.line.uptrend.xyaxis", iconBg: bg
             ),
-            "5Y Profit CAGR": (
+            "5Y Profit CAGR": IndicatorDefinition(
                 definition: "Compound Annual Growth Rate of profit over 5 years. Shows long term profitability trend.",
                 formula: "CAGR = ( End Profit ÷ Start Profit ) ^ (1 ÷ 5) − 1",
-                icon: "chart.line.uptrend.xyaxis", iconBg: blueBg
+                icon: "chart.line.uptrend.xyaxis", iconBg: bg
             ),
-            "Operating CF Growth": (
+            "Operating CF Growth": IndicatorDefinition(
                 definition: "Growth in cash generated from normal business operations.",
                 formula: "OCF Growth = (OCF This Year - OCF Last Year) / OCF Last Year",
-                icon: "dollarsign.circle", iconBg: blueBg
-            ),
-            
-            // Financial Strength
-            "Net Profit Margin": (
+                icon: "dollarsign.circle", iconBg: bg
+            )
+        ]
+    }
+
+    private static func financialStrengthDefinitions() -> [String: IndicatorDefinition] {
+        let bg = UIColor(red: 0.91, green: 0.96, blue: 0.87, alpha: 1)
+        return [
+            "Net Profit Margin": IndicatorDefinition(
                 definition: "How much profit a company keeps from every ₹100 of revenue. Higher is generally better.",
                 formula: "Net Profit Margin = Net Profit ÷ Revenue × 100",
-                icon: "percent", iconBg: greenBg
+                icon: "percent", iconBg: bg
             ),
-            "Return on Equity": (
-                definition: "Measures how effectively management is using a company’s assets to create profits.",
+            "Return on Equity": IndicatorDefinition(
+                definition: "Measures how effectively management is using a company's assets to create profits.",
                 formula: "ROE = Net Income / Shareholders' Equity",
-                icon: "arrow.uturn.up", iconBg: greenBg
+                icon: "arrow.uturn.up", iconBg: bg
             ),
-            "Return on Capital Employed": (
+            "Return on Capital Employed": IndicatorDefinition(
                 definition: "Measures a company's profitability and the efficiency with which its capital is used.",
                 formula: "ROCE = EBIT / Capital Employed",
-                icon: "arrow.uturn.up", iconBg: greenBg
+                icon: "arrow.uturn.up", iconBg: bg
             ),
-            "Operating Margin": (
+            "Operating Margin": IndicatorDefinition(
                 definition: "Measures how much profit a company makes on a dollar of sales after paying for variable costs.",
                 formula: "Operating Margin = Operating Income / Revenue",
-                icon: "percent", iconBg: greenBg
+                icon: "percent", iconBg: bg
             ),
-            "Asset Turnover": (
+            "Asset Turnover": IndicatorDefinition(
                 definition: "Measures the value of a company's sales or revenues relative to the value of its assets.",
                 formula: "Asset Turnover = Total Sales / Average Assets",
-                icon: "arrow.triangle.2.circlepath", iconBg: greenBg
-            ),
-            
-            // Debt Levels
-            "Debt-to-Equity": (
+                icon: "arrow.triangle.2.circlepath", iconBg: bg
+            )
+        ]
+    }
+
+    private static func debtLevelsDefinitions() -> [String: IndicatorDefinition] {
+        let bg = UIColor(red: 0.98, green: 0.93, blue: 0.85, alpha: 1)
+        return [
+            "Debt-to-Equity": IndicatorDefinition(
                 definition: "How much the company relies on debt vs its own funds. A lower ratio means less financial risk.",
                 formula: "Debt-to-Equity = Total Debt / Total Equity",
-                icon: "scalemass", iconBg: orangeBg
+                icon: "scalemass", iconBg: bg
             ),
-            "Interest Coverage": (
+            "Interest Coverage": IndicatorDefinition(
                 definition: "Measures how easily a company can pay interest on its outstanding debt.",
                 formula: "Interest Coverage = EBIT / Interest Expense",
-                icon: "shield", iconBg: orangeBg
+                icon: "shield", iconBg: bg
             ),
-            "Debt-to-EBITDA": (
+            "Debt-to-EBITDA": IndicatorDefinition(
                 definition: "Measures a company's ability to pay off its incurred debt.",
                 formula: "Debt-to-EBITDA = Total Debt / EBITDA",
-                icon: "banknote", iconBg: orangeBg
+                icon: "banknote", iconBg: bg
             ),
-            "Current Ratio": (
+            "Current Ratio": IndicatorDefinition(
                 definition: "Measures a company's ability to pay short-term obligations or those due within one year.",
                 formula: "Current Ratio = Current Assets / Current Liabilities",
-                icon: "clock.arrow.circlepath", iconBg: orangeBg
+                icon: "clock.arrow.circlepath", iconBg: bg
             ),
-            "FCF-to-Debt": (
+            "FCF-to-Debt": IndicatorDefinition(
                 definition: "Measures how much free cash flow is available to cover debt.",
                 formula: "FCF-to-Debt = Free Cash Flow / Total Debt",
-                icon: "banknote.fill", iconBg: orangeBg
-            ),
-            
-            // Valuation
-            "P/E Ratio": (
+                icon: "banknote.fill", iconBg: bg
+            )
+        ]
+    }
+
+    private static func valuationDefinitions() -> [String: IndicatorDefinition] {
+        let bg = UIColor(red: 0.98, green: 0.91, blue: 0.94, alpha: 1)
+        return [
+            "P/E Ratio": IndicatorDefinition(
                 definition: "Price investors pay for every ₹1 of earnings. High P/E can mean growth expectations are already priced in.",
                 formula: "P/E Ratio = Share Price / Earnings Per Share",
-                icon: "tag", iconBg: pinkBg
+                icon: "tag", iconBg: bg
             ),
-            "Price-to-Book": (
+            "Price-to-Book": IndicatorDefinition(
                 definition: "Compares a company's market value to its book value.",
                 formula: "P/B Ratio = Market Price per Share / Book Value per Share",
-                icon: "book.closed", iconBg: pinkBg
+                icon: "book.closed", iconBg: bg
             ),
-            "EV/EBITDA": (
+            "EV/EBITDA": IndicatorDefinition(
                 definition: "Compares a company's Enterprise Value to its Earnings Before Interest, Taxes, Depreciation, and Amortization.",
                 formula: "EV/EBITDA = Enterprise Value / EBITDA",
-                icon: "building.columns", iconBg: pinkBg
+                icon: "building.columns", iconBg: bg
             ),
-            "Price-to-Sales": (
+            "Price-to-Sales": IndicatorDefinition(
                 definition: "Compares a company's stock price to its revenues.",
                 formula: "P/S Ratio = Market Capitalization / Total Sales",
-                icon: "cart", iconBg: pinkBg
+                icon: "cart", iconBg: bg
             ),
-            "PEG Ratio": (
+            "PEG Ratio": IndicatorDefinition(
                 definition: "A stock's price-to-earnings ratio divided by the growth rate of its earnings.",
                 formula: "PEG Ratio = (P/E Ratio) / Earnings Growth Rate",
-                icon: "chart.bar.xaxis", iconBg: pinkBg
+                icon: "chart.bar.xaxis", iconBg: bg
             )
         ]
     }
