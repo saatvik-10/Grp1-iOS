@@ -1,5 +1,7 @@
 // swiftlint:disable file_length
 
+import UIKit
+
 // MARK: - Setup Methods
 
 extension news2ViewController {
@@ -109,9 +111,9 @@ extension news2ViewController {
     }
 }
 
-// MARK: - UICollectionViewDataSource
+// MARK: - UICollectionViewDataSource & Delegate
 
-extension news2ViewController: UICollectionViewDataSource {
+extension news2ViewController: UICollectionViewDataSource, UICollectionViewDelegate {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 2
     }

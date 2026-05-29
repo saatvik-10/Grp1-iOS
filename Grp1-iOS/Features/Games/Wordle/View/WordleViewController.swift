@@ -7,8 +7,8 @@ class WordleViewController: UIViewController {
     @IBOutlet weak var profitPoints: UIProgressView!
     @IBOutlet weak var keyboardStack: UIStackView!
     @IBOutlet weak var gridContainer: UIStackView!
-    private var tileGrid: [[LetterTileView]] = []
-    private var keyStates: [Character: LetterTileView.State] = [:]
+    var tileGrid: [[LetterTileView]] = []
+    var keyStates: [Character: LetterTileView.State] = [:]
     private var isGameOver = false
     private var hints: [String] = [
         "It appears on a company's balance sheet and includes things like cash or investments.",
@@ -18,19 +18,18 @@ class WordleViewController: UIViewController {
     private var revealedLetters: [Int: Character] = [:]
     private var currentHintIndex = 0
     private var revealUsed = false
-    private var progressScore: Float = 0.0
+    var progressScore: Float = 0.0
     private var wordLength: Int {
         engine.revealedAnswer.count
     }
 
-    private var currentGuess = ""
-    private let engine = WordleEngine(answer: "asset")
+    var currentGuess = ""
 
         private lazy var currentWordItem: WordleItem = {
             let unplayed = WordleData.items.filter { !WordHistoryManager.shared.hasPlayedWordleWord($0.word) }
             return unplayed.randomElement() ?? WordleData.items.randomElement() ?? WordleItem(word: "", hints: [], definition: "")
         }()
-        private lazy var engine = WordleEngine(answer: currentWordItem.word.lowercased())
+        lazy var engine = WordleEngine(answer: currentWordItem.word.lowercased())
 
         override func viewDidLoad() {
             super.viewDidLoad()
@@ -49,7 +48,7 @@ class WordleViewController: UIViewController {
                 UIColor.systemTeal.withAlphaComponent(0.2).cgColor
             ]
         gradient.frame = view.bounds
-        return g
+        return gradient
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -254,7 +253,7 @@ class WordleViewController: UIViewController {
         WordHistoryManager.shared.markWordleWordPlayed(currentWordItem.word)
 
         self.presentWinSheet()
-        DailyGameManager.shared.markGamePlayed(.Wordle)
+        DailyGameManager.shared.markGamePlayed(.wordle)
     }
 
     private func presentWinSheet() {

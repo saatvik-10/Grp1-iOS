@@ -8,37 +8,37 @@ final class CrosswordViewController: UIViewController,
     @IBOutlet weak var gridCollectionView: UICollectionView!
     @IBOutlet weak var questionLabel: UILabel!
     @IBOutlet weak var keyboardStack: UIStackView!
-    private var didSetupRing = false
+    var didSetupRing = false
 
-    private var cells: [CrosswordCell] = []
-    private var didLoadOnce = false
-    private var words: [CrosswordWord] = []
-    private var countdownTimer: Timer?
-    private var remainingSeconds = 120
-    private let totalSeconds = 120
+    var cells: [CrosswordCell] = []
+    var didLoadOnce = false
+    var words: [CrosswordWord] = []
+    var countdownTimer: Timer?
+    var remainingSeconds = 120
+    let totalSeconds = 120
 
-    private let gameState = CrosswordGameState()
+    let gameState = CrosswordGameState()
 
-    private let ringLayer = CAShapeLayer()
-    private let ringBackgroundLayer = CAShapeLayer()
+    let ringLayer = CAShapeLayer()
+    let ringBackgroundLayer = CAShapeLayer()
 
-    private let lightHaptic = UIImpactFeedbackGenerator(style: .light)
+    let lightHaptic = UIImpactFeedbackGenerator(style: .light)
 
-    private let totalCols = 9
-    private let totalRows = 9
+    let totalCols = 9
+    let totalRows = 9
 
-    private var minX = 0
-    private var minY = 0
-    private var maxX = 0
-    private var maxY = 0
-    private var progressScore: Float = 0.0
-    private var rewardedWords: Set<Int> = []
+    var minX = 0
+    var minY = 0
+    var maxX = 0
+    var maxY = 0
+    var progressScore: Float = 0.0
+    var rewardedWords: Set<Int> = []
 
-    private var allPuzzles: [([String], [String: String])] = []
-    private var currentPuzzleIndex = 0
+    var allPuzzles: [([String], [String: String])] = []
+    var currentPuzzleIndex = 0
 
-    private var isReadOnly = false
-    private var loadingOverlay: UIView?
+    var isReadOnly = false
+    var loadingOverlay: UIView?
 
     // MARK: - Lifecycle
 

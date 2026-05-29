@@ -241,50 +241,12 @@ class PuzzleGenerator {
 
             results.append(Result1(companyId: companyId, returnPercent: retPct, explanation: ""))
         }
-<<<<<<< HEAD
-        
-        // ── Step 5: Generate explanation ──────────────────────────
-        var bestExplanation = explanationTemplates.randomElement() ?? "Strong fundamentals across the board."
-        
-        #if canImport(FoundationModels)
-        if SystemLanguageModel.default.isAvailable, let bData = bestCompanyData {
-            if let aiExpl = await generateExplanationWithAI(
-                companyName: bestCompanyName, sector: sector, returnPct: bestCompanyReturn,
-                visibleNames: selectedVisibleNames, twistName: twistName, data: bData
-            ) {
-                bestExplanation = aiExpl
-            }
-        }
-        #endif
-        
-        var finalResults: [Result1] = []
-        for r in results {
-            if r.companyId == bestCompanyId {
-                finalResults.append(Result1(
-                    companyId: r.companyId, returnPercent: r.returnPercent,
-                    explanation: bestExplanation.replacingOccurrences(of: "\n", with: " ").trimmingCharacters(in: .whitespacesAndNewlines)
-                ))
-            } else {
-                finalResults.append(Result1(
-                    companyId: r.companyId, returnPercent: r.returnPercent,
-                    explanation: "Did not perform optimally compared to sector peers."
-                ))
-            }
-        }
-        
-        let puzzle = DailyPuzzle(
-            sector: sector, companies: companies.shuffled(),
-            visibleIndicators: visibleIndicators,
-            twistIndicators: twistIndicators,
-            results: finalResults
-=======
 
         return CompanyResults(
             companies: companies, visibleIndicators: visibleIndicators,
             twistIndicators: twistIndicators, results: results,
             bestCompanyId: bestCompanyId, bestCompanyReturn: bestCompanyReturn,
             bestCompanyData: bestCompanyData, bestCompanyName: bestCompanyName
->>>>>>> 21a9307f7428d267491398cd043a445447339b54
         )
     }
 

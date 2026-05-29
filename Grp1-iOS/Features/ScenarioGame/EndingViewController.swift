@@ -60,10 +60,6 @@ class EndingViewController: UIViewController {
         setupScrollView()
         buildUI()
     }
-}
-
-// MARK: - Data Models
-extension EndingViewController {
     let kahnemanEndingQuotes: [KahnemanQuote] = [
         KahnemanQuote(
             text: "The goal of investing is not to avoid risk, but to understand it well enough to take the right one.",
@@ -81,7 +77,7 @@ extension EndingViewController {
             endingType: .failure
         ),
         KahnemanQuote(
-            text: "What investors see is all there is \u2014 past prices anchor expectations, even when the future has already changed.",
+            text: "What investors see is all there is \u{2014} past prices anchor expectations, even when the future has already changed.",
             author: "Daniel Kahneman",
             endingType: .criticalFailure
         )
@@ -101,7 +97,7 @@ extension EndingViewController {
             title: "Sunk Cost Fallacy",
             description: "Past investments influenced future decisions. "
                 + "Additional capital was committed to justify earlier losses.\n\n"
-                + "Lesson: Markets don\u2019t care what you already invested.",
+                + "Lesson: Markets don\u{2019}t care what you already invested.",
             iconName: "arrow.triangle.2.circlepath"
         ),
         .overconfidence: BiasDefine(
@@ -109,7 +105,7 @@ extension EndingViewController {
             title: "Overconfidence",
             description: "Strong narratives increased conviction. "
                 + "Confidence exceeded the accuracy of available information.\n\n"
-                + "Lesson: Confidence should follow evidence \u2014 not stories.",
+                + "Lesson: Confidence should follow evidence \u{2014} not stories.",
             iconName: "brain.head.profile"
         ),
         .statusQuo: BiasDefine(
@@ -125,7 +121,7 @@ extension EndingViewController {
             title: "Anchoring",
             description: "Early price levels anchored expectations. "
                 + "New information was underweighted.\n\n"
-                + "Lesson: Yesterday\u2019s price is irrelevant.",
+                + "Lesson: Yesterday\u{2019}s price is irrelevant.",
             iconName: "paperclip"
         )
     ]
@@ -230,18 +226,18 @@ extension EndingViewController {
         card.layer.cornerCurve = .continuous
         card.clipsToBounds = true
 
-        let (bgColor, iconColor, iconName, titleText) = bannerTheme()
-        card.backgroundColor = bgColor
+        let theme = bannerTheme()
+        card.backgroundColor = theme.bgColor
 
-        let iconBox = makeIconBox(iconName: iconName, iconColor: iconColor)
-        let badgeLabel = makeBadgeLabel(iconColor: iconColor)
+        let iconBox = makeIconBox(iconName: theme.iconName, iconColor: theme.iconColor)
+        let badgeLabel = makeBadgeLabel(iconColor: theme.iconColor)
         let badgeRow = UIStackView(arrangedSubviews: [iconBox, badgeLabel])
         badgeRow.axis = .horizontal
         badgeRow.spacing = 8
         badgeRow.alignment = .center
 
         let title = UILabel()
-        title.text = titleText
+        title.text = theme.titleText
         title.font = UIFont.systemFont(ofSize: 22, weight: .bold)
         title.textColor = .white
         title.numberOfLines = 0

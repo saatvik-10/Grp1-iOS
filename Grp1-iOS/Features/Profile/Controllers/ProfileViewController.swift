@@ -215,40 +215,63 @@ class ProfileViewController: UIViewController {
             profileLevel.text = "@\(profile.username)"
             profileLevel.textColor = .secondaryLabel
 
-            if let urlString = profile.profileImageUrl,
-               let url = URL(string: urlString) {
-                URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
-                    guard let data = data, let image = UIImage(data: data) else {
-                        DispatchQueue.main.async {
-                            if let fallback = UIImage(named: "profile") {
-                                self?.profileBtn.setImage(nil, for: .normal)
-                                self?.profileBtn.setBackgroundImage(fallback, for: .normal)
-                            }
-                        }
-                        return
-                    }
-                    DispatchQueue.main.async {
-                        self?.profileBtn.setImage(nil, for: .normal)
-                        self?.profileBtn.setBackgroundImage(image, for: .normal)
-//                        self?.applyProfileBackgroundImage(image)
-                    }
-                }.resume()
-            } else {
-                if let fallback = UIImage(named: "profile") {
-                    profileBtn.setImage(nil, for: .normal)
-                    profileBtn.setBackgroundImage(fallback, for: .normal)
-                }
-            }
+            loadProfileButtonImage(from: profile.profileImageUrl)
         } else {
             let user = User.current
             profileName.text       = user.name
             profileLevel.text      = "@" + (user.email.components(separatedBy: "@").first ?? "username")
             profileLevel.textColor = .secondaryLabel
 
-            if let img = UIImage(named: user.image) {
-                profileBtn.setImage(nil, for: .normal)
-                profileBtn.setBackgroundImage(img, for: .normal)
+            setProfileButtonImage(nil)
+        }
+    }
+
+    private func loadProfileButtonImage(from urlString: String?) {
+        guard let url = profileImageURL(from: urlString) else {
+            setProfileButtonImage(nil)
+            return
+        }
+
+        URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
+            guard let data, let image = UIImage(data: data) else {
+                DispatchQueue.main.async {
+                    self?.setProfileButtonImage(nil)
+                }
+                return
             }
+
+            DispatchQueue.main.async {
+                self?.setProfileButtonImage(image)
+//                self?.applyProfileBackgroundImage(image)
+            }
+        }.resume()
+    }
+
+    private func profileImageURL(from value: String?) -> URL? {
+        guard let value, !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return nil
+        }
+
+        if let absoluteURL = URL(string: value),
+           absoluteURL.scheme != nil {
+            return absoluteURL
+        }
+
+        let separator = value.hasPrefix("/") ? "" : "/"
+        return URL(string: APIService.shared.baseURL + separator + value)
+    }
+
+    private func setProfileButtonImage(_ image: UIImage?) {
+        if let image {
+            profileBtn.setImage(nil, for: .normal)
+            profileBtn.setBackgroundImage(image, for: .normal)
+        } else {
+            profileBtn.setBackgroundImage(nil, for: .normal)
+            profileBtn.setImage(
+                UIImage(systemName: "person.fill")?
+                    .withConfiguration(UIImage.SymbolConfiguration(pointSize: 34, weight: .regular)),
+                for: .normal
+            )
         }
     }
 

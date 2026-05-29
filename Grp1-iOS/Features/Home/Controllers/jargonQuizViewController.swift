@@ -189,7 +189,7 @@ class jargonQuizViewController: UIViewController {
                     button.layer.shadowRadius = 12
                 }
             )
-        }
+        })
     }
 
     private func animateWrong(button: UIButton) {
@@ -210,7 +210,7 @@ class jargonQuizViewController: UIViewController {
                 options: [.curveEaseOut],
                 animations: { self.quizView.transform = .identity }
             )
-        }
+        })
     }
 
     private func animateQuizError() {
@@ -227,7 +227,7 @@ class jargonQuizViewController: UIViewController {
                     self.quizView.alpha = 1
                 }
             )
-        }
+        })
     }
 
     // MARK: - Glass Effect

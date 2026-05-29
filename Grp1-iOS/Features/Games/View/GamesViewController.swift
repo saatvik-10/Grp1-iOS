@@ -28,12 +28,6 @@ final class GamesViewController: UIViewController {
 
     private let categories: [GameCategory] = [
         .init(
-            title: "Scenario",
-            icon: UIImage(named: "SceanrioImaghe")!,
-            colors: [UIColor.white.withAlphaComponent(0.5), UIColor.systemGray3.withAlphaComponent(0.7)],
-            description: "Navigate real-world business situations and make critical decisions."
-        ),
-        .init(
             title: "Wordle",
             icon: UIImage(named: "WordleImage")!,
             colors: [UIColor.white.withAlphaComponent(0.5), UIColor.systemGray3.withAlphaComponent(0.7)],
@@ -180,11 +174,8 @@ extension GamesViewController: UICollectionViewDelegate {
                 showAlreadyPlayedAlert(for: "Crossword")
             }
 
-        case "Scenario":
-            performSegue(withIdentifier: "scenario", sender: nil)
-
         case "Evaluate the Company":
-            if DailyGameManager.shared.canPlay(.Evaluate) {
+            if DailyGameManager.shared.canPlay(.evaluate) {
                 performSegue(withIdentifier: "Evaluate", sender: nil)
             } else {
                 showAlreadyPlayedAlert(for: "Evaluate the Company")

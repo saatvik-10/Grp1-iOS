@@ -7,7 +7,7 @@ class news2ViewController: UIViewController {
     @IBOutlet weak var headlineLabel: UILabel!
     @IBOutlet weak var floatingButton: UIButton!
     @IBOutlet weak var collectionView: UICollectionView!
-    private var didSetupJargons = false
+    var didSetupJargons = false
 
     var selectedJargon: String?
     @IBOutlet weak var optionsButton: UIBarButtonItem!

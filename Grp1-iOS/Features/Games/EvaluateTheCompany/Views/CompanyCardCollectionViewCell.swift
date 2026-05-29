@@ -123,7 +123,7 @@ class CompanyCardCollectionViewCell: UICollectionViewCell {
     private func styleBack() {
         backView.backgroundColor     = UIColor(red: 0.09, green: 0.09, blue: 0.09, alpha: 1)
         dividerViewBack?.backgroundColor = UIColor(white: 0.22, alpha: 1)
-        
+
         if let stack = indicatorStackView {
             // Deactivate fixed width constraint if it exists
             if let widthConstraint = stack.constraints.first(where: { $0.firstAttribute == .width }) {
@@ -162,8 +162,7 @@ class CompanyCardCollectionViewCell: UICollectionViewCell {
         let mint  = UIColor(red: 0.75, green: 0.95, blue: 0.82, alpha: 1)
 
         let labels = [indicator1Label, indicator2Label, indicator3Label, indicator4Label]
-<<<<<<< HEAD
- 
+
         // Remove old dynamically added progress bars
         indicatorStackView?.arrangedSubviews
             .filter { $0.tag == 8888 }
@@ -171,22 +170,13 @@ class CompanyCardCollectionViewCell: UICollectionViewCell {
         indicatorStackView?.subviews
             .filter { $0.tag == 8888 }
             .forEach { $0.removeFromSuperview() }
-            
+
         // Restore original stack view configuration and spacing
         indicatorStackView?.axis = .vertical
-        indicatorStackView?.spacing = 12 // Original spacing
+        indicatorStackView?.spacing = 12
         indicatorStackView?.distribution = .equalSpacing
 
-        for (i, label) in labels.enumerated() {
-=======
-
-        // Remove old bars
-        indicatorStackView?.subviews
-            .filter { $0.tag == 8888 }
-            .forEach { $0.removeFromSuperview() }
-
         for (labelIdx, label) in labels.enumerated() {
->>>>>>> 21a9307f7428d267491398cd043a445447339b54
             guard let label = label else { continue }
 
             if indicators.indices.contains(labelIdx) {
@@ -212,15 +202,11 @@ class CompanyCardCollectionViewCell: UICollectionViewCell {
                 ))
                 label.attributedText = attributed
                 label.numberOfLines  = 1
-<<<<<<< HEAD
-                
+
                 // Add auto-scaling to prevent clipping or truncation of names/values
                 label.adjustsFontSizeToFitWidth = true
                 label.minimumScaleFactor = 0.85
- 
-=======
 
->>>>>>> 21a9307f7428d267491398cd043a445447339b54
                 // Add progress bar as a sibling inside the stack
                 let raw     = value
                     .replacingOccurrences(of: "%", with: "")

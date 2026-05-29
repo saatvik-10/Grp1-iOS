@@ -53,9 +53,9 @@ final class APIService {
     // MARK: - JSON Request (for non-image endpoints)
     // ─────────────────────────────────────────────
 
-    private struct EmptyBody: Encodable {}
+    struct EmptyBody: Encodable {}
 
-    private func request<Response: Decodable, Body: Encodable>(
+    func request<Response: Decodable, Body: Encodable>(
         method: APIMethod,
         path: String,
         token: String? = nil,
@@ -87,7 +87,7 @@ final class APIService {
         }.resume()
     }
 
-    private func requestStatus<Body: Encodable>(
+    func requestStatus<Body: Encodable>(
         method: APIMethod,
         path: String,
         token: String? = nil,
@@ -138,7 +138,7 @@ final class APIService {
     // MARK: - Multipart Form-Data Request
     // ─────────────────────────────────────────────
 
-    private func multipartRequest<Response: Decodable>(
+    func multipartRequest<Response: Decodable>(
         method: APIMethod,
         path: String,
         token: String? = nil,
