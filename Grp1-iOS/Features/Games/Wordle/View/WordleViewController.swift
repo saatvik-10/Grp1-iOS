@@ -26,13 +26,30 @@ class WordleViewController: UIViewController {
     private var currentGuess = ""
     private let engine = WordleEngine(answer: "asset")
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        hintLabel.text = hints[0]
-        hintLabel.alpha = 1
-        hintLabel.transform = CGAffineTransform(translationX: 0, y: 20)
-        buildGrid()
-        setupKeyboard()
+        private lazy var currentWordItem: WordleItem = {
+            let unplayed = WordleData.items.filter { !WordHistoryManager.shared.hasPlayedWordleWord($0.word) }
+            return unplayed.randomElement() ?? WordleData.items.randomElement()!
+        }()
+        private lazy var engine = WordleEngine(answer: currentWordItem.word.lowercased())
+
+        override func viewDidLoad() {
+            super.viewDidLoad()
+            hints = currentWordItem.hints
+            hintLabel.text = hints[0]
+            hintLabel.alpha = 1
+            hintLabel.transform = CGAffineTransform(translationX: 0, y: 20)
+            buildGrid()
+            setupKeyboard()
+//            view.layer.insertSublayer(makeGradient(), at: 0)
+        }
+    private func makeGradient() -> CAGradientLayer {
+        let g = CAGradientLayer()
+        g.colors = [
+                UIColor.systemBlue.withAlphaComponent(0.2).cgColor,
+                UIColor.systemTeal.withAlphaComponent(0.2).cgColor
+            ]
+        g.frame = view.bounds
+        return g
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -233,6 +250,8 @@ class WordleViewController: UIViewController {
 
     private func endGame(won: Bool) {
         isGameOver = true
+        
+        WordHistoryManager.shared.markWordleWordPlayed(currentWordItem.word)
 
         self.presentWinSheet()
         DailyGameManager.shared.markGamePlayed(.Wordle)
@@ -254,13 +273,7 @@ class WordleViewController: UIViewController {
 // MARK: - Utilities
 extension WordleViewController {
     private func getDefinitionForWord() -> String {
-        return """
-        An asset is anything of value owned or controlled by an individual, company, or institution.
-        Assets can generate income, be sold for cash, or provide long-term economic benefits.
-        They include physical items like property and equipment, as well as non-physical items such as stocks, patents, and goodwill.
-        In finance and accounting, assets are recorded on the balance sheet.
-        Strong assets are key to financial stability and growth.
-        """
+        return currentWordItem.definition
     }
 
     private func showEndAlert(title: String, message: String) {
@@ -282,16 +295,25 @@ extension WordleViewController {
     private func resetGame() {
         isGameOver = false
         currentGuess = ""
-        engine.reset()
-        keyboardStack.isUserInteractionEnabled = true
+        
+        let unplayed = WordleData.items.filter { !WordHistoryManager.shared.hasPlayedWordleWord($0.word) }
+        currentWordItem = unplayed.randomElement() ?? WordleData.items.randomElement()!
+        engine = WordleEngine(answer: currentWordItem.word.lowercased())
+        hints = currentWordItem.hints
+        currentHintIndex = 0
+        hintLabel.text = hints[0]
+        revealUsed = false
+        revealButton.isEnabled = true
+        revealButton.alpha = 1.0
+        revealedPositions.removeAll()
+        revealedLetters.removeAll()
 
+        keyboardStack.isUserInteractionEnabled = true
         keyStates.removeAll()
 
-        for row in tileGrid {
-            for tile in row {
-                tile.reset()
-            }
-        }
+        gridContainer.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        tileGrid.removeAll()
+        buildGrid()
 
         resetKeyboardColors()
     }

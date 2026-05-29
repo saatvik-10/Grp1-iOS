@@ -12,14 +12,11 @@ class EndingViewController: UIViewController {
     @IBOutlet weak var contentView: UIView!
 
     @IBOutlet weak var biasScoreView: UIView!
-
     @IBOutlet weak var capitalCardView: UIView!
     @IBOutlet weak var capitalLabel: UILabel!
-
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var biasCardStackView: UIStackView!
     @IBOutlet weak var biasLabel: UILabel!
-
     @IBOutlet weak var authorLabel: UILabel!
     @IBOutlet weak var quoteLabel: UILabel!
     @IBOutlet weak var quoteCardView: UIView!
@@ -188,16 +185,55 @@ extension EndingViewController {
             view.backgroundColor = UIColor(red: 0.98, green: 0.56, blue: 0.16, alpha: 1.0)
 
         case .criticalFailure:
-            titleLabel.text = "Systemic Collapse"
-            accentColor = UIColor(red: 0.85, green: 0.15, blue: 0.18, alpha: 1.0)
-            view.backgroundColor =  UIColor(red: 0.85, green: 0.15, blue: 0.18, alpha: 1.0)
-            titleLabel.textColor = .white
+            bgColor = UIColor(red: 0.4, green: 0.08, blue: 0.08, alpha: 1)
+            iconColor = UIColor(red: 0.98, green: 0.4, blue: 0.4, alpha: 1)
+            iconName = "xmark.octagon.fill"
+            titleText = "Systemic Collapse"
+        case .none:
+            break
         }
-
+        card.backgroundColor = bgColor
+        
+        let iconBox = UIView()
+        iconBox.backgroundColor = UIColor(white: 1.0, alpha: 0.15)
+        iconBox.layer.cornerRadius = 10
+        iconBox.translatesAutoresizingMaskIntoConstraints = false
+        iconBox.widthAnchor.constraint(equalToConstant: 36).isActive  = true
+        iconBox.heightAnchor.constraint(equalToConstant: 36).isActive = true
+ 
+        let iconImg = UIImageView(image: UIImage(systemName: iconName))
+        iconImg.tintColor    = iconColor
+        iconImg.contentMode  = .scaleAspectFit
+        iconImg.translatesAutoresizingMaskIntoConstraints = false
+        iconBox.addSubview(iconImg)
+        NSLayoutConstraint.activate([
+            iconImg.centerXAnchor.constraint(equalTo: iconBox.centerXAnchor),
+            iconImg.centerYAnchor.constraint(equalTo: iconBox.centerYAnchor),
+            iconImg.widthAnchor.constraint(equalToConstant: 16),
+            iconImg.heightAnchor.constraint(equalToConstant: 16)
+        ])
+ 
+        let badgeLabel = UILabel()
+        badgeLabel.text      = "RESULT"
+        badgeLabel.font      = UIFont.systemFont(ofSize: 9, weight: .semibold)
+        badgeLabel.textColor = iconColor
+ 
+        let badgeRow = UIStackView(arrangedSubviews: [iconBox, badgeLabel])
+        badgeRow.axis      = .horizontal
+        badgeRow.spacing   = 8
+        badgeRow.alignment = .center
+ 
+        let title = UILabel()
+        title.text          = titleText
+        title.font          = UIFont.systemFont(ofSize: 22, weight: .bold)
+        title.textColor     = .white
+        title.numberOfLines = 0
+        
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         formatter.locale = Locale(identifier: "en_IN")
         let formattedCapital = formatter.string(from: NSNumber(value: finalCapital)) ?? "\(finalCapital)"
+<<<<<<< HEAD
         capitalLabel.text = "Final Capital: \u{20B9}\(formattedCapital)"
         scoreValueLabel.text = "\(biasScore)"
     }
@@ -342,74 +378,131 @@ extension EndingViewController {
     }
 
     private func makeBiasCard(define: BiasDefine) -> UIView {
-        let card = UIView()
-        card.translatesAutoresizingMaskIntoConstraints = false
-        applyCardStyle(card, cornerRadius: 24, backgroundColor: UIColor(red: 1.0, green: 0.97, blue: 0.94, alpha: 1.0))
-
-        let iconContainer = UIView()
-        iconContainer.translatesAutoresizingMaskIntoConstraints = false
-        iconContainer.backgroundColor = UIColor(red: 1.0, green: 0.94, blue: 0.86, alpha: 1.0)
-        iconContainer.layer.cornerRadius = 16
-
-        let iconView = UIImageView(image: UIImage(systemName: define.iconName))
-        iconView.translatesAutoresizingMaskIntoConstraints = false
-        iconView.tintColor = accentColor
-        iconView.contentMode = .scaleAspectFit
-
-        let title = UILabel()
-        title.translatesAutoresizingMaskIntoConstraints = false
-        title.text = define.title
-        title.font = UIFont.systemFont(ofSize: 20, weight: .bold)
-        title.textColor = .label
-        title.numberOfLines = 0
-
-        let body = UILabel()
-        body.translatesAutoresizingMaskIntoConstraints = false
-        body.text = define.description.replacingOccurrences(of: "\n", with: " ")
-        body.font = UIFont.systemFont(ofSize: 16, weight: .regular)
-        body.textColor = UIColor(white: 0.35, alpha: 1.0)
-        body.numberOfLines = 0
-
-        let accent = UIView()
-        accent.translatesAutoresizingMaskIntoConstraints = false
-        accent.backgroundColor = accentColor
-        accent.layer.cornerRadius = 2
-
-        card.addSubview(iconContainer)
-        iconContainer.addSubview(iconView)
-        card.addSubview(title)
-        card.addSubview(body)
-        card.addSubview(accent)
-
+=======
+ 
+        let msg = UILabel()
+        msg.text = "You finished the scenario with ₹\(formattedCapital) in capital."
+        msg.font          = UIFont.systemFont(ofSize: 13, weight: .regular)
+        msg.textColor     = UIColor.white.withAlphaComponent(0.65)
+        msg.numberOfLines = 0
+ 
+        let vstack = UIStackView(arrangedSubviews: [badgeRow, title, msg])
+        vstack.axis    = .vertical
+        vstack.spacing = 8
+        vstack.translatesAutoresizingMaskIntoConstraints = false
+        card.addSubview(vstack)
+ 
         NSLayoutConstraint.activate([
-            iconContainer.topAnchor.constraint(equalTo: card.topAnchor, constant: 20),
-            iconContainer.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 20),
-            iconContainer.widthAnchor.constraint(equalToConstant: 52),
-            iconContainer.heightAnchor.constraint(equalToConstant: 52),
-
-            iconView.centerXAnchor.constraint(equalTo: iconContainer.centerXAnchor),
-            iconView.centerYAnchor.constraint(equalTo: iconContainer.centerYAnchor),
-            iconView.widthAnchor.constraint(equalToConstant: 24),
-            iconView.heightAnchor.constraint(equalToConstant: 24),
-
-            title.topAnchor.constraint(equalTo: card.topAnchor, constant: 24),
-            title.leadingAnchor.constraint(equalTo: iconContainer.trailingAnchor, constant: 16),
-            title.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -20),
-
-            body.topAnchor.constraint(equalTo: title.bottomAnchor, constant: 12),
-            body.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 20),
-            body.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -20),
-
-            accent.topAnchor.constraint(equalTo: body.bottomAnchor, constant: 16),
-            accent.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 20),
-            accent.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -20),
-            accent.heightAnchor.constraint(equalToConstant: 4),
-            accent.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -20)
+            vstack.topAnchor.constraint(equalTo: card.topAnchor, constant: 20),
+            vstack.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 20),
+            vstack.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -20),
+            vstack.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -20)
         ])
-
+        return card
+    }
+    
+    private func makePerformanceCard() -> UIView {
+>>>>>>> 661247719a1460aa7bc648ef07b30326d4379025
+        let card = UIView()
+        card.backgroundColor    = C.card
+        card.layer.cornerRadius = 16
+        card.layer.cornerCurve  = .continuous
+        card.layer.borderWidth  = 1.5
+        card.layer.borderColor  = (isSuccess ? C.green : C.red).withAlphaComponent(0.4).cgColor
+ 
+        // Bias Score
+        let scoreLabel = UILabel()
+        scoreLabel.text      = "Bias Score"
+        scoreLabel.font      = UIFont.systemFont(ofSize: 16, weight: .semibold)
+        scoreLabel.textColor = C.text
+ 
+        let badgeBg  = UIView()
+        badgeBg.backgroundColor    = isSuccess ? C.greenLight : C.redLight
+        badgeBg.layer.cornerRadius = 7
+ 
+        let badgeLbl = UILabel()
+        badgeLbl.text      = isSuccess ? "Rational" : "Biased"
+        badgeLbl.font      = UIFont.systemFont(ofSize: 10, weight: .semibold)
+        badgeLbl.textColor = isSuccess ? C.green : C.red
+        badgeLbl.translatesAutoresizingMaskIntoConstraints = false
+ 
+        let badgeIcon = UIImageView(image: UIImage(systemName: isSuccess ? "brain" : "exclamationmark.triangle.fill"))
+        badgeIcon.tintColor    = isSuccess ? C.green : C.red
+        badgeIcon.contentMode  = .scaleAspectFit
+        badgeIcon.translatesAutoresizingMaskIntoConstraints = false
+        badgeIcon.widthAnchor.constraint(equalToConstant: 10).isActive  = true
+        badgeIcon.heightAnchor.constraint(equalToConstant: 10).isActive = true
+ 
+        let badgeRow = UIStackView(arrangedSubviews: [badgeIcon, badgeLbl])
+        badgeRow.axis      = .horizontal
+        badgeRow.spacing   = 4
+        badgeRow.alignment = .center
+        badgeRow.translatesAutoresizingMaskIntoConstraints = false
+        badgeBg.addSubview(badgeRow)
+        NSLayoutConstraint.activate([
+            badgeRow.topAnchor.constraint(equalTo: badgeBg.topAnchor, constant: 4),
+            badgeRow.bottomAnchor.constraint(equalTo: badgeBg.bottomAnchor, constant: -4),
+            badgeRow.leadingAnchor.constraint(equalTo: badgeBg.leadingAnchor, constant: 8),
+            badgeRow.trailingAnchor.constraint(equalTo: badgeBg.trailingAnchor, constant: -8)
+        ])
+ 
+        let topRow = UIStackView(arrangedSubviews: [scoreLabel, badgeBg])
+        topRow.axis      = .horizontal
+        topRow.spacing   = 8
+        topRow.alignment = .center
+ 
+        let descLabel = UILabel()
+        descLabel.text      = "Your overall cognitive bias score. Lower means more rational decisions."
+        descLabel.font      = UIFont.systemFont(ofSize: 12, weight: .regular)
+        descLabel.textColor = C.subtext
+        descLabel.numberOfLines = 0
+ 
+        let divider = UIView()
+        divider.backgroundColor = C.separator
+        divider.translatesAutoresizingMaskIntoConstraints = false
+        divider.widthAnchor.constraint(equalToConstant: 1).isActive = true
+ 
+        // Score number
+        let rankNum = UILabel()
+        rankNum.text          = "\(biasScore)"
+        rankNum.font          = UIFont.systemFont(ofSize: 28, weight: .bold)
+        rankNum.textColor     = isSuccess ? C.green : C.red
+        rankNum.textAlignment = .center
+ 
+        let rankSub = UILabel()
+        rankSub.text          = "Pts"
+        rankSub.font          = UIFont.systemFont(ofSize: 11, weight: .regular)
+        rankSub.textColor     = C.subtext
+        rankSub.textAlignment = .center
+ 
+        let rightStack = UIStackView(arrangedSubviews: [rankNum, rankSub])
+        rightStack.axis      = .vertical
+        rightStack.spacing   = 0
+        rightStack.alignment = .center
+        rightStack.translatesAutoresizingMaskIntoConstraints = false
+        rightStack.widthAnchor.constraint(equalToConstant: 64).isActive = true
+ 
+        let leftStack = UIStackView(arrangedSubviews: [topRow, descLabel])
+        leftStack.axis    = .vertical
+        leftStack.spacing = 3
+ 
+        let hstack = UIStackView(arrangedSubviews: [leftStack, divider, rightStack])
+        hstack.axis      = .horizontal
+        hstack.spacing   = 14
+        hstack.alignment = .center
+        hstack.translatesAutoresizingMaskIntoConstraints = false
+        card.addSubview(hstack)
+ 
+        NSLayoutConstraint.activate([
+            hstack.topAnchor.constraint(equalTo: card.topAnchor, constant: 16),
+            hstack.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 16),
+            hstack.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -16),
+            hstack.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -16)
+        ])
         return card
     }
 
+<<<<<<< HEAD
     private func drawBiasScoreRing() {
         let ringInset: CGFloat = 22
         let radius = min(biasScoreView.bounds.width, biasScoreView.bounds.height) / 2 - ringInset
@@ -453,6 +546,186 @@ extension EndingViewController {
 extension EndingViewController {
 
     func navigateToHome() {
+=======
+    private func makeBiasesStack() -> UIView {
+        let container = UIStackView()
+        container.axis    = .vertical
+        container.spacing = 10
+ 
+        let sortedBiases = biasExposure
+            .sorted { abs($0.value) > abs($1.value) }
+            .prefix(3)
+        
+        guard !sortedBiases.isEmpty else {
+            let empty = UILabel()
+            empty.text = "No major biases detected."
+            empty.font = UIFont.systemFont(ofSize: 13)
+            empty.textColor = C.subtext
+            container.addArrangedSubview(empty)
+            return container
+        }
+ 
+        for (bias, _) in sortedBiases {
+            guard let define = biasDefinitions[bias] else { continue }
+            let isDominant = (bias == dominantBias)
+            container.addArrangedSubview(makeBiasRow(define: define, isDominant: isDominant))
+        }
+ 
+        return container
+    }
+    
+    private func makeBiasRow(define: BiasDefine, isDominant: Bool) -> UIView {
+        let card = UIView()
+        card.backgroundColor    = C.card
+        card.layer.cornerRadius = 16
+        card.layer.cornerCurve  = .continuous
+        card.layer.borderWidth  = isDominant ? 1.5 : 0.5
+        card.layer.borderColor  = isDominant ? C.orange.withAlphaComponent(0.6).cgColor : C.border.cgColor
+ 
+        let iconBox = UIView()
+        iconBox.backgroundColor    = isDominant ? UIColor(red: 0.99, green: 0.95, blue: 0.9, alpha: 1) : UIColor(red: 0.96, green: 0.96, blue: 0.95, alpha: 1)
+        iconBox.layer.cornerRadius = 10
+        iconBox.translatesAutoresizingMaskIntoConstraints = false
+        iconBox.widthAnchor.constraint(equalToConstant: 36).isActive  = true
+        iconBox.heightAnchor.constraint(equalToConstant: 36).isActive = true
+ 
+        let img = UIImageView(image: UIImage(systemName: define.iconName))
+        img.tintColor   = isDominant ? C.orange : UIColor(red: 0.40, green: 0.40, blue: 0.42, alpha: 1)
+        img.contentMode = .scaleAspectFit
+        img.translatesAutoresizingMaskIntoConstraints = false
+        iconBox.addSubview(img)
+        NSLayoutConstraint.activate([
+            img.centerXAnchor.constraint(equalTo: iconBox.centerXAnchor),
+            img.centerYAnchor.constraint(equalTo: iconBox.centerYAnchor),
+            img.widthAnchor.constraint(equalToConstant: 16),
+            img.heightAnchor.constraint(equalToConstant: 16)
+        ])
+ 
+        let titleLbl = UILabel()
+        titleLbl.text      = define.title
+        titleLbl.font      = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        titleLbl.textColor = C.text
+ 
+        let descLbl = UILabel()
+        descLbl.text          = define.description
+        descLbl.font          = UIFont.systemFont(ofSize: 12, weight: .regular)
+        descLbl.textColor     = UIColor(red: 0.45, green: 0.45, blue: 0.47, alpha: 1)
+        descLbl.numberOfLines = 0
+ 
+        let textStack = UIStackView(arrangedSubviews: [titleLbl, descLbl])
+        textStack.axis    = .vertical
+        textStack.spacing = 3
+ 
+        let hstack = UIStackView(arrangedSubviews: [iconBox, textStack])
+        hstack.axis      = .horizontal
+        hstack.spacing   = 12
+        hstack.alignment = .top
+        hstack.translatesAutoresizingMaskIntoConstraints = false
+        card.addSubview(hstack)
+ 
+        NSLayoutConstraint.activate([
+            hstack.topAnchor.constraint(equalTo: card.topAnchor, constant: 14),
+            hstack.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 14),
+            hstack.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -14),
+            hstack.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -14)
+        ])
+        
+        if isDominant {
+            let badge = UIView()
+            badge.backgroundColor = C.orange
+            badge.layer.cornerRadius = 6
+            badge.translatesAutoresizingMaskIntoConstraints = false
+            let lbl = UILabel()
+            lbl.text = "DOMINANT"
+            lbl.font = UIFont.systemFont(ofSize: 8, weight: .bold)
+            lbl.textColor = .white
+            lbl.translatesAutoresizingMaskIntoConstraints = false
+            badge.addSubview(lbl)
+            NSLayoutConstraint.activate([
+                lbl.topAnchor.constraint(equalTo: badge.topAnchor, constant: 3),
+                lbl.bottomAnchor.constraint(equalTo: badge.bottomAnchor, constant: -3),
+                lbl.leadingAnchor.constraint(equalTo: badge.leadingAnchor, constant: 6),
+                lbl.trailingAnchor.constraint(equalTo: badge.trailingAnchor, constant: -6)
+            ])
+            
+            card.addSubview(badge)
+            NSLayoutConstraint.activate([
+                badge.topAnchor.constraint(equalTo: card.topAnchor, constant: -6),
+                badge.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -12)
+            ])
+        }
+        
+        return card
+    }
+    
+    private func makeQuoteCard() -> UIView {
+        let card = UIView()
+        card.backgroundColor    = C.card
+        card.layer.cornerRadius = 16
+        card.layer.cornerCurve  = .continuous
+        card.layer.borderWidth  = 0.5
+        card.layer.borderColor  = C.border.cgColor
+        
+        guard let ending = endingType,
+              let quote = kahnemanEndingQuotes.first(where: { $0.endingType == ending }) else {
+            return card
+        }
+        
+        let quoteLbl = UILabel()
+        quoteLbl.text = "“\(quote.text)”"
+        quoteLbl.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        quoteLbl.textColor = C.text
+        quoteLbl.numberOfLines = 0
+        quoteLbl.textAlignment = .center
+        
+        let authorLbl = UILabel()
+        authorLbl.text = "— \(quote.author)"
+        authorLbl.font = UIFont.systemFont(ofSize: 12, weight: .regular)
+        authorLbl.textColor = C.subtext
+        authorLbl.textAlignment = .center
+        
+        let stack = UIStackView(arrangedSubviews: [quoteLbl, authorLbl])
+        stack.axis = .vertical
+        stack.spacing = 8
+        stack.alignment = .center
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        card.addSubview(stack)
+        
+        NSLayoutConstraint.activate([
+            stack.topAnchor.constraint(equalTo: card.topAnchor, constant: 20),
+            stack.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 20),
+            stack.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -20),
+            stack.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -20)
+        ])
+        return card
+    }
+
+    private func makeCTAs() -> UIView {
+        let homeBtn = makeButton(title: "Return to Home", bg: C.charcoal, fg: .white)
+        homeBtn.addTarget(self, action: #selector(restartTapped(_:)), for: .touchUpInside)
+ 
+        let stack = UIStackView(arrangedSubviews: [homeBtn])
+        stack.axis    = .vertical
+        stack.spacing = 10
+        return stack
+    }
+    
+    private func makeButton(title: String, bg: UIColor, fg: UIColor) -> UIButton {
+        let b = UIButton(type: .system)
+        b.setTitle(title, for: .normal)
+        b.setTitleColor(fg, for: .normal)
+        b.backgroundColor = bg
+        b.titleLabel?.font = UIFont.systemFont(ofSize: 15, weight: .bold)
+        b.layer.cornerRadius = 14
+        b.layer.cornerCurve  = .continuous
+        b.translatesAutoresizingMaskIntoConstraints = false
+        b.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        return b
+    }
+    
+    // MARK: - Actions
+    @objc @IBAction func restartTapped(_ sender: Any) {
+>>>>>>> 661247719a1460aa7bc648ef07b30326d4379025
         let storyboard = UIStoryboard(name: "HomeMain", bundle: nil)
         if let homeVC = storyboard.instantiateInitialViewController() {
             guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
@@ -460,7 +733,11 @@ extension EndingViewController {
                 return
             }
             window.rootViewController = homeVC
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> 661247719a1460aa7bc648ef07b30326d4379025
             UIView.transition(with: window, duration: 0.3,
                               options: .transitionCrossDissolve,
                               animations: nil)
@@ -468,8 +745,11 @@ extension EndingViewController {
             window.makeKeyAndVisible()
         }
     }
+<<<<<<< HEAD
 
     @IBAction func restartTapped(_ sender: UIButton) {
         navigateToHome()
     }
+=======
+>>>>>>> 661247719a1460aa7bc648ef07b30326d4379025
 }

@@ -297,10 +297,9 @@ extension ThreadDetailViewController {
 
         if let imageUrlStr = thread.imageUrl, let url = URL(string: imageUrlStr) {
             postImageView.isHidden = false
-            URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
-                guard let data = data, let img = UIImage(data: data) else { return }
-                DispatchQueue.main.async { self?.postImageView.image = img }
-            }.resume()
+            let _ = ImageCache.shared.loadImage(from: imageUrlStr) { [weak self] img in
+                if let img = img { self?.postImageView.image = img }
+            }
         } else {
             postImageView.isHidden = true
             descriptionLabel.topAnchor

@@ -61,6 +61,12 @@ class collectionViewCell: UICollectionViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
+        profileImg.image = UIImage(systemName: "person.circle.fill")
+        threadImg.image = nil
+        profileImageTask?.cancel()
+        threadImageTask?.cancel()
+        profileImageTask = nil
+        threadImageTask = nil
         onFollowTapped = nil
         onDeleteTapped = nil
         onUsernameTapped = nil
@@ -72,8 +78,6 @@ class collectionViewCell: UICollectionViewCell {
         isBookmarked = false
         shouldShowFollowAction = true
         isOwnPost = false
-        profileImg.image = nil
-        threadImg.image = nil
         threadImg.isHidden = true
     }
 
