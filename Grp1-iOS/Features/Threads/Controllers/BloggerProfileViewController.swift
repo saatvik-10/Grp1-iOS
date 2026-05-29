@@ -6,16 +6,16 @@
 //
 
 import UIKit
- 
+
 final class BloggerProfileViewController: UIViewController {
- 
+
     // MARK: - Input
     var bloggerUserName: String = ""
     var bloggerUserId: String = ""
     // MARK: - Data
     private var posts: [APIThread] = []
     private var bloggerProfile: APIUserProfileResponse?
- 
+
     // MARK: - UI
     private let collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -26,7 +26,7 @@ final class BloggerProfileViewController: UIViewController {
         layout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
         return UICollectionView(frame: .zero, collectionViewLayout: layout)
     }()
- 
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,14 +36,14 @@ final class BloggerProfileViewController: UIViewController {
         loadPosts()
         setupCollectionView()
     }
- 
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         if let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
             layout.invalidateLayout()
         }
     }
- 
+
     // MARK: - Data
     private func loadProfile() {
         guard let token = UserDefaults.standard.string(forKey: "authToken") else { return }
@@ -56,7 +56,7 @@ final class BloggerProfileViewController: UIViewController {
             }
         }
     }
-    
+
     private func loadPosts() {
         let token = UserDefaults.standard.string(forKey: "authToken")
         APIService.shared.fetchForYouThreads(token: token) { [weak self] result in
@@ -68,7 +68,7 @@ final class BloggerProfileViewController: UIViewController {
             }
         }
     }
- 
+
     // MARK: - CollectionView setup
     private func setupCollectionView() {
         collectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -85,27 +85,27 @@ final class BloggerProfileViewController: UIViewController {
             withReuseIdentifier: "BloggerProfileHeaderView"
         )
         view.addSubview(collectionView)
- 
+
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
 }
- 
+
 // MARK: - UICollectionViewDataSource
 extension BloggerProfileViewController: UICollectionViewDataSource {
- 
+
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         posts.count
     }
- 
+
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-    let cell = collectionView.dequeueReusableCell(
+    guard let cell = collectionView.dequeueReusableCell(
         withReuseIdentifier: "collectionViewCell", for: indexPath
-    ) as! collectionViewCell
+    ) as? collectionViewCell else { return UICollectionViewCell() }
     let post = posts[indexPath.item]
     cell.configure(with: post, isFollowing: false, isOwnPost: false)  // uses APIThread overload
     cell.applyStyle(isCard: true)
@@ -139,44 +139,44 @@ extension BloggerProfileViewController: UICollectionViewDataSource {
     }
     return cell
     }
- 
+
     func collectionView(_ collectionView: UICollectionView,
                         viewForSupplementaryElementOfKind kind: String,
                         at indexPath: IndexPath) -> UICollectionReusableView {
-        let header = collectionView.dequeueReusableSupplementaryView(
+        guard let header = collectionView.dequeueReusableSupplementaryView(
             ofKind: kind,
             withReuseIdentifier: "BloggerProfileHeaderView",
             for: indexPath
-        ) as! BloggerProfileHeaderView
- 
+        ) as? BloggerProfileHeaderView else { return UICollectionReusableView() }
+
         let isFollowing = bloggerProfile?.isFollowing ?? false
         let followers = bloggerProfile?.followersCount ?? 0
         let following = bloggerProfile?.followingCount ?? 0
         let profileUrl = bloggerProfile?.profileImageUrl
         let name = bloggerProfile?.name ?? bloggerUserName
-        
-        header.configure(
+
+        header.configure(.init(
             userName: name,
             profileImageUrl: profileUrl,
             posts: posts.count,
             followers: followers,
             following: following,
             isFollowing: isFollowing
-        )
- 
+        ))
+
         header.onFollowTapped = { [weak self] in
             guard let self,
                   let token = UserDefaults.standard.string(forKey: "authToken") else { return }
             APIService.shared.updateFollow(followingId: self.bloggerUserId, token: token) { result in
                 DispatchQueue.main.async {
-                    if case .success = result { 
+                    if case .success = result {
                         self.loadPosts()
-                        self.loadProfile() 
+                        self.loadProfile()
                     }
                 }
             }
         }
- 
+
         header.onFollowersTapped = { [weak self] in
             guard let self else { return }
             let vc = FollowersFollowingViewController()
@@ -184,7 +184,7 @@ extension BloggerProfileViewController: UICollectionViewDataSource {
             vc.targetUserId = self.bloggerUserId
             self.navigationController?.pushViewController(vc, animated: true)
         }
- 
+
         header.onFollowingTapped = { [weak self] in
             guard let self else { return }
             let vc = FollowersFollowingViewController()
@@ -192,21 +192,21 @@ extension BloggerProfileViewController: UICollectionViewDataSource {
             vc.targetUserId = self.bloggerUserId
             self.navigationController?.pushViewController(vc, animated: true)
         }
- 
+
         return header
     }
 }
- 
+
 // MARK: - UICollectionViewDelegateFlowLayout
 extension BloggerProfileViewController: UICollectionViewDelegateFlowLayout {
- 
+
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         referenceSizeForHeaderInSection section: Int) -> CGSize {
         CGSize(width: collectionView.bounds.width, height: 180)
     }
 }
- 
+
 // MARK: - UICollectionViewDelegate
 extension BloggerProfileViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -216,45 +216,44 @@ extension BloggerProfileViewController: UICollectionViewDelegate {
         navigationController?.pushViewController(detailVC, animated: true)
     }
 }
- 
- 
+
 // MARK: - BloggerProfileHeaderView (programmatic)
 final class BloggerProfileHeaderView: UICollectionReusableView {
- 
+
     var onFollowTapped: (() -> Void)?
     var onFollowersTapped: (() -> Void)?
     var onFollowingTapped: (() -> Void)?
- 
+
     private let profileImageView  = UIImageView()
     private let userNameLabel     = UILabel()
     private let followButton      = UIButton(type: .system)
- 
+
     // Stat views
     private let postsStatView     = BloggerStatView()
     private let followersStatView = BloggerStatView()
     private let followingStatView = BloggerStatView()
- 
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .clear
         setupUI()
- 
+
         let followersTap = UITapGestureRecognizer(target: self, action: #selector(handleFollowersTap))
         followersStatView.isUserInteractionEnabled = true
         followersStatView.addGestureRecognizer(followersTap)
- 
+
         let followingTap = UITapGestureRecognizer(target: self, action: #selector(handleFollowingTap))
         followingStatView.isUserInteractionEnabled = true
         followingStatView.addGestureRecognizer(followingTap)
     }
- 
+
     required init?(coder: NSCoder) { fatalError() }
- 
+
     override func layoutSubviews() {
         super.layoutSubviews()
         profileImageView.layer.cornerRadius = profileImageView.frame.width / 2
     }
- 
+
     private func setupUI() {
         // Profile image — left side
         profileImageView.translatesAutoresizingMaskIntoConstraints = false
@@ -265,7 +264,7 @@ final class BloggerProfileHeaderView: UICollectionReusableView {
             .withRenderingMode(.alwaysOriginal)
             .withTintColor(.systemGray3)
         addSubview(profileImageView)
- 
+
         // Stats stack — right of image
         let statsStack = UIStackView(arrangedSubviews: [postsStatView, followersStatView, followingStatView])
         statsStack.translatesAutoresizingMaskIntoConstraints = false
@@ -273,13 +272,13 @@ final class BloggerProfileHeaderView: UICollectionReusableView {
         statsStack.distribution = .fillEqually
         statsStack.spacing = 8
         addSubview(statsStack)
- 
+
         // Username — below image
         userNameLabel.translatesAutoresizingMaskIntoConstraints = false
         userNameLabel.font = .systemFont(ofSize: 18, weight: .semibold)
         userNameLabel.textColor = .label
         addSubview(userNameLabel)
- 
+
         // Follow button — below username
         followButton.translatesAutoresizingMaskIntoConstraints = false
         followButton.layer.cornerRadius = 10
@@ -288,51 +287,72 @@ final class BloggerProfileHeaderView: UICollectionReusableView {
         followButton.titleLabel?.font = .systemFont(ofSize: 15, weight: .semibold)
         followButton.addTarget(self, action: #selector(followTapped), for: .touchUpInside)
         addSubview(followButton)
- 
+
         NSLayoutConstraint.activate([
             // Profile image — top left
             profileImageView.topAnchor.constraint(equalTo: topAnchor, constant: 16),
             profileImageView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             profileImageView.widthAnchor.constraint(equalToConstant: 80),
             profileImageView.heightAnchor.constraint(equalToConstant: 80),
- 
+
             // Stats — right of image, vertically centred
             statsStack.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 20),
             statsStack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
             statsStack.centerYAnchor.constraint(equalTo: profileImageView.centerYAnchor),
- 
+
             // Username — below profile image
             userNameLabel.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 10),
             userNameLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             userNameLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
- 
+
             // Follow button — below username, full width with insets
             followButton.topAnchor.constraint(equalTo: userNameLabel.bottomAnchor, constant: 10),
             followButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             followButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
             followButton.heightAnchor.constraint(equalToConstant: 36),
-            followButton.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -12),
+            followButton.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -12)
         ])
     }
- 
-    func configure(userName: String, profileImageUrl: String?, posts: Int, followers: Int, following: Int, isFollowing: Bool) {
-        userNameLabel.text = userName
+
+    func setUserName(_ name: String) {
+        userNameLabel.text = name
+    }
+
+    func setStats(posts: Int, followers: Int, following: Int) {
         postsStatView.configure(value: "\(posts)", label: "posts")
         followersStatView.configure(value: "\(followers)", label: "followers")
         followingStatView.configure(value: "\(following)", label: "following")
-        updateFollowButton(isFollowing: isFollowing)
-        
-        profileImageView.image = UIImage(systemName: "person.circle.fill")?
-            .withRenderingMode(.alwaysOriginal)
-            .withTintColor(.systemGray3)
-            
-        if let profileUrlStr = profileImageUrl {
-            let _ = ImageCache.shared.loadImage(from: profileUrlStr) { [weak self] img in
-                if let img = img { self?.profileImageView.image = img }
-            }
+    }
+
+    func setProfileImage(url: String?) {
+        if let profileUrlStr = url, let url = URL(string: profileUrlStr) {
+            URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
+                guard let data, let img = UIImage(data: data) else { return }
+                DispatchQueue.main.async { self?.profileImageView.image = img }
+            }.resume()
+        } else {
+            profileImageView.image = UIImage(systemName: "person.circle.fill")?
+                .withRenderingMode(.alwaysOriginal)
+                .withTintColor(.systemGray3)
         }
     }
- 
+
+    struct ProfileConfig {
+        let userName: String
+        let profileImageUrl: String?
+        let posts: Int
+        let followers: Int
+        let following: Int
+        let isFollowing: Bool
+    }
+
+    func configure(_ config: ProfileConfig) {
+        setUserName(config.userName)
+        setStats(posts: config.posts, followers: config.followers, following: config.following)
+        updateFollowButton(isFollowing: config.isFollowing)
+        setProfileImage(url: config.profileImageUrl)
+    }
+
     private func updateFollowButton(isFollowing: Bool) {
         if isFollowing {
             followButton.setTitle("Following", for: .normal)
@@ -346,20 +366,20 @@ final class BloggerProfileHeaderView: UICollectionReusableView {
             followButton.layer.borderColor = UIColor.systemBlue.cgColor
         }
     }
- 
+
     @objc private func handleFollowersTap() { onFollowersTapped?() }
     @objc private func handleFollowingTap() { onFollowingTapped?() }
- 
+
     @objc private func followTapped() {
         onFollowTapped?()
     }
 }
- 
+
 // MARK: - BloggerStatView
 final class BloggerStatView: UIView {
     private let valueLabel = UILabel()
     private let titleLabel = UILabel()
- 
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         let stack = UIStackView(arrangedSubviews: [valueLabel, titleLabel])
@@ -372,7 +392,7 @@ final class BloggerStatView: UIView {
             stack.topAnchor.constraint(equalTo: topAnchor),
             stack.bottomAnchor.constraint(equalTo: bottomAnchor),
             stack.leadingAnchor.constraint(equalTo: leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor),
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor)
         ])
         valueLabel.font = .systemFont(ofSize: 17, weight: .bold)
         valueLabel.textColor = .label
@@ -381,9 +401,9 @@ final class BloggerStatView: UIView {
         titleLabel.textColor = .secondaryLabel
         titleLabel.textAlignment = .center
     }
- 
+
     required init?(coder: NSCoder) { fatalError() }
- 
+
     func configure(value: String, label: String) {
         valueLabel.text = value
         titleLabel.text = label

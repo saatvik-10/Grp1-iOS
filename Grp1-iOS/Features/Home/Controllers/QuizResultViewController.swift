@@ -23,22 +23,23 @@ class QuizResultViewController: UIViewController {
         scoreLabel.text = "\(score) / \(totalQuestions)"
         if percent <= 50 {
             scoreLabel.textColor = .red
-            messageLabel.text = "Don’t worry—every attempt is part of the learning process. Take a moment to revisit the article and reflect on the key ideas. With a little more practice, you’ll see steady improvement."
+            messageLabel.text = "Don't worry—every attempt is part of the learning process. "
+                + "Take a moment to revisit the article and reflect on the key ideas. "
+                + "With a little more practice, you'll see steady improvement."
 
-        }
-        else {
+        } else {
             scoreLabel.textColor = .systemGreen
-            messageLabel.text = "Great job! You’ve understood the core ideas of the article really well. Your effort is clearly paying off, so keep building on this momentum and stay curious."
+            messageLabel.text = "Great job! You've understood the core ideas of the article really well. "
+                + "Your effort is clearly paying off, so keep building on this momentum and stay curious."
         }
     }
     func scorePercentage() -> Int {
         guard totalQuestions > 0 else { return 0 }
         return Int((Double(score) / Double(totalQuestions)) * 100)
     }
-    
+
     @IBAction func closeTapped(_ sender: Any) {
         dismiss(animated: true)
     }
-    
 
 }

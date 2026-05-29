@@ -21,11 +21,10 @@ final class GamesViewController: UIViewController {
     @IBOutlet weak var gamesInfoButton: UIBarButtonItem!
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var containerView: UIView!
-    
-    @IBOutlet weak var ChartOuterView: UIView!
+
+    @IBOutlet weak var chartOuterView: UIView!
     @IBOutlet weak var segmentedControl: UISegmentedControl!
     private var currentData: [GameUsage] = []
-
 
     private let categories: [GameCategory] = [
         .init(
@@ -51,8 +50,8 @@ final class GamesViewController: UIViewController {
         Array(categories.prefix(4))
     }
 
-    private var fullWidthCategory: GameCategory {
-        categories.last!
+    private var fullWidthCategory: GameCategory? {
+        categories.last
     }
 
     override func viewDidLoad() {
@@ -70,7 +69,7 @@ final class GamesViewController: UIViewController {
         nav.modalPresentationStyle = .pageSheet
         present(nav, animated: true)
     }
-    
+
     private func setupCollectionView() {
         collectionView.collectionViewLayout = makeLayout()
         collectionView.backgroundColor = .systemGray6
@@ -88,7 +87,7 @@ final class GamesViewController: UIViewController {
     private func makeLayout() -> UICollectionViewLayout {
 
         let layout = UICollectionViewCompositionalLayout { section, _ in
-            
+
             // 🔹 FULL-WIDTH CELL (matching trending section)
             let itemSize = NSCollectionLayoutSize(
                 widthDimension: .fractionalWidth(1.0),
@@ -563,10 +562,12 @@ extension GamesViewController: UICollectionViewDataSource {
         _ collectionView: UICollectionView,
         cellForItemAt indexPath: IndexPath
     ) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(
+        guard let cell = collectionView.dequeueReusableCell(
             withReuseIdentifier: "GamesCategoryCollectionViewCell",
             for: indexPath
-        ) as! GamesCategoryCollectionViewCell
+        ) as? GamesCategoryCollectionViewCell else {
+            return UICollectionViewCell()
+        }
 
         cell.configure(with: categories[indexPath.item])
         return cell
@@ -578,12 +579,12 @@ extension GamesViewController: UICollectionViewDelegate {
         print("Current streak: \(DailyGameManager.shared.getStreak())") // ← add this
 
 
-
+        
         let category = categories[indexPath.item]
 
         switch category.title {
         case "Wordle":
-            if DailyGameManager.shared.canPlay(.Wordle) {
+            if DailyGameManager.shared.canPlay(.wordle) {
                 performSegue(withIdentifier: "Wordle", sender: nil)
             } else {
                 print("Already played today")
@@ -608,5 +609,5 @@ extension GamesViewController: UICollectionViewDelegate {
             print("No screen connected for:", category.title)
         }
     }
-
+    
 }

@@ -10,14 +10,13 @@ import UIKit
 class CommentTableViewCell: UITableViewCell {
 
     @IBOutlet weak var profileImageView: UIImageView!
-    
+
     @IBOutlet weak var nameLabel: UILabel!
-    
+
     @IBOutlet weak var commentLabel: UILabel!
-    
-   
+
     @IBOutlet weak var likeButton: UIButton!
-    
+
     var onLikeTapped: (() -> Void)?
         var onReplyTapped: (() -> Void)?
 

@@ -38,7 +38,6 @@ final class GridCell: UICollectionViewCell {
             letterLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
         ])
     }
-    
 
     func configure(with model: CrosswordCell) {
         letterLabel.text = ""
@@ -59,7 +58,7 @@ final class GridCell: UICollectionViewCell {
             numberLabel.text = ""
             return
         }
-        
+
         if model.isSelected {
             contentView.backgroundColor = UIColor.systemPurple.withAlphaComponent(0.45)
             layer.borderWidth = 2
@@ -71,7 +70,7 @@ final class GridCell: UICollectionViewCell {
 
             return
         }
-        
+
         if model.isCorrectWord {
             contentView.backgroundColor = UIColor.systemPurple
             layer.borderWidth = 1
@@ -88,14 +87,13 @@ final class GridCell: UICollectionViewCell {
             return
         }
 
-
         if model.isWrongLetter {
             contentView.backgroundColor = UIColor.red.withAlphaComponent(0.15)
             layer.borderWidth = 1
             layer.borderColor = UIColor.red.cgColor
 
             letterLabel.textColor = UIColor.red
-            letterLabel.text = model.letter != nil ? String(model.letter!) : ""
+            letterLabel.text = model.letter.map { String($0) }
 
             numberLabel.textColor = .darkGray
             numberLabel.text = model.numbers.isEmpty ? "" : model.numbers.map { "\($0)" }.joined(separator: ",")
@@ -120,7 +118,7 @@ final class GridCell: UICollectionViewCell {
         layer.borderColor = UIColor.systemGray.withAlphaComponent(0.5).cgColor
 
         letterLabel.textColor = .black
-        letterLabel.text = model.letter != nil ? String(model.letter!) : ""
+        letterLabel.text = model.letter.map { String($0) } ?? ""
 
         numberLabel.textColor = .darkGray
         numberLabel.text = model.numbers.isEmpty ? "" : model.numbers.map { "\($0)" }.joined(separator: ",")

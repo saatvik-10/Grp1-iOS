@@ -77,7 +77,7 @@ class ThreadsSearchViewController: UIViewController {
             subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
             subtitleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             subtitleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40),
-            subtitleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40),
+            subtitleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40)
         ])
 
         return view
@@ -150,7 +150,7 @@ class ThreadsSearchViewController: UIViewController {
             hintLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             hintLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -40),
             hintLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40),
-            hintLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40),
+            hintLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40)
         ])
     }
 
@@ -169,7 +169,7 @@ class ThreadsSearchViewController: UIViewController {
             post.title.lowercased().contains(trimmed) ||
             (post.user?.name ?? "").lowercased().contains(trimmed) ||
             (post.user?.username ?? "").lowercased().contains(trimmed) ||
-            post.tags!.contains { $0.lowercased().contains(trimmed) }
+            (post.tags ?? []).contains { $0.lowercased().contains(trimmed) }
         }
         updateUI()
     }
@@ -210,7 +210,9 @@ extension ThreadsSearchViewController: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: SearchResultCell.reuseID, for: indexPath) as! SearchResultCell
+        guard let cell = tableView.dequeueReusableCell(
+            withIdentifier: SearchResultCell.reuseID, for: indexPath
+        ) as? SearchResultCell else { return UITableViewCell() }
         cell.configure(with: filteredPosts[indexPath.row])
         return cell
     }
@@ -227,22 +229,21 @@ extension ThreadsSearchViewController: UITableViewDelegate {
     }
 }
 
-
 // MARK: - SearchResultCell
 class SearchResultCell: UITableViewCell {
     static let reuseID = "SearchResultCell"
 
     private let cardView: UIView = {
-        let v = UIView()
-        v.translatesAutoresizingMaskIntoConstraints = false
-        v.backgroundColor = .white
-        v.layer.cornerRadius = 16
-        v.layer.shadowColor = UIColor.gray.cgColor
-        v.layer.shadowOpacity = 0.08
-        v.layer.shadowOffset = CGSize(width: 0, height: 2)
-        v.layer.shadowRadius = 4
-        v.layer.masksToBounds = false
-        return v
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .white
+        view.layer.cornerRadius = 16
+        view.layer.shadowColor = UIColor.gray.cgColor
+        view.layer.shadowOpacity = 0.08
+        view.layer.shadowOffset = CGSize(width: 0, height: 2)
+        view.layer.shadowRadius = 4
+        view.layer.masksToBounds = false
+        return view
     }()
 
     private let profileImg: UIImageView = {
@@ -256,35 +257,35 @@ class SearchResultCell: UITableViewCell {
     }()
 
     private let userNameLabel: UILabel = {
-        let l = UILabel()
-        l.font = UIFont.systemFont(ofSize: 15, weight: .semibold)
-        l.translatesAutoresizingMaskIntoConstraints = false
-        return l
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 15, weight: .semibold)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
     }()
 
     private let timeAgoLabel: UILabel = {
-        let l = UILabel()
-        l.font = UIFont.systemFont(ofSize: 13)
-        l.textColor = .secondaryLabel
-        l.translatesAutoresizingMaskIntoConstraints = false
-        return l
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 13)
+        label.textColor = .secondaryLabel
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
     }()
 
     private let titleLabel: UILabel = {
-        let l = UILabel()
-        l.font = UIFont.systemFont(ofSize: 17, weight: .bold)
-        l.numberOfLines = 2
-        l.translatesAutoresizingMaskIntoConstraints = false
-        return l
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 17, weight: .bold)
+        label.numberOfLines = 2
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
     }()
 
     private let tagsLabel: UILabel = {
-        let l = UILabel()
-        l.font = UIFont.systemFont(ofSize: 13)
-        l.textColor = .systemBlue
-        l.translatesAutoresizingMaskIntoConstraints = false
-        l.numberOfLines = 1
-        return l
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 13)
+        label.textColor = .systemBlue
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.numberOfLines = 1
+        return label
     }()
 
     // MARK: - Init
@@ -329,14 +330,14 @@ class SearchResultCell: UITableViewCell {
             tagsLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
             tagsLabel.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 14),
             tagsLabel.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -14),
-            tagsLabel.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -14),
+            tagsLabel.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -14)
         ])
     }
 
     func configure(with post: APIThread) {
         userNameLabel.text = post.user?.name ?? post.user?.username ?? "Unknown"
         titleLabel.text = post.title
-        tagsLabel.text = post.tags!.prefix(3).map { "#\($0)" }.joined(separator: "  ")
+        tagsLabel.text = (post.tags ?? []).prefix(3).map { "#\($0)" }.joined(separator: "  ")
 
         if let imageUrl = post.user?.profileImageUrl, let url = URL(string: imageUrl) {
             URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in

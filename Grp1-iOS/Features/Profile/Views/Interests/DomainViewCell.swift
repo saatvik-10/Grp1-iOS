@@ -10,16 +10,16 @@ import UIKit
 class DomainViewCell: UICollectionViewCell {
     @IBOutlet weak var domainImageView: UIImageView!
     @IBOutlet weak var domainTitle: UILabel!
-    
+
     var onDelete: (() -> Void)?
-    
+
     override func awakeFromNib() {
         super.awakeFromNib()
-        
+
         let interaction = UIContextMenuInteraction(delegate: self)
         contentView.addInteraction(interaction)
     }
-    
+
     func configure(_ model: InterestModel) {
         domainTitle.text = model.title
         contentView.layer.cornerRadius = 16
@@ -34,16 +34,15 @@ class DomainViewCell: UICollectionViewCell {
     }
 }
 
-
 extension DomainViewCell: UIContextMenuInteractionDelegate {
-    
+
     func contextMenuInteraction(
         _ interaction: UIContextMenuInteraction,
         configurationForMenuAtLocation location: CGPoint
     ) -> UIContextMenuConfiguration? {
-        
+
         UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
-            
+
             let delete = UIAction(
                 title: "Delete",
                 image: UIImage(systemName: "trash"),
@@ -51,7 +50,7 @@ extension DomainViewCell: UIContextMenuInteractionDelegate {
             ) { _ in
                 self.onDelete?()
             }
-            
+
             return UIMenu(title: "", children: [delete])
         }
     }

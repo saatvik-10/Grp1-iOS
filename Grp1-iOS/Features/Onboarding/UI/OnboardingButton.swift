@@ -1,4 +1,3 @@
-
 //
 //  Button.swift
 //  Grp1-iOS
@@ -42,4 +41,3 @@ class OnboardingButton: UIButton {
         )
     }
 }
-

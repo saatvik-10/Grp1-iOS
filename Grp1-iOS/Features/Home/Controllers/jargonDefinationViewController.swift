@@ -97,7 +97,7 @@ class jargonDefinationViewController: UIViewController {
         guard index >= 0 && index < pages.count else {
             print("Index out of range:", index)
             return
-        
+
         }
 
         headingLabel.text = pages[index].title
@@ -126,7 +126,7 @@ class jargonDefinationViewController: UIViewController {
 
         animateWordByWord(text: pages[index].content, isLastPage: index == pages.count - 1)
     }
-    
+
     private var typewriterTimer: Timer?
 
     private func animateWordByWord(text: String, isLastPage: Bool) {
@@ -197,13 +197,13 @@ class jargonDefinationViewController: UIViewController {
     // MARK: - Animation
 
     private func animateChange(direction: CGFloat) {
-        let card = glassView!
+        guard let card = glassView else { return }
         let width = card.frame.width
 
         UIView.animate(withDuration: 0.25, animations: {
             card.transform = CGAffineTransform(translationX: -direction * width, y: 0)
             card.alpha = 0
-        }) { _ in
+        }, completion: { _ in
             self.currentIndex += Int(direction)
             self.applyPage(index: self.currentIndex)
 
@@ -220,7 +220,7 @@ class jargonDefinationViewController: UIViewController {
                     card.alpha = 1
                 }
             )
-        }
+        })
     }
 
     // MARK: - Segue

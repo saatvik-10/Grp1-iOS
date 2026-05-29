@@ -5,7 +5,6 @@
 //  Created by SDC-USER on 05/03/26.
 //
 
-
 import Foundation
 
 // MARK: - Mint RSS Parser
@@ -123,42 +122,36 @@ final class MintRSSService {
     }
 }
 
-
 extension String {
 
     func extractMintArticleBody(minWords: Int = 12) -> String {
-
         var results: [String] = []
         var isInsideArticle = false
         var isInsideScript = false
         var isInsideStyle = false
 
-        let tokens = self.components(separatedBy: "<")
+        let tokens = components(separatedBy: "<")
 
         for token in tokens {
-
             let lower = token.lowercased()
+            let cleanup = MintHTMLCleanup(lower: lower)
 
-            if lower.contains("itemprop=\"articlebody\"")
-                || lower.contains("class=\"storydetailssec\"")
-                || lower.contains("class=\"storycontent\"")
-                || lower.contains("class=\"contentsec\"")
-                || lower.contains("data-articlebody") {
+            if cleanup.isArticleBodyMarker {
                 isInsideArticle = true
                 continue
             }
 
-            if isInsideArticle
-                && (lower.contains("class=\"also-read\"")
-                    || lower.contains("class=\"tagsection\"")
-                    || lower.contains("class=\"disclaimer\"")) {
-                break
-            }
+            if isInsideArticle && cleanup.isStopMarker { break }
 
-            if lower.hasPrefix("script") { isInsideScript = true; continue }
-            if lower.hasPrefix("/script") { isInsideScript = false; continue }
-            if lower.hasPrefix("style") { isInsideStyle = true; continue }
-            if lower.hasPrefix("/style") { isInsideStyle = false; continue }
+            let isTagClosed = lower.hasPrefix("/")
+            if lower.hasPrefix("script") || lower.hasPrefix("/script") {
+                isInsideScript = !isTagClosed
+                continue
+            }
+            if lower.hasPrefix("style") || lower.hasPrefix("/style") {
+                isInsideStyle = !isTagClosed
+                continue
+            }
 
             if !isInsideArticle || isInsideScript || isInsideStyle { continue }
 
@@ -188,5 +181,23 @@ extension String {
         }
 
         return results.joined(separator: "\n\n")
+    }
+}
+
+private struct MintHTMLCleanup {
+    let lower: String
+
+    var isArticleBodyMarker: Bool {
+        lower.contains("itemprop=\"articlebody\"")
+            || lower.contains("class=\"storydetailssec\"")
+            || lower.contains("class=\"storycontent\"")
+            || lower.contains("class=\"contentsec\"")
+            || lower.contains("data-articlebody")
+    }
+
+    var isStopMarker: Bool {
+        lower.contains("class=\"also-read\"")
+            || lower.contains("class=\"tagsection\"")
+            || lower.contains("class=\"disclaimer\"")
     }
 }

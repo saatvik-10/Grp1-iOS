@@ -12,8 +12,8 @@ struct Result1: Codable {
     let explanation: String
 }
 
-//struct CompanyScore {
+// struct CompanyScore {
 //    let companyId: String
 //    let totalScore: Double
 //    let breakdown: [Pillar: Double]   // pillar -> score
-//}
+// }

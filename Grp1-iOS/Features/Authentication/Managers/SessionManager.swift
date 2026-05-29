@@ -36,4 +36,3 @@ class SessionManager {
         _ = CredentialStorageService.shared.deleteCredentials()
     }
 }
-

@@ -13,18 +13,20 @@ import Observation
 struct JargonContent: Equatable {
 
     @Guide(description: """
-        A detailed definition of the financial or economic term, written in two paragraphs separated by a blank line.
-        Paragraph 1 (4–5 sentences): Define the term clearly, explain what it means, why it exists, and how it works in financial markets.
-        Paragraph 2 (4–5 sentences): Explain why it matters to investors, how it affects the broader economy, and what happens when it changes.
-        Use professional financial language throughout. Total length should be 8–10 sentences.
+        A detailed definition of the financial or economic term, written in two paragraphs separated by \
+        a blank line. Paragraph 1 (4-5 sentences): Define the term clearly, explain what it means, why \
+        it exists, and how it works in financial markets. Paragraph 2 (4-5 sentences): Explain why it \
+        matters to investors, how it affects the broader economy, and what happens when it changes. Use \
+        professional financial language throughout. Total length should be 8-10 sentences.
         """)
     let definition: String
 
     @Guide(description: """
-        A real-world example of this term in action, written in two paragraphs separated by a blank line.
-        Paragraph 1 (2-3 sentences): Describe a specific market event, scenario, or case where this term was relevant. Use concrete numbers or named events where possible.
-        Paragraph 2 (2-3 sentences): Explain what happened as a result, how investors or institutions reacted, and what the outcome was.
-        Make it relatable to everyday investors or news readers. Total length should be 8–10 sentences.
+        A real-world example of this term in action, written in two paragraphs separated by a blank \
+        line. Paragraph 1 (2-3 sentences): Describe a specific market event, scenario, or case where \
+        this term was relevant. Use concrete numbers or named events where possible. Paragraph 2 (2-3 \
+        sentences): Explain what happened as a result, how investors or institutions reacted, and what \
+        the outcome was. Make it relatable to everyday investors or news readers.
         """)
     let realWorldExample: String
 
@@ -86,9 +88,13 @@ final class JargonContentGenerator {
                 \(articleContext.prefix(600))
 
                 Generate the following with rich, detailed content:
-                1. Definition of "\(jargonWord)" — two paragraphs, 8–10 sentences total. First paragraph explains what it is and how it works. Second paragraph explains why it matters and its economic impact.
-                2. Real-world example — two paragraphs, 8–10 sentences total. First paragraph describes a specific event or scenario. Second paragraph explains the outcome and investor reaction.
-                3. A multiple-choice quiz question with exactly 4 options testing application of the concept.
+                1. Definition of "\(jargonWord)" — two paragraphs, 8-10 sentences total. \
+                First paragraph explains what it is and how it works. Second paragraph explains \
+                why it matters and its economic impact.
+                2. Real-world example — two paragraphs, 8-10 sentences total. First paragraph \
+                describes a specific event or scenario. Second paragraph explains the outcome \
+                and investor reaction.
+                3. A multiple-choice quiz question with exactly 4 options testing application.
                 4. The correct answer index (0, 1, 2, or 3).
                 """
             }
@@ -114,13 +120,13 @@ final class JargonContentGenerator {
     // MARK: - Convert to existing model structs
 
     func toJargonPages(for word: String) -> [JargonPage] {
-        guard let c = content else { return [] }
+        guard let contentData = content else { return [] }
         var pages: [JargonPage] = []
 
-        if let def = c.definition, !def.isEmpty {
+        if let def = contentData.definition, !def.isEmpty {
             pages.append(JargonPage(jargonWord: word, title: "Definition", content: formatParagraphs(def)))
         }
-        if let ex = c.realWorldExample, !ex.isEmpty {
+        if let ex = contentData.realWorldExample, !ex.isEmpty {
             pages.append(JargonPage(jargonWord: word, title: "Real World Example", content: formatParagraphs(ex)))
         }
         return pages
@@ -151,16 +157,16 @@ final class JargonContentGenerator {
 
     func toJargonQuiz(for word: String) -> JargonQuiz? {
         guard
-            let c    = content,
-            let q    = c.quizQuestion,    !q.isEmpty,
-            let opts = c.quizOptions,     opts.count == 4,
-            let idx  = c.correctOptionIndex,
+            let contentData = content,
+            let question    = contentData.quizQuestion, !question.isEmpty,
+            let opts        = contentData.quizOptions, opts.count == 4,
+            let idx         = contentData.correctOptionIndex,
             (0...3).contains(idx)
         else { return nil }
 
         return JargonQuiz(
             jargonWord: word,
-            question: q,
+            question: question,
             options: opts,
             correctIndex: idx
         )

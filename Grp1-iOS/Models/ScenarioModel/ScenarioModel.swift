@@ -12,13 +12,13 @@ struct GameState {
     var node: DecisionNode
     var biasScore: Int
     var biasExposure: [CognitiveBias: Int] = [:]
-    var ending : EndingType? = nil
+    var ending: EndingType?
 }
 
 struct KahnemanQuote {
     let text: String
     let author: String
-    let endingType : EndingType
+    let endingType: EndingType
 }
 
 struct BiasDefine {
@@ -27,5 +27,3 @@ struct BiasDefine {
     let description: String
     let iconName: String
 }
-
-

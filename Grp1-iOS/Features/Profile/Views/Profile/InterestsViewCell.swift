@@ -8,24 +8,23 @@
 import UIKit
 
 class InterestsViewCell: UICollectionViewCell {
-    
+
     @IBOutlet weak var interestsLabel: UILabel!
-    
+
     @IBOutlet weak var badgeStackView: UIStackView!
-    
-    
+
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
         contentView.layer.cornerRadius = 16
         contentView.clipsToBounds = true
     }
-    
+
     func configure(interests: [String]) {
         badgeStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        
+
         let itemsToShow = interests.suffix(4)
-        
+
         for title in itemsToShow {
             let badge = UILabel()
 
@@ -40,7 +39,7 @@ class InterestsViewCell: UICollectionViewCell {
             badge.layer.masksToBounds = true
             badge.translatesAutoresizingMaskIntoConstraints = false
             badge.heightAnchor.constraint(equalToConstant: 30).isActive = true
-            
+
             badgeStackView.addArrangedSubview(badge)
         }
     }

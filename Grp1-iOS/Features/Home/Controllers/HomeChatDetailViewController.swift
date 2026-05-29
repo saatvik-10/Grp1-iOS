@@ -28,7 +28,7 @@ class HomeChatDetailViewController: MessagesViewController {
     var isNewChat: Bool = false
 
     let currentUser = Sender(senderId: "self", displayName: "")
-    let botSender   = Sender(senderId: "bot",  displayName: "")
+    let botSender   = Sender(senderId: "bot", displayName: "")
 
     var messages: [Message] = []
 
@@ -193,24 +193,28 @@ class HomeChatDetailViewController: MessagesViewController {
 
                     UIView.animate(withDuration: 0.2, animations: {
                         self?.view.alpha = 0.95
-                    }) { _ in
+                    }, completion: { _ in
                         self?.dismiss(animated: true)
-                    }
+                    })
 
-                case .failure(_):
+                case .failure:
                     NewsDataStore.shared.addQA(for: articleID, question: question, answer: answer)
 
                     let generator = UINotificationFeedbackGenerator()
                     generator.notificationOccurred(.warning)
 
-                    let alert = UIAlertController(title: "Notice", message: "Q&A saved locally but failed to sync with server. Try again later.", preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+                    let alert = UIAlertController(
+                        title: "Notice",
+                        message: "Q&A saved locally but failed to sync with server. Try again later.",
+                        preferredStyle: .alert
+                    )
+                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
                         UIView.animate(withDuration: 0.2, animations: {
                             self?.view.alpha = 0.95
-                        }) { _ in
+                        }, completion: { _ in
                             self?.dismiss(animated: true)
-                        }
-                    })
+                        })
+                    }))
                     self?.present(alert, animated: true)
                 }
             }

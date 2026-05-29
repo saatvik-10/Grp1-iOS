@@ -12,13 +12,13 @@ class ArticleLensPopupViewController: UIViewController {
         view.backgroundColor = UIColor.black.withAlphaComponent(0.0)
 
         containerView.layer.cornerRadius = 20
- 
+
         containerView.layer.masksToBounds = true
-   
 
         containerView.transform = CGAffineTransform(translationX: 0, y: 600)
 
-        messageLabel.text = "Your FD returns remain stable. Current 7.2% rate is competitive. Consider ladder strategy for better liquidity while maintaining returns."
+        messageLabel.text = "Your FD returns remain stable. Current 7.2% rate is competitive. "
+            + "Consider ladder strategy for better liquidity while maintaining returns."
     }
 
     override func viewDidAppear(_ animated: Bool) {

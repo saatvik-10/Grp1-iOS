@@ -19,7 +19,7 @@ enum APIError: Error, LocalizedError {
 	case server(statusCode: Int, message: String?)
 	case decodingError
 	case transport(Error)
-	
+
 	var errorDescription: String? {
 		switch self {
 		case .invalidURL: return "The URL is invalid."
@@ -108,24 +108,30 @@ struct APIUserProfileResponse: Decodable {
 	let phone: String
 	let dob: String
 	let gender: String
-	let profileImageUrl: String? // presigned R2 URL returned by backend
+	let profileImageUrl: String?
 	let level: String
-	let _count: ProfileCounts?
-	
+	let counts: ProfileCounts?
+
 	struct ProfileCounts: Decodable {
 		let followers: Int
 		let following: Int
 		let thread: Int
 	}
-	
+
 	// Prisma naming inversion fix:
-	// _count.following = rows where followingId=userId → people who follow this user = FOLLOWERS
-	// _count.followers = rows where followerId=userId → people this user follows    = FOLLOWING
-	var followersCount: Int { _count?.following ?? 0 }
-	var followingCount: Int { _count?.followers ?? 0 }
-	var threadCount: Int { _count?.thread ?? 0 }
+	// counts.following = rows where followingId=userId → people who follow this user = FOLLOWERS
+	// counts.followers = rows where followerId=userId → people this user follows    = FOLLOWING
+	var followersCount: Int { counts?.following ?? 0 }
+	var followingCount: Int { counts?.followers ?? 0 }
+	var threadCount: Int { counts?.thread ?? 0 }
 	let isSelf: Bool?
 	let isFollowing: Bool?
+
+	enum CodingKeys: String, CodingKey {
+		case id, name, username, email, phone, dob, gender
+		case profileImageUrl, level, isSelf, isFollowing
+		case counts = "_count"
+	}
 }
 
 struct APIUserBasicInfo: Decodable {
@@ -183,11 +189,11 @@ struct APIThread: Codable {
 	let userId: String
 	let title: String
 	let description: String
-	let imageName: String?  
-	let imageUrl: String?   
+	let imageName: String?
+	let imageUrl: String?
 	let tags: [String]?
 	var likesCount: Int
-	var isLiked: Bool?      
+	var isLiked: Bool?
 	let commentsCount: Int
 	let sharesCount: Int?
 	let createdAt: String
@@ -221,7 +227,7 @@ struct APIThreadDraft: Decodable {
 	let imageName: String? // S3 key — may be null
 	let imageUrl: String?  // presigned URL for display
 	let tags: [String]
-	let createdAt: String 
+	let createdAt: String
 	let updatedAt: String
 }
 
@@ -310,8 +316,12 @@ struct APIBookmarkFolder: Decodable {
 	let name: String
 	let createdAt: Date
 	let updatedAt: Date?
-	// Backend returns _count via Prisma include
-	let _count: BookmarkFolderCount?
+	let counts: BookmarkFolderCount?
+
+	enum CodingKeys: String, CodingKey {
+		case id, userId, name, createdAt, updatedAt
+		case counts = "_count"
+	}
 }
 
 struct APICreateBookmarkFolderRequest: Encodable {

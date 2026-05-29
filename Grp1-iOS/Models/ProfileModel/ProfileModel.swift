@@ -4,7 +4,7 @@ enum UserLevel: String {
     case beginner = "Beginner"
     case intermediate = "Intermediate"
     case advanced = "Advanced"
-    
+
     var color: UIColor {
         switch self {
         case .beginner:
@@ -44,7 +44,7 @@ enum InterestType {
     case domain
 //    case company
     case preference
-    
+
     var title: String {
         switch self {
         case .domain: return "Add New Domain"
@@ -52,7 +52,7 @@ enum InterestType {
         case .preference: return "Add New Preferences"
         }
     }
-    
+
     var searchPlaceholder: String {
         switch self {
         case .domain: return "Search Domains"

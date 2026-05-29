@@ -7,13 +7,10 @@
 import Foundation
 import NaturalLanguage
 
-
 enum FeedbackSignal {
-
 
     case recommendMore
     case recommendLess
-
 
     case readFull         // strongest implicit signal
     case scrolledToBottom // strong implicit signal
@@ -21,8 +18,6 @@ enum FeedbackSignal {
     case clicked          // weaker evidence
     case scrolledPast     // Weak negative
     case dismissed        // Strong negative
-
-
 
     var value: Double {
         switch self {
@@ -37,12 +32,9 @@ enum FeedbackSignal {
         case .scrolledPast:     return -0.1   // weak negative
         case .dismissed:        return -0.4   // strong negative
 
-
         }
     }
 }
-
-
 
 struct UserProfile1 {
 
@@ -68,12 +60,11 @@ struct UserProfile1 {
         }
     }
 
-    static let beta:  Double = 0.8
+    static let beta: Double = 0.8
     static let gamma: Double = 0.2
     static let minWeight: Double = 0.1
     static let maxWeight: Double = 5.0
 }
-
 
 // score = Σ confidence(tag) × weight(tag)
 //              ↑                    ↑
@@ -89,8 +80,6 @@ final class ArticleScorer {
     private let semanticFloor: Double = 0.0
 
     private lazy var embedding: NLEmbedding? = NLEmbedding.wordEmbedding(for: .english)
-
-
 
     func score(title: String, body: String) -> Double {
 
@@ -116,15 +105,14 @@ final class ArticleScorer {
                 let userWeight = UserProfile1.weights[tag] ?? 1.0
                 totalScore += confidence * userWeight
 
-                print("✅ Tag: '\(tag)' | Confidence: \(String(format: "%.2f", confidence)) | Weight: \(String(format: "%.2f", userWeight)) | Contribution: \(String(format: "%.2f", confidence * userWeight))")
+                print("✅ Tag: '\(tag)' | Confidence: \(String(format: "%.2f", confidence)) "
+                    + "| Contribution: \(String(format: "%.2f", confidence * userWeight))")
             }
         }
 
         print("📊 Final Score: \(String(format: "%.2f", totalScore)) | '\(title.prefix(50))'")
         return totalScore
     }
-
-
 
     func updateWeights(for title: String, body: String, signal: FeedbackSignal) {
         print("🎯 updateWeights called | signal: \(signal) | '\(title.prefix(40))'")
@@ -143,7 +131,6 @@ final class ArticleScorer {
             )
             print("   🔍 tag: '\(tag)' | confidence: \(String(format: "%.3f", confidence))")
 
-
             guard confidence >= minConfidence else { continue }
 
             let oldWeight    = UserProfile1.weights[tag] ?? 1.0
@@ -152,7 +139,7 @@ final class ArticleScorer {
             let newWeight: Double
 
             if signalValue > 0 {
- 
+
                 newWeight = oldWeight + UserProfile1.beta * signalValue
 
             } else {
@@ -160,17 +147,16 @@ final class ArticleScorer {
                 newWeight = oldWeight + UserProfile1.gamma * signalValue
             }
 
-  
-            UserProfile1.weights[tag] = max(
-                UserProfile1.minWeight,
-                min(newWeight, UserProfile1.maxWeight)
+            UserProfile1.weights[tag] = min(
+                max(newWeight, UserProfile1.minWeight),
+                UserProfile1.maxWeight
             )
 
-            print("🔄 Updated '\(tag)': \(String(format: "%.2f", oldWeight)) → \(String(format: "%.2f", UserProfile1.weights[tag]!)) | Signal: \(signal)")
+            if let newWeight = UserProfile1.weights[tag] {
+                print("🔄 Updated '\(tag)': \(String(format: "%.2f", oldWeight)) → \(String(format: "%.2f", newWeight)) | Signal: \(signal)")
+            }
         }
     }
-
- 
 
     private func computeConfidence(
         tag: String,
@@ -203,7 +189,6 @@ final class ArticleScorer {
                         break outer
                     }
 
-
                     let distance   = embedding.distance(between: tagWord, and: phraseWord)
                     let similarity = max(semanticFloor, 1.0 - distance)
                     bestScore      = max(bestScore, similarity)
@@ -213,12 +198,10 @@ final class ArticleScorer {
             tagWordScores.append(bestScore)
         }
 
-
         return tagWordScores.isEmpty
             ? 0.0
             : tagWordScores.reduce(0, +) / Double(tagWordScores.count)
     }
-
 
     private func cleanText(_ text: String) -> String {
         text.lowercased()
@@ -230,7 +213,7 @@ final class ArticleScorer {
         tagger.string = text
 
         var phrases: [String] = []
-        var buffer:  [String] = []
+        var buffer: [String] = []
 
         tagger.enumerateTags(
             in: text.startIndex..<text.endIndex,
@@ -262,7 +245,3 @@ final class ArticleScorer {
         return word
     }
 }
-
-
-
-

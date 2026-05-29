@@ -7,25 +7,20 @@
 
 import UIKit
 
-
-
-
 class AskQuestionViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
-    
-    
+
     @IBOutlet weak var tableView: UITableView!
-    
+
     @IBOutlet weak var sendButton: UIButton!
     @IBOutlet weak var textField: UITextField!
     @IBOutlet weak var inputContainer: UIView!
-    
-    
+
     var messages: [ChatMessage] = [
             ChatMessage(text: "Hi! Ask anything about the article.", isIncoming: true)
         ]
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         tableView.dataSource = self
                 tableView.delegate = self
                 tableView.separatorStyle = .none
@@ -36,7 +31,6 @@ class AskQuestionViewController: UIViewController, UITableViewDataSource, UITabl
 
         // Do any additional setup after loading the view.
     }
-    
 
         @IBAction func sendTapped(_ sender: Any) {
             guard let text = textField.text, !text.isEmpty else { return }
@@ -66,17 +60,17 @@ class AskQuestionViewController: UIViewController, UITableViewDataSource, UITabl
         func tableView(_ tableView: UITableView,
                        cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
-            let cell = tableView.dequeueReusableCell(withIdentifier: "chat_cell", for: indexPath) as! ChatTableViewCell
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "chat_cell", for: indexPath) as? ChatTableViewCell else {
+                return UITableViewCell()
+            }
             cell.configure(with: messages[indexPath.row])
             return cell
         }
-    
 
     @IBAction func doneTapped(_ sender: Any) {
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(.success)
         dismiss(animated: true)
     }
-    
 
 }

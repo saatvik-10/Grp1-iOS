@@ -26,17 +26,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 extension AppDelegate {
 
     func fetchAllFeedsOnce() {
-
         guard NewsDataStore.shared.isCacheStale else {
             print("Cache is fresh, skipping fetch")
             return
         }
+        fetchTOIFeed()
+        fetchMintFeed()
+        fetchETFeed()
+    }
 
-        // ════════════════════════════════════════════════
-        // MARK: — TOI FEED
-        // ════════════════════════════════════════════════
+    private func fetchTOIFeed() {
         RSSService.shared.fetchTOINews { items in
-
             print("")
             print("╔══════════════════════════════════════════════════════════╗")
             print("║              TIMES OF INDIA — RSS FETCH                  ║")
@@ -91,7 +91,6 @@ extension AppDelegate {
                             jargons: jargons
                         )
 
-                        // ✅ Score the article before storing
                         let score = ArticleScorer.shared.score(
                             title: cleanTitle,
                             body: fullText
@@ -109,26 +108,24 @@ extension AppDelegate {
                             NewsArticleAssembler.makeArticle(
                                 from: scrapedArticle,
                                 summary: summary,
-                                score: score        // ✅ passed in
+                                score: score
                             )
                         )
 
                         print("TOI OVERVIEW:")
-                        summary.overview.forEach     { print("• \($0)\n") }
+                        summary.overview.forEach { print("• \($0)\n") }
                         print("TOI KEY TAKEAWAYS:")
                         summary.keyTakeaways.forEach { print("• \($0)\n") }
                         print("TOI JARGONS:")
-                        summary.jargons.forEach      { print("• \($0)") }
+                        summary.jargons.forEach { print("• \($0)") }
                     }
                 }
             }
         }
+    }
 
-        // ════════════════════════════════════════════════
-        // MARK: — MINT FEED
-        // ════════════════════════════════════════════════
+    private func fetchMintFeed() {
         MintRSSService.shared.fetchMintNews { items in
-
             print("")
             print("╔══════════════════════════════════════════════════════════╗")
             print("║                 LIVEMINT — RSS FETCH                     ║")
@@ -183,7 +180,6 @@ extension AppDelegate {
                             jargons: jargons
                         )
 
-                        // ✅ Score the article before storing
                         let score = ArticleScorer.shared.score(
                             title: cleanTitle,
                             body: fullText
@@ -201,26 +197,24 @@ extension AppDelegate {
                             NewsArticleAssembler.makeArticle(
                                 from: scrapedArticle,
                                 summary: summary,
-                                score: score        // ✅ passed in
+                                score: score
                             )
                         )
 
                         print("Mint OVERVIEW:")
-                        summary.overview.forEach     { print("• \($0)\n") }
+                        summary.overview.forEach { print("• \($0)\n") }
                         print("Mint KEY TAKEAWAYS:")
                         summary.keyTakeaways.forEach { print("• \($0)\n") }
                         print("Mint JARGONS:")
-                        summary.jargons.forEach      { print("• \($0)") }
+                        summary.jargons.forEach { print("• \($0)") }
                     }
                 }
             }
         }
+    }
 
-        // ════════════════════════════════════════════════
-        // MARK: — ECONOMIC TIMES FEED
-        // ════════════════════════════════════════════════
+    private func fetchETFeed() {
         ETRSSService.shared.fetchETNews { items in
-
             print("")
             print("╔══════════════════════════════════════════════════════════╗")
             print("║              ECONOMIC TIMES — RSS FETCH                  ║")
@@ -275,7 +269,6 @@ extension AppDelegate {
                             jargons: jargons
                         )
 
-                        // ✅ Score the article before storing
                         let score = ArticleScorer.shared.score(
                             title: cleanTitle,
                             body: fullText
@@ -293,20 +286,19 @@ extension AppDelegate {
                             NewsArticleAssembler.makeArticle(
                                 from: scrapedArticle,
                                 summary: summary,
-                                score: score        // ✅ passed in
+                                score: score
                             )
                         )
 
                         print("ET OVERVIEW:")
-                        summary.overview.forEach     { print("• \($0)\n") }
+                        summary.overview.forEach { print("• \($0)\n") }
                         print("ET KEY TAKEAWAYS:")
                         summary.keyTakeaways.forEach { print("• \($0)\n") }
                         print("ET JARGONS:")
-                        summary.jargons.forEach      { print("• \($0)") }
+                        summary.jargons.forEach { print("• \($0)") }
                     }
                 }
             }
         }
-        
     }
 }

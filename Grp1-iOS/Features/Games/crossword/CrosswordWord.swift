@@ -20,5 +20,3 @@ struct CrosswordWord {
         return direction == .across ? .across : .down
     }
 }
-
-

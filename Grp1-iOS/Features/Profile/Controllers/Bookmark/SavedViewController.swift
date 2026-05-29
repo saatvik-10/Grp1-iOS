@@ -7,7 +7,7 @@ class SavedViewController: UIViewController, UICollectionViewDataSource, UIColle
     var folderName: String = ""
     var folderId: String = ""
     var segment: BookmarkSegment = .articles
-    
+
     private var articles: [SavedArticle] = []
     private var threads: [APIThread] = []
 
@@ -27,7 +27,7 @@ class SavedViewController: UIViewController, UICollectionViewDataSource, UIColle
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
+
         // Refresh data on appear
         if segment == .articles {
             articles = SavedArticlesStore.shared.articles(in: folderName)
@@ -96,13 +96,13 @@ class SavedViewController: UIViewController, UICollectionViewDataSource, UIColle
             return UICollectionViewCompositionalLayout(section: section)
         } else {
             // Layout for Threads
-            return UICollectionViewCompositionalLayout { sectionIndex, _ in
+            return UICollectionViewCompositionalLayout { _, _ in
                 let itemSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
                     heightDimension: .estimated(200)
                 )
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
-                
+
                 let groupSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
                     heightDimension: .estimated(200)
@@ -111,7 +111,7 @@ class SavedViewController: UIViewController, UICollectionViewDataSource, UIColle
                     layoutSize: groupSize,
                     subitems: [item]
                 )
-                
+
                 let section = NSCollectionLayoutSection(group: group)
                 section.contentInsets = NSDirectionalEdgeInsets(top: 16, leading: 16, bottom: 16, trailing: 16)
                 section.interGroupSpacing = 16
@@ -131,10 +131,10 @@ class SavedViewController: UIViewController, UICollectionViewDataSource, UIColle
                         cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
 
         if segment == .articles {
-            let cell = collectionView.dequeueReusableCell(
+            guard let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: "trending_cell",
                 for: indexPath
-            ) as! TrendingCollectionViewCell
+            ) as? TrendingCollectionViewCell else { return UICollectionViewCell() }
 
             let saved = articles[indexPath.row]
 
@@ -156,30 +156,30 @@ class SavedViewController: UIViewController, UICollectionViewDataSource, UIColle
 
             cell.configureCell(with: article)
             return cell
-            
+
         } else {
-            let cell = collectionView.dequeueReusableCell(
+            guard let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: "collectionViewCell",
                 for: indexPath
-            ) as! collectionViewCell
-            
+            ) as? collectionViewCell else { return UICollectionViewCell() }
+
             let thread = threads[indexPath.row]
             let currentUserId = UserDefaults.standard.string(forKey: "userId")
             let isOwnPost = thread.userId == currentUserId
-            
+
             cell.isBookmarked = true   // always true — we're inside a bookmark folder
             cell.configure(with: thread, isFollowing: false, isOwnPost: isOwnPost)
             cell.applyStyle(isCard: true)
-            
+
             // Unsave from this folder via API when toggle tapped
             cell.onBookmarkTapped = { [weak self] in
                 guard let self,
                       let token = UserDefaults.standard.string(forKey: "authToken") else { return }
-                
+
                 // Optimistic: remove from local array immediately
                 self.threads.remove(at: indexPath.row)
                 self.collectionView.reloadData()
-                
+
                 APIService.shared.deleteBookmarkedThreadByThreadId(
                     threadId: thread.id, token: token
                 ) { [weak self] result in
@@ -195,7 +195,7 @@ class SavedViewController: UIViewController, UICollectionViewDataSource, UIColle
                     }
                 }
             }
-            
+
             return cell
         }
     }
@@ -204,7 +204,7 @@ class SavedViewController: UIViewController, UICollectionViewDataSource, UIColle
 
     func collectionView(_ collectionView: UICollectionView,
                         didSelectItemAt indexPath: IndexPath) {
-        
+
         if segment == .articles {
             let saved = articles[indexPath.row]
 

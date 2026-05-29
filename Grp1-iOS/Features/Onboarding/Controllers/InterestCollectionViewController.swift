@@ -38,7 +38,7 @@ final class AllDomainsViewController: UIViewController {
             tableView.topAnchor.constraint(equalTo: view.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
 
@@ -81,12 +81,12 @@ extension AllDomainsViewController: UITableViewDataSource, UITableViewDelegate {
 
 extension AllDomainsViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
-        let q = (searchController.searchBar.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-        if q.isEmpty {
+        let query = (searchController.searchBar.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        if query.isEmpty {
             filtered = allItems
         } else {
             filtered = allItems.filter {
-                $0.title.localizedCaseInsensitiveContains(q) || ($0.subtitle?.localizedCaseInsensitiveContains(q) ?? false)
+                $0.title.localizedCaseInsensitiveContains(query) || ($0.subtitle?.localizedCaseInsensitiveContains(query) ?? false)
             }
         }
         tableView.reloadData()
@@ -146,6 +146,16 @@ class InterestCollectionViewController: UIViewController {
         collectionView.showsVerticalScrollIndicator = false
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 10, right: 0)
 
+        interestCollectionView = collectionView
+
+        view.addSubview(titleLabel)
+        view.addSubview(subtitleLabel)
+        view.addSubview(collectionView)
+
+        setupBottomBar(titleLabel: titleLabel, subtitleLabel: subtitleLabel, collectionView: collectionView)
+    }
+
+    private func setupBottomBar(titleLabel: UILabel, subtitleLabel: UILabel, collectionView: UICollectionView) {
         let footerView = UIView()
         footerView.translatesAutoresizingMaskIntoConstraints = false
         footerView.backgroundColor = screenBackground
@@ -173,14 +183,9 @@ class InterestCollectionViewController: UIViewController {
         finishButton.layer.shadowRadius = 16
         finishButton.addTarget(self, action: #selector(finishButtonTapped(_:)), for: .touchUpInside)
 
-        view.addSubview(titleLabel)
-        view.addSubview(subtitleLabel)
-        view.addSubview(collectionView)
         view.addSubview(footerView)
         footerView.addSubview(backButton)
         footerView.addSubview(finishButton)
-
-        interestCollectionView = collectionView
 
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 26),
@@ -237,10 +242,10 @@ extension InterestCollectionViewController: UICollectionViewDataSource {
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(
+        guard let cell = collectionView.dequeueReusableCell(
             withReuseIdentifier: "InterestCollectionViewCell",
             for: indexPath
-        ) as! InterestCollectionViewCell
+        ) as? InterestCollectionViewCell else { return UICollectionViewCell() }
 
         let previewCount = min(domainsPreviewCount, InterestsDataSource.domains.count)
         if indexPath.item == previewCount {
@@ -275,10 +280,8 @@ extension InterestCollectionViewController {
         // Seed with current selections from the grid and any previously chosen.
         var selected = Set(UserInterests.domains.map { $0.title })
         if let indexPaths = interestCollectionView.indexPathsForSelectedItems {
-            for idx in indexPaths {
-                if idx.item < InterestsDataSource.domains.count {
-                    selected.insert(InterestsDataSource.domains[idx.item].title)
-                }
+            for idx in indexPaths where idx.item < InterestsDataSource.domains.count {
+                selected.insert(InterestsDataSource.domains[idx.item].title)
             }
         }
         vc.selectedTitles = selected
@@ -290,9 +293,9 @@ extension InterestCollectionViewController {
             // Reflect selection back into the preview grid (only for the first N items).
             let previewCount = min(self?.domainsPreviewCount ?? 0, InterestsDataSource.domains.count)
             self?.interestCollectionView.reloadData()
-            for i in 0..<previewCount {
-                let ip = IndexPath(item: i, section: 0)
-                if titles.contains(InterestsDataSource.domains[i].title) {
+            for index in 0..<previewCount {
+                let ip = IndexPath(item: index, section: 0)
+                if titles.contains(InterestsDataSource.domains[index].title) {
                     self?.interestCollectionView.selectItem(at: ip, animated: false, scrollPosition: [])
                 } else {
                     self?.interestCollectionView.deselectItem(at: ip, animated: false)
