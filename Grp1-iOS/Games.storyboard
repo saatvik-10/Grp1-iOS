@@ -9,7 +9,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Title-->
+        <!--Daily Challenge-->
         <scene sceneID="s0d-6b-0kx">
             <objects>
                 <viewController id="Y6W-OH-hqX" customClass="GamesViewController" customModule="Grp1_iOS" customModuleProvider="target" sceneMemberID="viewController">
@@ -51,7 +51,7 @@
                             <constraint firstItem="hUl-rh-p0C" firstAttribute="leading" secondItem="vDu-zF-Fre" secondAttribute="leading" id="tls-Kz-ND7"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="Title" id="1aI-tL-F7L">
+                    <navigationItem key="navigationItem" title="Daily Challenge" id="1aI-tL-F7L">
                         <barButtonItem key="rightBarButtonItem" image="info.circle" catalog="system" id="DOs-j0-KH9"/>
                     </navigationItem>
                     <connections>
@@ -76,11 +76,11 @@
             </objects>
             <point key="canvasLocation" x="1738" y="461"/>
         </scene>
-        <!--Games-->
+        <!--Daily Challenge-->
         <scene sceneID="2bE-DX-XrO">
             <objects>
                 <navigationController restorationIdentifier="Games" storyboardIdentifier="Games" automaticallyAdjustsScrollViewInsets="NO" id="HWG-ao-lyw" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Games" image="gamecontroller" catalog="system" id="Ap8-oE-cxn"/>
+                    <tabBarItem key="tabBarItem" title="Daily Challenge" image="gamecontroller" catalog="system" id="Ap8-oE-cxn"/>
                     <toolbarItems/>
                     <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" largeTitles="YES" id="kJc-xN-35r">
@@ -105,17 +105,17 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleAspectFit" axis="vertical" distribution="fillEqually" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="lkp-f7-xIj">
-                                <rect key="frame" x="37" y="354" width="319" height="131"/>
+                                <rect key="frame" x="37" y="354" width="147" height="161"/>
                             </stackView>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="equalSpacing" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="zCT-kF-bRi">
-                                <rect key="frame" x="16" y="535" width="361" height="275"/>
+                                <rect key="frame" x="16" y="535" width="189" height="275"/>
                             </stackView>
                             <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dNA-AB-FGK">
-                                <rect key="frame" x="80" y="90" width="233" height="4"/>
+                                <rect key="frame" x="80" y="90" width="61" height="4"/>
                                 <color key="progressTintColor" systemColor="systemGreenColor"/>
                             </progressView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DYk-7V-Z6f">
-                                <rect key="frame" x="20" y="102" width="319" height="0.0"/>
+                                <rect key="frame" x="20" y="92" width="319" height="0.0"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="319" id="otD-1I-UFM"/>
                                 </constraints>
@@ -124,7 +124,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6bL-kd-gIP">
-                                <rect key="frame" x="37" y="132" width="319" height="35"/>
+                                <rect key="frame" x="37" y="117" width="147" height="35"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="tinted" title="Hint"/>
                                 <connections>
@@ -132,7 +132,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jHq-Mv-F1e">
-                                <rect key="frame" x="37" y="182" width="319" height="35"/>
+                                <rect key="frame" x="37" y="167" width="147" height="35"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="filled" title="Reveal Alphabet"/>
                                 <connections>
@@ -147,16 +147,16 @@
                             <constraint firstAttribute="bottom" secondItem="zCT-kF-bRi" secondAttribute="bottom" constant="42" id="4QE-t3-3aq"/>
                             <constraint firstItem="d0j-mP-h0f" firstAttribute="trailing" secondItem="6bL-kd-gIP" secondAttribute="trailing" constant="37" id="66k-ip-2Zq"/>
                             <constraint firstItem="DYk-7V-Z6f" firstAttribute="leading" secondItem="bro-Cu-XH8" secondAttribute="leading" constant="20" id="GoQ-zs-q4Q"/>
-                            <constraint firstItem="zCT-kF-bRi" firstAttribute="top" secondItem="lkp-f7-xIj" secondAttribute="bottom" constant="50" id="Nc6-Pr-jXD"/>
+                            <constraint firstItem="zCT-kF-bRi" firstAttribute="top" secondItem="lkp-f7-xIj" secondAttribute="bottom" constant="20" id="Nc6-Pr-jXD"/>
                             <constraint firstItem="lkp-f7-xIj" firstAttribute="top" secondItem="d0j-mP-h0f" secondAttribute="top" constant="130" id="RjX-gt-1Nk"/>
                             <constraint firstItem="jHq-Mv-F1e" firstAttribute="top" secondItem="6bL-kd-gIP" secondAttribute="bottom" constant="15" id="VfD-S3-hML"/>
-                            <constraint firstItem="d0j-mP-h0f" firstAttribute="bottom" secondItem="lkp-f7-xIj" secondAttribute="bottom" constant="250" id="YFT-vL-WOY"/>
-                            <constraint firstItem="DYk-7V-Z6f" firstAttribute="top" secondItem="dNA-AB-FGK" secondAttribute="bottom" constant="8" id="Zs7-SY-Lhd"/>
+                            <constraint firstItem="d0j-mP-h0f" firstAttribute="bottom" secondItem="lkp-f7-xIj" secondAttribute="bottom" constant="220" id="YFT-vL-WOY"/>
+                            <constraint firstItem="DYk-7V-Z6f" firstAttribute="top" secondItem="dNA-AB-FGK" secondAttribute="bottom" constant="-2" id="Zs7-SY-Lhd"/>
                             <constraint firstItem="dNA-AB-FGK" firstAttribute="top" secondItem="bro-Cu-XH8" secondAttribute="top" constant="90" id="c9o-GH-SOD"/>
                             <constraint firstItem="jHq-Mv-F1e" firstAttribute="leading" secondItem="d0j-mP-h0f" secondAttribute="leading" constant="37" id="cYA-P3-5xy"/>
                             <constraint firstItem="dNA-AB-FGK" firstAttribute="leading" secondItem="bro-Cu-XH8" secondAttribute="leading" constant="80" id="d3K-vF-YaY"/>
                             <constraint firstItem="d0j-mP-h0f" firstAttribute="trailing" secondItem="jHq-Mv-F1e" secondAttribute="trailing" constant="37" id="izh-ZS-ZHp"/>
-                            <constraint firstItem="6bL-kd-gIP" firstAttribute="top" secondItem="DYk-7V-Z6f" secondAttribute="bottom" constant="30" id="j76-ZM-ipj"/>
+                            <constraint firstItem="6bL-kd-gIP" firstAttribute="top" secondItem="DYk-7V-Z6f" secondAttribute="bottom" constant="25" id="j76-ZM-ipj"/>
                             <constraint firstItem="d0j-mP-h0f" firstAttribute="trailing" secondItem="zCT-kF-bRi" secondAttribute="trailing" constant="16" id="oKU-bl-DiE"/>
                             <constraint firstAttribute="trailing" secondItem="dNA-AB-FGK" secondAttribute="trailing" constant="80" id="oUH-qv-FbQ"/>
                             <constraint firstItem="d0j-mP-h0f" firstAttribute="trailing" secondItem="lkp-f7-xIj" secondAttribute="trailing" constant="37" id="rgD-8w-UGq"/>
@@ -211,7 +211,7 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Ent-WG-Wbr">
+                            <progressView opaque="NO" alpha="0.0" contentMode="scaleToFill" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Ent-WG-Wbr">
                                 <rect key="frame" x="80" y="87" width="233" height="4"/>
                             </progressView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Zi3-Ra-jbF">
@@ -221,7 +221,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Mrx-PV-T0g">
-                                <rect key="frame" x="8" y="280" width="377" height="430"/>
+                                <rect key="frame" x="8" y="250" width="377" height="430"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="430" id="0UN-ux-xT4"/>
@@ -261,7 +261,7 @@
                             <constraint firstItem="Ent-WG-Wbr" firstAttribute="top" secondItem="v4V-um-eB6" secondAttribute="top" constant="87" id="eLE-kc-lTY"/>
                             <constraint firstAttribute="bottom" secondItem="XN7-99-CHL" secondAttribute="bottom" constant="40" id="jkK-zy-ySg"/>
                             <constraint firstItem="EQy-oc-3yj" firstAttribute="trailing" secondItem="Zi3-Ra-jbF" secondAttribute="trailing" constant="157" id="r4l-of-mjY"/>
-                            <constraint firstItem="Mrx-PV-T0g" firstAttribute="top" secondItem="v4V-um-eB6" secondAttribute="top" constant="280" id="sIM-CI-S8b"/>
+                            <constraint firstItem="Mrx-PV-T0g" firstAttribute="top" secondItem="v4V-um-eB6" secondAttribute="top" constant="250" id="sIM-CI-S8b"/>
                             <constraint firstItem="Ent-WG-Wbr" firstAttribute="leading" secondItem="v4V-um-eB6" secondAttribute="leading" constant="80" id="uOe-lM-czB"/>
                         </constraints>
                     </view>
@@ -286,10 +286,10 @@
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemGray6Color">
-            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemGreenColor">
-            <color red="0.20392156862745098" green="0.7803921568627451" blue="0.34901960784313724" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.20392156859999999" green="0.78039215689999997" blue="0.34901960780000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

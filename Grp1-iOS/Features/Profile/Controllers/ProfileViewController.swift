@@ -43,6 +43,11 @@ class ProfileViewController: UIViewController {
         setupCollectionView()
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        collectionView.reloadData()
+    }
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         fetchProfile()
@@ -350,7 +355,8 @@ extension ProfileViewController: UICollectionViewDataSource, UICollectionViewDel
         case .progress:
             let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: "progress_cell", for: indexPath) as! ProgressViewCell
-            cell.configure(streakCount: 7)
+            let currentStreak = DailyGameManager.shared.getStreak()
+            cell.configure(streakCount: currentStreak)
             cell.contentView.backgroundColor = .white
             cell.backgroundColor = .white
             cell.layer.cornerRadius = 12
