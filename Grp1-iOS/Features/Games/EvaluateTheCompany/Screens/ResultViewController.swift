@@ -61,6 +61,10 @@ final class ResultViewController: UIViewController {
  
         guard let d = puzzle.buildResultScreenData(selectedCompanyId: selectedCompanyId) else { return }
         self.data = d
+        
+        // Mark the daily game completed and clear saved active session state
+        DailyGameManager.shared.markGamePlayed(.Evaluate)
+        EvaluateGameStateManager.shared.clearState()
  
         setupScrollView()
         buildUI()
@@ -756,16 +760,83 @@ final class ResultViewController: UIViewController {
     // MARK: - 7. CTAs
  
     private func makeCTAs() -> UIView {
-        let nextBtn = makeButton(title: "Try Next Round  →", bg: C.charcoal, fg: .white)
-        nextBtn.addTarget(self, action: #selector(nextRoundTapped), for: .touchUpInside)
- 
-        let homeBtn = makeButton(title: "Return to Home", bg: UIColor(red: 0.88, green: 0.87, blue: 0.85, alpha: 1), fg: C.subtext)
-        homeBtn.addTarget(self, action: #selector(homeTapped), for: .touchUpInside)
- 
-        let stack = UIStackView(arrangedSubviews: [nextBtn, homeBtn])
-        stack.axis    = .vertical
-        stack.spacing = 10
-        return stack
+        let container = UIStackView()
+        container.axis = .vertical
+        container.spacing = 16
+        container.alignment = .fill
+        
+        // 1. Completion Banner / Card
+        let completionCard = UIView()
+        completionCard.backgroundColor = UIColor(red: 0.90, green: 0.95, blue: 0.98, alpha: 1) // Premium light blue
+        completionCard.layer.cornerRadius = 16
+        completionCard.layer.borderWidth = 0.5
+        completionCard.layer.borderColor = UIColor.systemBlue.withAlphaComponent(0.2).cgColor
+        
+        let checkIcon = UIImageView(image: UIImage(systemName: "checkmark.seal.fill"))
+        checkIcon.tintColor = C.green
+        checkIcon.translatesAutoresizingMaskIntoConstraints = false
+        checkIcon.widthAnchor.constraint(equalToConstant: 24).isActive = true
+        checkIcon.heightAnchor.constraint(equalToConstant: 24).isActive = true
+        
+        let titleLabel = UILabel()
+        titleLabel.text = "Challenge Completed!"
+        titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+        titleLabel.textColor = C.text
+        
+        let msgLabel = UILabel()
+        msgLabel.text = "You've successfully evaluated today's company. Your streak is safe — come back tomorrow!"
+        msgLabel.font = UIFont.systemFont(ofSize: 13, weight: .regular)
+        msgLabel.textColor = C.subtext
+        msgLabel.numberOfLines = 0
+        msgLabel.textAlignment = .center
+        
+        // Streak Info
+        let streakCount = DailyGameManager.shared.getStreak()
+        let streakLabel = UILabel()
+        streakLabel.text = "🔥 Daily Streak: \(streakCount) day\(streakCount == 1 ? "" : "s")"
+        streakLabel.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        streakLabel.textColor = .systemOrange
+        
+        let nextLabel = UILabel()
+        nextLabel.text = "⏳ Next challenge available tomorrow"
+        nextLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
+        nextLabel.textColor = C.subtext
+        
+        let cardStack = UIStackView(arrangedSubviews: [checkIcon, titleLabel, msgLabel, streakLabel, nextLabel])
+        cardStack.axis = .vertical
+        cardStack.spacing = 8
+        cardStack.alignment = .center
+        cardStack.translatesAutoresizingMaskIntoConstraints = false
+        
+        completionCard.addSubview(cardStack)
+        NSLayoutConstraint.activate([
+            cardStack.topAnchor.constraint(equalTo: completionCard.topAnchor, constant: 16),
+            cardStack.bottomAnchor.constraint(equalTo: completionCard.bottomAnchor, constant: -16),
+            cardStack.leadingAnchor.constraint(equalTo: completionCard.leadingAnchor, constant: 16),
+            cardStack.trailingAnchor.constraint(equalTo: completionCard.trailingAnchor, constant: -16)
+        ])
+        
+        // 2. Simple Exit Button
+        let exitBtn = makeButton(title: "Exit to Games", bg: C.charcoal, fg: .white)
+        exitBtn.addTarget(self, action: #selector(exitButtonTapped), for: .touchUpInside)
+        
+        container.addArrangedSubview(completionCard)
+        container.addArrangedSubview(exitBtn)
+        
+        return container
+    }
+    
+    @objc private func exitButtonTapped() {
+        if let nav = self.navigationController {
+            if nav.presentingViewController != nil {
+                nav.dismiss(animated: true, completion: nil)
+            } else {
+                nav.popToRootViewController(animated: true)
+                nav.dismiss(animated: true, completion: nil)
+            }
+        } else {
+            self.dismiss(animated: true, completion: nil)
+        }
     }
  
     // MARK: - Reusable helpers

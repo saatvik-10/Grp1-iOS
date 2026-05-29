@@ -640,7 +640,11 @@ extension GamesViewController: UICollectionViewDelegate {
             performSegue(withIdentifier: "scenario", sender: nil)
             
         case "Evaluate the Company":
-            performSegue(withIdentifier: "Evaluate", sender: nil)
+            if DailyGameManager.shared.canPlay(.Evaluate) {
+                performSegue(withIdentifier: "Evaluate", sender: nil)
+            } else {
+                showAlreadyPlayedAlert(for: "Evaluate the Company")
+            }
 
         default:
             print("No screen connected for:", category.title)

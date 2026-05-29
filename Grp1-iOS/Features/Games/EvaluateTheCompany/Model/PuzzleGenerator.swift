@@ -205,7 +205,7 @@ class PuzzleGenerator {
         }
         
         let puzzle = DailyPuzzle(
-            sector: sector, companies: companies,
+            sector: sector, companies: companies.shuffled(),
             visibleIndicators: visibleIndicators,
             twistIndicators: twistIndicators,
             results: finalResults

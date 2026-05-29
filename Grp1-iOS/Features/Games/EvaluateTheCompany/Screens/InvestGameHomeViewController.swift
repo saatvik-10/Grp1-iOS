@@ -18,6 +18,7 @@ class InvestGameHomeViewController: UIViewController {
         private var flippedCards = Set<Int>()
         private var collectionViewTopRef: UILabel?
         private var indicatorPillButton: UIButton?
+        private var hintStackView: UIStackView?
     
     
     required init?(coder: NSCoder) {
@@ -30,13 +31,46 @@ class InvestGameHomeViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = UIColor(red: 0.961, green: 0.957, blue: 0.945, alpha: 1)
         
+        #if DEBUG
+        if #available(iOS 26.0, *) {
+            PuzzleGenerator.runSelfSanityChecks()
+        }
+        #endif
+        
+        setupQuitButton()
+        
         Task {
             await loadPuzzleAsync()
         }
     }
     
     private func loadPuzzleAsync() async {
+        if self.puzzle != nil {
+            return
+        }
+        
         showLoadingOverlay()
+        
+        if let savedState = EvaluateGameStateManager.shared.loadState() {
+            self.puzzle = savedState.puzzle
+            self.flippedCards = Set(savedState.flippedCards)
+            print("🔄 Resumed game from saved state: step=\(savedState.currentStep)")
+            
+            hideLoadingOverlay()
+            setupHeader()
+            setupIndicatorInfoButton()
+            setupCollectionView()
+            setupHintLabel()
+            styleStartButton()
+            
+            // Check if we need to auto-advance to twist or selection
+            if savedState.currentStep == "twist" {
+                self.performSegue(withIdentifier: "showTwist", sender: nil)
+            } else if savedState.currentStep == "selection" {
+                self.performSegue(withIdentifier: "showTwist", sender: "autoAdvance")
+            }
+            return
+        }
         
         if #available(iOS 26.0, *) {
             if let generated = await PuzzleGenerator.shared.generate() {
@@ -47,6 +81,9 @@ class InvestGameHomeViewController: UIViewController {
         } else {
             self.puzzle = DailyPuzzleLoader.loadDailyPuzzle()
         }
+        
+        // Save initial state
+        EvaluateGameStateManager.shared.saveState(step: "home", puzzle: self.puzzle, flippedCards: self.flippedCards)
         
         hideLoadingOverlay()
         
@@ -139,14 +176,14 @@ class InvestGameHomeViewController: UIViewController {
         private func setupHeader() {
             let titleLabel = UILabel()
             titleLabel.text          = "Evaluate The\nCompany"
-            titleLabel.font          = UIFont.systemFont(ofSize: 40, weight: .bold)
+            titleLabel.font          = UIFont.systemFont(ofSize: 34, weight: .bold)
             titleLabel.textColor     = UIColor(red: 0.08, green: 0.08, blue: 0.08, alpha: 1)
             titleLabel.textAlignment = .center
             titleLabel.numberOfLines = 2
             titleLabel.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview(titleLabel)
      
-            sectorLabel.font          = UIFont.systemFont(ofSize: 20, weight: .regular)
+            sectorLabel.font          = UIFont.systemFont(ofSize: 16, weight: .medium)
             sectorLabel.textColor     = .secondaryLabel
             sectorLabel.textAlignment = .center
             sectorLabel.text          = "Sector — \(puzzle.sector)"
@@ -160,11 +197,11 @@ class InvestGameHomeViewController: UIViewController {
             }
      
             NSLayoutConstraint.activate([
-                titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -60),
+                titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -45),
                 titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
                 titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
      
-                sectorLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 10),
+                sectorLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 6),
                 sectorLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
                 sectorLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             ])
@@ -179,26 +216,26 @@ class InvestGameHomeViewController: UIViewController {
      
             let dot = UIView()
             dot.backgroundColor    = green
-            dot.layer.cornerRadius = 3.5
+            dot.layer.cornerRadius = 2.5
             dot.translatesAutoresizingMaskIntoConstraints = false
-            dot.widthAnchor.constraint(equalToConstant: 7).isActive  = true
-            dot.heightAnchor.constraint(equalToConstant: 7).isActive = true
+            dot.widthAnchor.constraint(equalToConstant: 5).isActive  = true
+            dot.heightAnchor.constraint(equalToConstant: 5).isActive = true
      
             let lbl = UILabel()
             lbl.text      = "What do these indicators mean?"
-            lbl.font      = UIFont.systemFont(ofSize: 13, weight: .medium)
+            lbl.font      = UIFont.systemFont(ofSize: 11.5, weight: .medium)
             lbl.textColor = green
      
             let row = UIStackView(arrangedSubviews: [dot, lbl])
             row.axis                 = .horizontal
-            row.spacing              = 6
+            row.spacing              = 5
             row.alignment            = .center
             row.isUserInteractionEnabled = false
             row.translatesAutoresizingMaskIntoConstraints = false
      
             let pill = UIButton(type: .custom)
             pill.backgroundColor    = green.withAlphaComponent(0.10)
-            pill.layer.cornerRadius = 16
+            pill.layer.cornerRadius = 12
             pill.layer.borderWidth  = 1
             pill.layer.borderColor  = green.withAlphaComponent(0.25).cgColor
             pill.translatesAutoresizingMaskIntoConstraints = false
@@ -206,15 +243,15 @@ class InvestGameHomeViewController: UIViewController {
             pill.addTarget(self, action: #selector(indicatorInfoTapped), for: .touchUpInside)
      
             NSLayoutConstraint.activate([
-                row.topAnchor.constraint(equalTo: pill.topAnchor, constant: 8),
-                row.bottomAnchor.constraint(equalTo: pill.bottomAnchor, constant: -8),
-                row.leadingAnchor.constraint(equalTo: pill.leadingAnchor, constant: 14),
-                row.trailingAnchor.constraint(equalTo: pill.trailingAnchor, constant: -14),
+                row.topAnchor.constraint(equalTo: pill.topAnchor, constant: 5),
+                row.bottomAnchor.constraint(equalTo: pill.bottomAnchor, constant: -5),
+                row.leadingAnchor.constraint(equalTo: pill.leadingAnchor, constant: 10),
+                row.trailingAnchor.constraint(equalTo: pill.trailingAnchor, constant: -10),
             ])
      
             view.addSubview(pill)
             NSLayoutConstraint.activate([
-                pill.topAnchor.constraint(equalTo: sectorLabel.bottomAnchor, constant: 14),
+                pill.topAnchor.constraint(equalTo: sectorLabel.bottomAnchor, constant: 10),
                 pill.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             ])
      
@@ -262,8 +299,8 @@ class InvestGameHomeViewController: UIViewController {
             NSLayoutConstraint.activate([
                 collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
                 collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-                collectionView.topAnchor.constraint(equalTo: topRef, constant: 4),
-                collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -90)
+                collectionView.topAnchor.constraint(equalTo: topRef, constant: 8),
+                collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -105)
             ])
         }
      
@@ -303,50 +340,114 @@ class InvestGameHomeViewController: UIViewController {
             view.addSubview(row)
             NSLayoutConstraint.activate([
                 row.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-                row.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -80)
+                row.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -74)
             ])
+            self.hintStackView = row
         }
      
         // MARK: - Start button
      
         private func styleStartButton() {
-            startEvaluationButton?.setTitle("Start Evaluation  →", for: .normal)
-            startEvaluationButton?.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-            startEvaluationButton?.backgroundColor  = UIColor(red: 0.08, green: 0.08, blue: 0.08, alpha: 1)
-            startEvaluationButton?.setTitleColor(.white, for: .normal)
-            startEvaluationButton?.layer.cornerRadius  = 16
-            startEvaluationButton?.alpha               = 0.4
+            var config = UIButton.Configuration.filled()
+            config.baseBackgroundColor = UIColor(red: 0.08, green: 0.08, blue: 0.08, alpha: 1)
+            config.baseForegroundColor = .white
+            config.cornerStyle = .fixed
+            config.background.cornerRadius = 16
+            
+            var titleAttr = AttributedString("Start Evaluation  →")
+            titleAttr.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
+            config.attributedTitle = titleAttr
+            
+            startEvaluationButton?.configuration = config
+            startEvaluationButton?.alpha               = 1.0
             startEvaluationButton?.layer.shadowColor   = UIColor.black.cgColor
             startEvaluationButton?.layer.shadowOpacity = 0.15
             startEvaluationButton?.layer.shadowOffset  = CGSize(width: 0, height: 4)
             startEvaluationButton?.layer.shadowRadius  = 10
         }
-     
+      
         // MARK: - Segue
-     
+      
+        override func viewDidAppear(_ animated: Bool) {
+            super.viewDidAppear(animated)
+            if self.puzzle != nil {
+                EvaluateGameStateManager.shared.saveState(step: "home", puzzle: self.puzzle, flippedCards: self.flippedCards)
+            }
+        }
+        
+        private func setupQuitButton() {
+            let quitBtn = UIBarButtonItem(
+                title: "Quit",
+                style: .plain,
+                target: self,
+                action: #selector(quitButtonTapped)
+            )
+            quitBtn.tintColor = .systemRed
+            navigationItem.rightBarButtonItem = quitBtn
+        }
+        
+        @objc private func quitButtonTapped() {
+            let alert = UIAlertController(
+                title: "Quit Game?",
+                message: "You can resume this daily challenge later today from where you left off. Quitting will not reset your progress.",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "Resume Game", style: .default, handler: nil))
+            alert.addAction(UIAlertAction(title: "Quit Game", style: .destructive, handler: { [weak self] _ in
+                self?.exitToGames()
+            }))
+            present(alert, animated: true)
+        }
+        
+        private func exitToGames() {
+            if let nav = self.navigationController {
+                if nav.presentingViewController != nil {
+                    nav.dismiss(animated: true, completion: nil)
+                } else {
+                    nav.popToRootViewController(animated: true)
+                    nav.dismiss(animated: true, completion: nil)
+                }
+            } else {
+                self.dismiss(animated: true, completion: nil)
+            }
+        }
+
         override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
             if segue.identifier == "showTwist",
                let vc = segue.destination as? TwistViewController {
                 vc.puzzle = puzzle
+                if let str = sender as? String, str == "autoAdvance" {
+                    vc.shouldAutoAdvanceToSelection = true
+                }
             }
         }
-     
+      
         @IBAction func startEvaluationTapped(_ sender: UIButton) {
             guard flippedCards.count >= puzzle.companies.count else {
                 return
             }
             performSegue(withIdentifier: "showTwist", sender: nil)
         }
-     
+      
         // MARK: - Flip tracking
-     
+      
         func cardFlipped(at index: Int) {
             flippedCards.insert(index)
+            
+            // Persist flips in state
+            EvaluateGameStateManager.shared.saveState(step: "home", puzzle: self.puzzle, flippedCards: self.flippedCards)
+            
             guard flippedCards.count >= puzzle.companies.count else { return }
             UIView.animate(withDuration: 0.35, delay: 0,
                            usingSpringWithDamping: 0.7, initialSpringVelocity: 0.5) {
-                self.startEvaluationButton?.alpha           = 1.0
-                self.startEvaluationButton?.backgroundColor = UIColor(red: 0.18, green: 0.62, blue: 0.37, alpha: 1)
+                self.startEvaluationButton?.alpha = 1.0
+                
+                // Update configuration base background color to green
+                if var config = self.startEvaluationButton?.configuration {
+                    config.baseBackgroundColor = UIColor(red: 0.18, green: 0.62, blue: 0.37, alpha: 1)
+                    self.startEvaluationButton?.configuration = config
+                }
+                
                 self.startEvaluationButton?.transform       = CGAffineTransform(scaleX: 1.04, y: 1.04)
             } completion: { _ in
                 UIView.animate(withDuration: 0.2) {

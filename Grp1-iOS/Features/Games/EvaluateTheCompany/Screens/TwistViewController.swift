@@ -18,15 +18,70 @@ final class TwistViewController: UIViewController {
     // ── Connect this in Storyboard ──
     @IBOutlet weak var proceedButton: UIButton!
  
+    var shouldAutoAdvanceToSelection = false
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if shouldAutoAdvanceToSelection {
+            DispatchQueue.main.async {
+                self.shouldAutoAdvanceToSelection = false
+                self.performSegue(withIdentifier: "showInvest", sender: nil)
+            }
+        }
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor(red: 0.961, green: 0.957, blue: 0.945, alpha: 1)
+        
+        // Persist active step as twist
+        EvaluateGameStateManager.shared.saveState(step: "twist", puzzle: self.puzzle)
+        
+        setupQuitButton()
+        
         // Shadow must stay in code (Storyboard can't do shadows)
         proceedButton.layer.shadowColor   = UIColor.black.cgColor
         proceedButton.layer.shadowOpacity = 0.15
         proceedButton.layer.shadowOffset  = CGSize(width: 0, height: 4)
         proceedButton.layer.shadowRadius  = 10
         setupUI()
+    }
+    
+    private func setupQuitButton() {
+        let quitBtn = UIBarButtonItem(
+            title: "Quit",
+            style: .plain,
+            target: self,
+            action: #selector(quitButtonTapped)
+        )
+        quitBtn.tintColor = .systemRed
+        navigationItem.rightBarButtonItem = quitBtn
+    }
+    
+    @objc private func quitButtonTapped() {
+        let alert = UIAlertController(
+            title: "Quit Game?",
+            message: "You can resume this daily challenge later today from where you left off. Quitting will not reset your progress.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "Resume Game", style: .default, handler: nil))
+        alert.addAction(UIAlertAction(title: "Quit Game", style: .destructive, handler: { [weak self] _ in
+            self?.exitToGames()
+        }))
+        present(alert, animated: true)
+    }
+    
+    private func exitToGames() {
+        if let nav = self.navigationController {
+            if nav.presentingViewController != nil {
+                nav.dismiss(animated: true, completion: nil)
+            } else {
+                nav.popToRootViewController(animated: true)
+                nav.dismiss(animated: true, completion: nil)
+            }
+        } else {
+            self.dismiss(animated: true, completion: nil)
+        }
     }
  
     // MARK: - Navigation
@@ -46,7 +101,7 @@ final class TwistViewController: UIViewController {
  
     private func setupUI() {
         mainStack.axis      = .vertical
-        mainStack.spacing   = 6
+        mainStack.spacing   = 4
         mainStack.alignment = .center
         mainStack.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(mainStack)
@@ -54,10 +109,10 @@ final class TwistViewController: UIViewController {
         NSLayoutConstraint.activate([
             mainStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             mainStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            mainStack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16)
+            mainStack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -45)
         ])
  
-        // ── "TWIST" small caps label ──
+        // ── "TWIST" primary page title (enlarged for strong hierarchy) ──
         let twistBadge = UILabel()
         twistBadge.text          = "TWIST"
         twistBadge.font          = UIFont.systemFont(ofSize: 40, weight: .bold)
@@ -65,21 +120,21 @@ final class TwistViewController: UIViewController {
         twistBadge.textAlignment = .center
         twistBadge.letterSpacing(2)
         mainStack.addArrangedSubview(twistBadge)
-        mainStack.setCustomSpacing(12, after: twistBadge)
+        mainStack.setCustomSpacing(16, after: twistBadge) // Increased spacing for breathing room
  
         // ── "Wait!" — Georgia serif, matches screen 1 title ──
         let waitLabel = UILabel()
         waitLabel.text          = "Wait!"
-        waitLabel.font          = UIFont.systemFont(ofSize: 28, weight: .bold)
+        waitLabel.font          = UIFont.systemFont(ofSize: 22, weight: .bold)
         waitLabel.textColor     = UIColor(red: 0.08, green: 0.08, blue: 0.08, alpha: 1)
         waitLabel.textAlignment = .center
         mainStack.addArrangedSubview(waitLabel)
-        mainStack.setCustomSpacing(6, after: waitLabel)
+        mainStack.setCustomSpacing(4, after: waitLabel)
  
         // ── Subtitle ──
         let subtitle = UILabel()
         subtitle.text          = "This might help your decision"
-        subtitle.font          = UIFont.systemFont(ofSize: 20, weight: .regular)
+        subtitle.font          = UIFont.systemFont(ofSize: 16, weight: .regular)
         subtitle.textColor     = .secondaryLabel
         subtitle.numberOfLines = 0
         subtitle.textAlignment = .center
@@ -89,8 +144,8 @@ final class TwistViewController: UIViewController {
         // ── Sector ──
         let sector = UILabel()
         sector.text          = "Sector — \(puzzle.sector)"
-        sector.font          = UIFont.systemFont(ofSize: 18, weight: .regular)
-        sector.textColor     = .systemGray
+        sector.font          = UIFont.systemFont(ofSize: 15, weight: .medium)
+        sector.textColor     = .secondaryLabel
         sector.textAlignment = .center
         mainStack.addArrangedSubview(sector)
  
@@ -111,30 +166,46 @@ final class TwistViewController: UIViewController {
         view.addSubview(cagrContainer)
  
         NSLayoutConstraint.activate([
-            cagrContainer.topAnchor.constraint(equalTo: mainStack.bottomAnchor, constant: 20),
+            cagrContainer.topAnchor.constraint(equalTo: mainStack.bottomAnchor, constant: 16),
             cagrContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             cagrContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
         ])
  
-        // ── Indicator name pill ──
+        // ── Integrated Insight Metric Badge (Enlarged) ──
+        let greenColor = UIColor(red: 0.18, green: 0.62, blue: 0.37, alpha: 1)
+ 
+        let dot = UIView()
+        dot.backgroundColor    = greenColor
+        dot.layer.cornerRadius = 3.5
+        dot.translatesAutoresizingMaskIntoConstraints = false
+        dot.widthAnchor.constraint(equalToConstant: 7).isActive  = true
+        dot.heightAnchor.constraint(equalToConstant: 7).isActive = true
+ 
+        let lbl = UILabel()
+        lbl.text      = puzzle.twistIndicators.first?.indicatorName ?? "Twist Indicator"
+        lbl.font      = UIFont.systemFont(ofSize: 15, weight: .semibold)
+        lbl.textColor = greenColor
+ 
+        let row = UIStackView(arrangedSubviews: [dot, lbl])
+        row.axis                 = .horizontal
+        row.spacing              = 6
+        row.alignment            = .center
+        row.isUserInteractionEnabled = false
+        row.translatesAutoresizingMaskIntoConstraints = false
+ 
         let pillBg = UIView()
-        pillBg.backgroundColor    = UIColor(red: 0.94, green: 0.94, blue: 0.92, alpha: 1)
-        pillBg.layer.cornerRadius = 12
+        pillBg.backgroundColor    = greenColor.withAlphaComponent(0.10)
+        pillBg.layer.cornerRadius = 16
+        pillBg.layer.borderWidth  = 1
+        pillBg.layer.borderColor  = greenColor.withAlphaComponent(0.25).cgColor
         pillBg.translatesAutoresizingMaskIntoConstraints = false
- 
-        let indicatorName = puzzle.twistIndicators.first?.indicatorName ?? "Twist Indicator"
-        let pillLabel = UILabel()
-        pillLabel.text      = indicatorName
-        pillLabel.font      = UIFont.systemFont(ofSize: 20, weight: .medium)
-        pillLabel.textColor = UIColor(red: 0.30, green: 0.35, blue: 0.30, alpha: 1)
-        pillLabel.translatesAutoresizingMaskIntoConstraints = false
- 
-        pillBg.addSubview(pillLabel)
+        
+        pillBg.addSubview(row)
         NSLayoutConstraint.activate([
-            pillLabel.topAnchor.constraint(equalTo: pillBg.topAnchor, constant: 5),
-            pillLabel.bottomAnchor.constraint(equalTo: pillBg.bottomAnchor, constant: -5),
-            pillLabel.leadingAnchor.constraint(equalTo: pillBg.leadingAnchor, constant: 12),
-            pillLabel.trailingAnchor.constraint(equalTo: pillBg.trailingAnchor, constant: -12),
+            row.topAnchor.constraint(equalTo: pillBg.topAnchor, constant: 8),
+            row.bottomAnchor.constraint(equalTo: pillBg.bottomAnchor, constant: -8),
+            row.leadingAnchor.constraint(equalTo: pillBg.leadingAnchor, constant: 14),
+            row.trailingAnchor.constraint(equalTo: pillBg.trailingAnchor, constant: -14),
         ])
  
         cagrContainer.addSubview(pillBg)
@@ -150,10 +221,10 @@ final class TwistViewController: UIViewController {
         cagrContainer.addSubview(valuesStack)
  
         NSLayoutConstraint.activate([
-            valuesStack.topAnchor.constraint(equalTo: pillBg.bottomAnchor, constant: 14),
-            valuesStack.leadingAnchor.constraint(equalTo: cagrContainer.leadingAnchor, constant: 14),
-            valuesStack.trailingAnchor.constraint(equalTo: cagrContainer.trailingAnchor, constant: -14),
-            valuesStack.bottomAnchor.constraint(equalTo: cagrContainer.bottomAnchor, constant: -14)
+            valuesStack.topAnchor.constraint(equalTo: pillBg.bottomAnchor, constant: 16),
+            valuesStack.leadingAnchor.constraint(equalTo: cagrContainer.leadingAnchor, constant: 16),
+            valuesStack.trailingAnchor.constraint(equalTo: cagrContainer.trailingAnchor, constant: -16),
+            valuesStack.bottomAnchor.constraint(equalTo: cagrContainer.bottomAnchor, constant: -16)
         ])
  
         addIndicatorRows()

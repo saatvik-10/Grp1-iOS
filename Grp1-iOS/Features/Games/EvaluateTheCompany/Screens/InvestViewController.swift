@@ -19,9 +19,52 @@ final class InvestViewController: UIViewController {
         override func viewDidLoad() {
             super.viewDidLoad()
             view.backgroundColor = UIColor(red: 0.961, green: 0.957, blue: 0.945, alpha: 1)
+            
+            // Persist active step as selection
+            EvaluateGameStateManager.shared.saveState(step: "selection", puzzle: self.puzzle)
+            
+            setupQuitButton()
+            
             setupHeader()
             setupTable()
             styleSubmitButton()
+        }
+        
+        private func setupQuitButton() {
+            let quitBtn = UIBarButtonItem(
+                title: "Quit",
+                style: .plain,
+                target: self,
+                action: #selector(quitButtonTapped)
+            )
+            quitBtn.tintColor = .systemRed
+            navigationItem.rightBarButtonItem = quitBtn
+        }
+        
+        @objc private func quitButtonTapped() {
+            let alert = UIAlertController(
+                title: "Quit Game?",
+                message: "You can resume this daily challenge later today from where you left off. Quitting will not reset your progress.",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "Resume Game", style: .default, handler: nil))
+            alert.addAction(UIAlertAction(title: "Quit Game", style: .destructive, handler: { [weak self] _ in
+                self?.exitToGames()
+            }))
+            present(alert, animated: true)
+        }
+        
+        private func exitToGames() {
+            if let nav = self.navigationController {
+                if nav.presentingViewController != nil {
+                    nav.dismiss(animated: true, completion: nil)
+                } else {
+                    nav.popToRootViewController(animated: true)
+                    nav.dismiss(animated: true, completion: nil)
+                }
+            } else {
+                self.dismiss(animated: true, completion: nil)
+            }
         }
      
         // MARK: - Header
