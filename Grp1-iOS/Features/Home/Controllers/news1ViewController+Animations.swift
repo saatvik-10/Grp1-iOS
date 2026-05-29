@@ -1,7 +1,9 @@
 // MARK: - Animations
 
+import UIKit
+
 extension news1ViewController {
-    private func animateRecommendationPulse() {
+    func animateRecommendationPulse() {
         guard let glassView = self.glassView else { return }
 
         let pulseView = UIView(frame: glassView.bounds)
@@ -37,7 +39,7 @@ extension news1ViewController {
         )
     }
 
-    private func animateSaveBookmarkIcon() {
+    func animateSaveBookmarkIcon() {
         let anchorView: UIView = glassView ?? self.view
 
         let iconSize: CGFloat = 28

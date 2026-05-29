@@ -14,13 +14,13 @@ final class ResultViewController: UIViewController {
     var puzzle: DailyPuzzle!
     var selectedCompanyId: String!
 
-    private var data: ResultScreenData!
+    var data: ResultScreenData!
 
     private let scrollView  = UIScrollView()
     private let contentView = UIView()
 
     // ── Palette (matches game theme) ──────────────────────────────────────
-    private enum C {
+    enum C {
         static let bg         = UIColor(red: 0.961, green: 0.957, blue: 0.945, alpha: 1)
         static let green      = UIColor(red: 0.18, green: 0.62, blue: 0.37, alpha: 1)
         static let greenLight = UIColor(red: 0.90, green: 0.97, blue: 0.92, alpha: 1)
@@ -36,7 +36,7 @@ final class ResultViewController: UIViewController {
     }
 
     // ── Rank circle colors ──
-    private let rankColors: [UIColor] = [
+    let rankColors: [UIColor] = [
         UIColor(red: 0.18, green: 0.62, blue: 0.37, alpha: 1),  // 1st — green
         UIColor(red: 0.55, green: 0.55, blue: 0.58, alpha: 1),  // 2nd — silver
         UIColor(red: 0.63, green: 0.47, blue: 0.31, alpha: 1),  // 3rd — bronze
@@ -44,7 +44,7 @@ final class ResultViewController: UIViewController {
     ]
 
     // ── Top 2 correlations per twist indicator ──
-    private let correlationMap: [String: [String]] = [
+    let correlationMap: [String: [String]] = [
         "5Y Sales CAGR": ["EPS Growth (YoY)", "Net Profit Margin"],
         "5Y Revenue CAGR": ["EPS Growth (YoY)", "Net Profit Margin"],
         "Net Profit Margin": ["EPS Growth (YoY)", "Debt-to-Equity"],
@@ -62,6 +62,10 @@ final class ResultViewController: UIViewController {
 
         guard let screenData = puzzle.buildResultScreenData(selectedCompanyId: selectedCompanyId) else { return }
         self.data = screenData
+
+        // Mark the daily game completed and clear saved active session state
+        DailyGameManager.shared.markGamePlayed(.evaluate)
+        EvaluateGameStateManager.shared.clearState()
 
         setupScrollView()
         buildUI()
@@ -168,18 +172,18 @@ final class ResultViewController: UIViewController {
 
     // MARK: - Actions
 
-    @objc private func nextRoundTapped() {
+    @objc func nextRoundTapped() {
         navigationController?.popToRootViewController(animated: true)
     }
 
-    @objc private func homeTapped() {
+    @objc func homeTapped() {
         navigationController?.popToRootViewController(animated: true)
     }
 }
 
 // MARK: - Safe subscript
 
-private extension Array {
+extension Array {
     subscript(safe index: Int) -> Element? {
         indices.contains(index) ? self[index] : nil
     }

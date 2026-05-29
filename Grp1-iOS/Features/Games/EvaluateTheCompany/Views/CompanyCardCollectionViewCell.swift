@@ -68,9 +68,11 @@ class CompanyCardCollectionViewCell: UICollectionViewCell {
         companyNameLabel.font      = UIFont.systemFont(ofSize: 20, weight: .semibold)
         companyNameLabel.textColor = UIColor(red: 0.08, green: 0.08, blue: 0.08, alpha: 1)
         companyNameLabel.numberOfLines = 2
+        companyNameLabel.textAlignment = .center
         descLabel.font             = UIFont.systemFont(ofSize: 15, weight: .regular)
         descLabel.textColor        = .secondaryLabel
         descLabel.numberOfLines    = 4
+        descLabel.textAlignment    = .center
     }
 
     private func injectPill() {
@@ -121,8 +123,21 @@ class CompanyCardCollectionViewCell: UICollectionViewCell {
     private func styleBack() {
         backView.backgroundColor     = UIColor(red: 0.09, green: 0.09, blue: 0.09, alpha: 1)
         dividerViewBack?.backgroundColor = UIColor(white: 0.22, alpha: 1)
-      //  indicatorStackView?.spacing      = 8
-       // indicatorStackView?.distribution = .fillProportionally
+        
+        if let stack = indicatorStackView {
+            // Deactivate fixed width constraint if it exists
+            if let widthConstraint = stack.constraints.first(where: { $0.firstAttribute == .width }) {
+                widthConstraint.isActive = false
+            }
+            if let superview = stack.superview {
+                let widthConstraints = superview.constraints.filter {
+                    ($0.firstItem === stack && $0.firstAttribute == .width) ||
+                    ($0.secondItem === stack && $0.secondAttribute == .width)
+                }
+                NSLayoutConstraint.deactivate(widthConstraints)
+                stack.trailingAnchor.constraint(equalTo: superview.trailingAnchor, constant: -12).isActive = true
+            }
+        }
     }
 
     // MARK: - Configure
@@ -132,12 +147,14 @@ class CompanyCardCollectionViewCell: UICollectionViewCell {
         descLabel.text        = company.description
 
         let attrs: [NSAttributedString.Key: Any] = [
-            .kern: CGFloat(1.2),
-            .font: UIFont.systemFont(ofSize: 11, weight: .semibold),
+            .kern: CGFloat(0.8),
+            .font: UIFont.systemFont(ofSize: 9.0, weight: .semibold),
             .foregroundColor: UIColor(white: 0.4, alpha: 1)
         ]
         companyNameBack?.attributedText = NSAttributedString(
             string: company.name.uppercased(), attributes: attrs)
+        companyNameBack?.adjustsFontSizeToFitWidth = true
+        companyNameBack?.minimumScaleFactor = 0.8
     }
 
     func configureBack(indicators: [IndicatorValue]) {
@@ -145,13 +162,21 @@ class CompanyCardCollectionViewCell: UICollectionViewCell {
         let mint  = UIColor(red: 0.75, green: 0.95, blue: 0.82, alpha: 1)
 
         let labels = [indicator1Label, indicator2Label, indicator3Label, indicator4Label]
-
-        // Remove old bars
+ 
+        // Remove old dynamically added progress bars
+        indicatorStackView?.arrangedSubviews
+            .filter { $0.tag == 8888 }
+            .forEach { $0.removeFromSuperview() }
         indicatorStackView?.subviews
             .filter { $0.tag == 8888 }
             .forEach { $0.removeFromSuperview() }
+            
+        // Restore original stack view configuration and spacing
+        indicatorStackView?.axis = .vertical
+        indicatorStackView?.spacing = 12 // Original spacing
+        indicatorStackView?.distribution = .equalSpacing
 
-        for (labelIdx, label) in labels.enumerated() {
+        for (i, label) in labels.enumerated() {
             guard let label = label else { continue }
 
             if indicators.indices.contains(labelIdx) {
@@ -177,7 +202,11 @@ class CompanyCardCollectionViewCell: UICollectionViewCell {
                 ))
                 label.attributedText = attributed
                 label.numberOfLines  = 1
-
+                
+                // Add auto-scaling to prevent clipping or truncation of names/values
+                label.adjustsFontSizeToFitWidth = true
+                label.minimumScaleFactor = 0.85
+ 
                 // Add progress bar as a sibling inside the stack
                 let raw     = value
                     .replacingOccurrences(of: "%", with: "")
@@ -228,12 +257,14 @@ class CompanyCardCollectionViewCell: UICollectionViewCell {
 
     func configureBackCompanyName(_ name: String) {
         let attrs: [NSAttributedString.Key: Any] = [
-            .kern: CGFloat(1.2),
-            .font: UIFont.systemFont(ofSize: 9.5, weight: .semibold),
+            .kern: CGFloat(0.8),
+            .font: UIFont.systemFont(ofSize: 9.0, weight: .semibold),
             .foregroundColor: UIColor(white: 0.4, alpha: 1)
         ]
         companyNameBack?.attributedText = NSAttributedString(
             string: name.uppercased(), attributes: attrs)
+        companyNameBack?.adjustsFontSizeToFitWidth = true
+        companyNameBack?.minimumScaleFactor = 0.8
     }
 
     // MARK: - Flip

@@ -276,22 +276,24 @@ extension GameViewController {
 // MARK: - Render
 extension GameViewController {
 
-    private let nodeRenderers: [DecisionNode: () -> Void] = [
-        .act1: renderAct1,
-        .loyalistFollowup: renderLoyalistFollowup,
-        .loyalistDoubleDown: renderLoyalistDoubleDown,
-        .loyalistTimeWillTell: renderLoyalistTimeWillTell,
-        .loyalistDoubleDownLoss: renderLoyalistDoubleDownLoss,
-        .loyalistExit: renderLoyalistExit,
-        .pragmatistFollowup: renderPragmatistFollowup,
-        .pragmatistStay: renderPragmatistStay,
-        .pragmatistExit: renderPragmatistExit,
-        .pragmaticLoss: renderPragmaticLoss,
-        .evPivot: renderEVPivot,
-        .evPivotLoss: renderEVPivotLoss,
-        .evPivotProfit: renderEVPivotProfit,
-        .evProfitBook: renderEVProfitBook
-    ]
+    private var nodeRenderers: [DecisionNode: () -> Void] {
+        [
+            .act1: renderAct1,
+            .loyalistFollowup: renderLoyalistFollowup,
+            .loyalistDoubleDown: renderLoyalistDoubleDown,
+            .loyalistTimeWillTell: renderLoyalistTimeWillTell,
+            .loyalistDoubleDownLoss: renderLoyalistDoubleDownLoss,
+            .loyalistExit: renderLoyalistExit,
+            .pragmatistFollowup: renderPragmatistFollowup,
+            .pragmatistStay: renderPragmatistStay,
+            .pragmatistExit: renderPragmatistExit,
+            .pragmaticLoss: renderPragmaticLoss,
+            .evPivot: renderEVPivot,
+            .evPivotLoss: renderEVPivotLoss,
+            .evPivotProfit: renderEVPivotProfit,
+            .evProfitBook: renderEVProfitBook
+        ]
+    }
 
     private func render() {
         if gameEnded { return }

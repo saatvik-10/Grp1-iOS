@@ -128,8 +128,8 @@ extension CrosswordViewController {
         for word in placedWords {
             for letterIndex in 0..<word.string.count {
                 let letter = word.string[word.string.index(word.string.startIndex, offsetBy: letterIndex)]
-                let gx = (word.dir == 0 ? word.x + letterIndex : word.x)
-                let gy = (word.dir == 0 ? word.y : word.y + letterIndex)
+                let gx = (word.direction == 0 ? word.column + letterIndex : word.column)
+                let gy = (word.direction == 0 ? word.row : word.row + letterIndex)
                 let cx = (gx - minX) + offsetX
                 let cy = (gy - minY) + offsetY
                 let idx = indexForCell(col: cx, row: cy)
@@ -139,8 +139,8 @@ extension CrosswordViewController {
         }
 
         words = placedWords.enumerated().map { (wordIndex, word) in
-            let sx = (word.x - minX) + offsetX
-            let sy = (word.y - minY) + offsetY
+            let sx = (word.column - minX) + offsetX
+            let sy = (word.row - minY) + offsetY
             let idx = indexForCell(col: sx, row: sy)
 
             return CrosswordWord(
@@ -148,7 +148,7 @@ extension CrosswordViewController {
                 answer: word.string,
                 clue: clues[word.string] ?? "No clue",
                 startIndex: idx,
-                direction: word.dir == 0 ? .across : .down
+                direction: word.direction == 0 ? .across : .down
             )
         }
 

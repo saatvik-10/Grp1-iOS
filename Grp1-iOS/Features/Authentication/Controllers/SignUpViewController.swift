@@ -241,16 +241,18 @@ class SignUpViewController: UIViewController {
         print("[SignUp] Profile image data size: \(imageData?.count ?? 0) bytes")
 
         AuthenticationService.shared.signUp(
-            name: name,
-            email: email,
-            password: password,
-            phone: phone,
-            level: "BEGINNER",
-            dob: dob,
-            gender: genderString,
-            hasOnboarding: false,
-            profileImageData: imageData,         // ✅ FIXED: was hardcoded nil
-            profileImageFileName: "avatar.jpg"
+            params: AuthenticationService.SignUpParameters(
+                name: name,
+                email: email,
+                password: password,
+                phone: phone,
+                level: "BEGINNER",
+                dob: dob,
+                gender: genderString,
+                hasOnboarding: false,
+                profileImageData: imageData,
+                profileImageFileName: "avatar.jpg"
+            )
         ) { [weak self] success, errorMessage in
             guard let self = self else { return }
 

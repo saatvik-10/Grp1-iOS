@@ -8,7 +8,7 @@ extension ResultViewController {
 
     // MARK: - 1. Hero Banner
 
-    private func makeBanner() -> UIView {
+    func makeBanner() -> UIView {
         let card = UIView()
         card.backgroundColor    = data.isCorrect ? C.greenDark : C.charcoal
         card.layer.cornerRadius = 22
@@ -77,7 +77,7 @@ extension ResultViewController {
 
     // MARK: - 2. Your Pick
 
-    private func makePickStrip() -> UIView {
+    func makePickStrip() -> UIView {
         let card = UIView()
         card.backgroundColor    = C.card
         card.layer.cornerRadius = 16
@@ -129,7 +129,7 @@ extension ResultViewController {
         return card
     }
 
-    private func makePickBadge() -> UIView {
+    func makePickBadge() -> UIView {
         let badgeBg  = UIView()
         badgeBg.backgroundColor    = data.isCorrect ? C.greenLight : C.redLight
         badgeBg.layer.cornerRadius = 7
@@ -162,7 +162,7 @@ extension ResultViewController {
         return badgeBg
     }
 
-    private func makeRankSection() -> UIView {
+    func makeRankSection() -> UIView {
         let rankNum = UILabel()
         let suffix  = ordinalSuffix(data.selectedRank)
         rankNum.text          = "\(data.selectedRank)\(suffix)"
@@ -187,7 +187,7 @@ extension ResultViewController {
 
     // MARK: - 3. Twist Indicator Card
 
-    private func makeTwistCard() -> UIView {
+    func makeTwistCard() -> UIView {
         let card = UIView()
         card.backgroundColor    = C.card
         card.layer.cornerRadius = 16
@@ -224,7 +224,7 @@ extension ResultViewController {
         return card
     }
 
-    private func makeTwistHeader() -> UIView {
+    func makeTwistHeader() -> UIView {
         let iconBox = UIView()
         iconBox.backgroundColor    = UIColor(red: 0.90, green: 0.97, blue: 0.92, alpha: 1)
         iconBox.layer.cornerRadius = 10
@@ -282,7 +282,7 @@ extension ResultViewController {
         return headerRow
     }
 
-    private func makeTwistFormula() -> UIView {
+    func makeTwistFormula() -> UIView {
         let formulaBox = UIView()
         formulaBox.backgroundColor    = UIColor(red: 0.94, green: 0.98, blue: 0.95, alpha: 1)
         formulaBox.layer.cornerRadius = 10
@@ -316,7 +316,7 @@ extension ResultViewController {
 
     // MARK: - 4. Correlations
 
-    private func makeCorrelationsStack() -> UIView {
+    func makeCorrelationsStack() -> UIView {
         let container = UIStackView()
         container.axis    = .vertical
         container.spacing = 10
@@ -342,7 +342,7 @@ extension ResultViewController {
         return container
     }
 
-    private func makeCorrelationRow(sfIcon: String, title: String, desc: String) -> UIView {
+    func makeCorrelationRow(sfIcon: String, title: String, desc: String) -> UIView {
         let card = UIView()
         card.backgroundColor    = C.card
         card.layer.cornerRadius = 16
@@ -402,7 +402,7 @@ extension ResultViewController {
 
     // MARK: - 5. Best Company Card
 
-    private func makeBestCard() -> UIView {
+    func makeBestCard() -> UIView {
         let card = UIView()
         card.backgroundColor    = C.card
         card.layer.cornerRadius = 18
@@ -468,7 +468,7 @@ extension ResultViewController {
         return card
     }
 
-    private func makeReasonRow(num: Int, text: String) -> UIView {
+    func makeReasonRow(num: Int, text: String) -> UIView {
         let circle = makeRankCircle(rank: num, size: 20)
 
         let lbl = UILabel()
@@ -486,7 +486,7 @@ extension ResultViewController {
 
     // MARK: - 6. Rankings Table
 
-    private func makeRankTable() -> UIView {
+    func makeRankTable() -> UIView {
         let card = UIView()
         card.backgroundColor    = C.card
         card.layer.cornerRadius = 16
@@ -518,7 +518,7 @@ extension ResultViewController {
         return card
     }
 
-    private func makeRankRow(entry: RankedEntry) -> UIView {
+    func makeRankRow(entry: RankedEntry) -> UIView {
         let row = UIView()
 
         if entry.isUserPick {
@@ -608,7 +608,7 @@ extension ResultViewController {
 
     // MARK: - 7. CTAs
 
-    private func makeCTAs() -> UIView {
+    func makeCTAs() -> UIView {
         let nextBtn = makeButton(title: "Try Next Round  →", bg: C.charcoal, fg: .white)
         nextBtn.addTarget(self, action: #selector(nextRoundTapped), for: .touchUpInside)
 
@@ -626,7 +626,7 @@ extension ResultViewController {
 
 extension ResultViewController {
 
-    private func makeRankCircle(rank: Int, size: CGFloat) -> UIView {
+    func makeRankCircle(rank: Int, size: CGFloat) -> UIView {
         let circle = UIView()
         circle.backgroundColor    = rankColors[safe: rank - 1] ?? C.subtext
         circle.layer.cornerRadius = size / 2
@@ -648,7 +648,7 @@ extension ResultViewController {
         return circle
     }
 
-    private func makeSmallBadge(text: String, color: UIColor) -> UIView {
+    func makeSmallBadge(text: String, color: UIColor) -> UIView {
         let bg = UIView()
         bg.backgroundColor    = color.withAlphaComponent(0.12)
         bg.layer.cornerRadius = 6
@@ -668,7 +668,7 @@ extension ResultViewController {
         return bg
     }
 
-    private func makeStatPill(label: String, value: String) -> UIView {
+    func makeStatPill(label: String, value: String) -> UIView {
         let bg = UIView()
         bg.backgroundColor    = UIColor(red: 0.94, green: 0.94, blue: 0.92, alpha: 1)
         bg.layer.cornerRadius = 8
@@ -688,7 +688,7 @@ extension ResultViewController {
         return bg
     }
 
-    private func makeButton(title: String, bg: UIColor, fg: UIColor) -> UIButton {
+    func makeButton(title: String, bg: UIColor, fg: UIColor) -> UIButton {
         let btn = UIButton(type: .system)
         btn.setTitle(title, for: .normal)
         btn.setTitleColor(fg, for: .normal)
@@ -699,7 +699,7 @@ extension ResultViewController {
         return btn
     }
 
-    private func padded(_ view: UIView, horizontal: CGFloat, vertical vPad: CGFloat) -> UIView {
+    func padded(_ view: UIView, horizontal: CGFloat, vertical vPad: CGFloat) -> UIView {
         let wrapper = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         wrapper.addSubview(view)
@@ -714,7 +714,7 @@ extension ResultViewController {
 
     // MARK: - Correlation descriptions
 
-    private func correlationDescription(for indicatorName: String) -> String {
+    func correlationDescription(for indicatorName: String) -> String {
         let twist = data.twistIndicatorName
         switch indicatorName {
         case "EPS Growth (YoY)":
@@ -732,7 +732,7 @@ extension ResultViewController {
 
     // MARK: - Ordinal suffix
 
-    private func ordinalSuffix(_ number: Int) -> String {
+    func ordinalSuffix(_ number: Int) -> String {
         switch number {
         case 1: return "st"
         case 2: return "nd"

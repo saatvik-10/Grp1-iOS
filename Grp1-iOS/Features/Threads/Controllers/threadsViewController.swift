@@ -330,7 +330,7 @@ extension threadsViewController {
         }
     }
 
-    private func handleBookmarkFoldersSuccess(apiFolders: [APIFolder], thread: APIThread, token: String) {
+    private func handleBookmarkFoldersSuccess(apiFolders: [APIBookmarkFolder], thread: APIThread, token: String) {
         let folderItems = apiFolders.map { folder in
             BookmarkItem(
                 icon: UIImage(systemName: "folder") ?? UIImage(),

@@ -56,7 +56,7 @@ class AuthenticationService {
         apiService.signUp(payload: payload) { result in
             switch result {
             case .success:
-                let saved = self.credentialStorage.saveCredentials(email: email, password: password)
+                let saved = self.credentialStorage.saveCredentials(email: params.email, password: params.password)
                 DispatchQueue.main.async {
                     completion(saved, nil)
                 }

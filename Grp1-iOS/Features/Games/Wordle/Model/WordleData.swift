@@ -5,6 +5,7 @@ struct WordleItem {
     let hints: [String]
     let definition: String
 }
+// swiftlint:disable:next type_body_length
 struct WordleData {
     static let items: [WordleItem] = [
 

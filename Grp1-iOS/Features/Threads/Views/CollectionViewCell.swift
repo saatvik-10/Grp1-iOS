@@ -27,6 +27,8 @@ class collectionViewCell: UICollectionViewCell {
     @IBOutlet weak var sharesButton: UIButton!
     @IBOutlet weak var dividerView: UIView!
     private var widthConstraint: NSLayoutConstraint?
+    private var profileImageTask: URLSessionDataTask?
+    private var threadImageTask: URLSessionDataTask?
 
     @IBAction func likeButtonTapped(_ sender: UIButton) {
         onLikeTapped?()
@@ -228,19 +230,21 @@ extension collectionViewCell {
 
         if let profileUrlStr = thread.user?.profileImageUrl,
            let url = URL(string: profileUrlStr) {
-            URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
+            profileImageTask = URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
                 guard let data, let img = UIImage(data: data) else { return }
                 DispatchQueue.main.async { self?.profileImg.image = img }
-            }.resume()
+            }
+            profileImageTask?.resume()
         }
 
         if let imageUrlStr = thread.imageUrl, let url = URL(string: imageUrlStr) {
             threadImg.isHidden = false
             threadImg.image = nil
-            URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
+            threadImageTask = URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
                 guard let data, let img = UIImage(data: data) else { return }
                 DispatchQueue.main.async { self?.threadImg.image = img }
-            }.resume()
+            }
+            threadImageTask?.resume()
         } else {
             threadImg.image = nil
             threadImg.isHidden = true
