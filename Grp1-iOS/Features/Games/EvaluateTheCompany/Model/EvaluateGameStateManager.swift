@@ -12,6 +12,7 @@ struct EvaluateGameState: Codable {
     let currentStep: String      // "home", "twist", "selection"
     let puzzle: DailyPuzzle
     let flippedCards: [Int]      // Saved card flips
+    var selectedCompanyId: String? // Saved company selection from InvestViewController
 }
 
 enum EvaluateGameStatus: String {
@@ -34,16 +35,20 @@ class EvaluateGameStateManager {
         return formatter.string(from: Date())
     }
 
-    func saveState(step: String, puzzle: DailyPuzzle, flippedCards: Set<Int> = []) {
+    func saveState(step: String, puzzle: DailyPuzzle, flippedCards: Set<Int> = [], selectedCompanyId: String? = nil) {
         let state = EvaluateGameState(
             date: todayString(),
             currentStep: step,
             puzzle: puzzle,
-            flippedCards: Array(flippedCards)
+            flippedCards: Array(flippedCards),
+            selectedCompanyId: selectedCompanyId
         )
-        if let data = try? JSONEncoder().encode(state) {
+        do {
+            let data = try JSONEncoder().encode(state)
             UserDefaults.standard.set(data, forKey: stateKey)
-            print("💾 Saved Evaluate Game State: step=\(step), date=\(state.date)")
+            print("💾 Saved Evaluate Game State: step=\(step), date=\(state.date), selectedCompanyId=\(selectedCompanyId ?? "nil")")
+        } catch {
+            print("❌ Failed to save Evaluate Game State: \(error)")
         }
     }
 
