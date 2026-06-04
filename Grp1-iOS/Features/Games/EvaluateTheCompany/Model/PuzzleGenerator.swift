@@ -93,6 +93,15 @@ private struct IndicatorSelection {
     let twistPillar: Pillar
 }
 
+private struct AIExplanationInput {
+    let companyName: String
+    let sector: String
+    let returnPct: Int
+    let visibleNames: [Pillar: String]
+    let twistName: String
+    let data: PuzzleEngine.GeneratedCompanyData
+}
+
 @available(iOS 26.0, *)
 class PuzzleGenerator {
     static let shared = PuzzleGenerator()
@@ -138,7 +147,10 @@ class PuzzleGenerator {
         saveToCache(puzzle)
         return puzzle
     }
+}
 
+@available(iOS 26.0, *)
+extension PuzzleGenerator {
     // MARK: - Helpers
 
     private func sectorAndCompanies() async -> (sector: String, generatedCompanies: [(name: String, desc: String)]) {
@@ -241,41 +253,16 @@ class PuzzleGenerator {
 
             results.append(Result1(companyId: companyId, returnPercent: retPct, explanation: ""))
         }
-        
-        // ── Step 5: Generate explanation ──────────────────────────
-        var bestExplanation = explanationTemplates.randomElement() ?? "Strong fundamentals across the board."
-        
-        #if canImport(FoundationModels)
-        if SystemLanguageModel.default.isAvailable, let bData = bestCompanyData {
-            if let aiExpl = await generateExplanationWithAI(
-                companyName: bestCompanyName, sector: sector, returnPct: bestCompanyReturn,
-                visibleNames: selectedVisibleNames, twistName: twistName, data: bData
-            ) {
-                bestExplanation = aiExpl
-            }
-        }
-        #endif
-        
-        var finalResults: [Result1] = []
-        for r in results {
-            if r.companyId == bestCompanyId {
-                finalResults.append(Result1(
-                    companyId: r.companyId, returnPercent: r.returnPercent,
-                    explanation: bestExplanation.replacingOccurrences(of: "\n", with: " ").trimmingCharacters(in: .whitespacesAndNewlines)
-                ))
-            } else {
-                finalResults.append(Result1(
-                    companyId: r.companyId, returnPercent: r.returnPercent,
-                    explanation: "Did not perform optimally compared to sector peers."
-                ))
-            }
-        }
-        
-        let puzzle = DailyPuzzle(
-            sector: sector, companies: companies.shuffled(),
+
+        return CompanyResults(
+            companies: companies,
             visibleIndicators: visibleIndicators,
             twistIndicators: twistIndicators,
-            results: finalResults
+            results: results,
+            bestCompanyId: bestCompanyId,
+            bestCompanyReturn: bestCompanyReturn,
+            bestCompanyData: bestCompanyData,
+            bestCompanyName: bestCompanyName
         )
     }
 
@@ -305,15 +292,6 @@ class PuzzleGenerator {
     // MARK: - AI helpers (only called when FoundationModels is available)
 
     #if canImport(FoundationModels)
-
-    private struct AIExplanationInput {
-        let companyName: String
-        let sector: String
-        let returnPct: Int
-        let visibleNames: [Pillar: String]
-        let twistName: String
-        let data: PuzzleEngine.GeneratedCompanyData
-    }
 
     @available(iOS 26.0, *)
     private func generateCompaniesWithAI(sector: String) async -> [(name: String, desc: String)]? {

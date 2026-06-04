@@ -44,4 +44,3 @@ import UIKit
             cardFlipped(at: indexPath.item)
         }
     }
-

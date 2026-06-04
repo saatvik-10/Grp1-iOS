@@ -12,7 +12,7 @@ final class DailyPuzzleLoader {
     static func loadDailyPuzzle() -> DailyPuzzle {
         let fileManager = FileManager.default
         var puzzle: DailyPuzzle
-        
+
         // 1. Try cache
         if let cacheURL = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first {
             let cacheFile = cacheURL.appendingPathComponent("generated_puzzle.json")

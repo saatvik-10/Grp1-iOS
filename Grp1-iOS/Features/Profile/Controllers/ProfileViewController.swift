@@ -274,6 +274,10 @@ class ProfileViewController: UIViewController {
             )
         }
     }
+}
+
+// MARK: - Background Image & Fetching
+extension ProfileViewController {
 
     // MARK: - Optional background image tinting
 

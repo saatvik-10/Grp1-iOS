@@ -251,5 +251,3 @@ class InvestGameHomeViewController: UIViewController {
             UINotificationFeedbackGenerator().notificationOccurred(.success)
         }
     }
-
-
